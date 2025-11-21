@@ -22,7 +22,6 @@ new:
 .PHONY: run
 run:
 	@if [ -f $(INPUT_FILE) ]; then \
-		echo "[ Using $(INPUT_FILE) ]"; \
 		cat $(INPUT_FILE) | cargo run --quiet --bin $(prefix)_$(p); \
 	else \
 		echo "[ Manual Input Mode ]"; \

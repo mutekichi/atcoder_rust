@@ -40,32 +40,6 @@ fn solve<W: Write>(out: &mut W) {
 // --- Macros ---
 
 #[macro_export]
-#[cfg(debug_assertions)] // for debug build
-macro_rules! md { // stands for my_dbg
-    ($($arg:expr),* $(,)?) => {{
-        eprint!("[{}:{}] ", file!(), line!());
-        
-        let mut _first = true;
-        $(
-            if !_first {
-                eprint!(", ");
-            }
-            eprint!("{}: {}", stringify!($arg), $arg);
-            _first = false;
-        )*
-        eprintln!();
-    }};
-}
-
-#[macro_export]
-#[cfg(not(debug_assertions))] // for release build
-macro_rules! md {
-    ($($arg:expr),* $(,)?) => {{
-        // do nothing
-    }};
-}
-
-#[macro_export]
 macro_rules! chmin {
     ($a:expr, $b:expr) => {
         if $a > $b {

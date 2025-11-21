@@ -27,43 +27,12 @@ fn main() {
 }
 
 // Logic goes here
-#[allow(unused_macros)]
-#[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
-    macro_rules! wl {
-        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
-        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
+    input! {
     }
-
 }
 
 // --- Macros ---
-
-#[macro_export]
-#[cfg(debug_assertions)] // for debug build
-macro_rules! md { // stands for my_dbg
-    ($($arg:expr),* $(,)?) => {{
-        eprint!("[{}:{}] ", file!(), line!());
-        
-        let mut _first = true;
-        $(
-            if !_first {
-                eprint!(", ");
-            }
-            eprint!("{}: {}", stringify!($arg), $arg);
-            _first = false;
-        )*
-        eprintln!();
-    }};
-}
-
-#[macro_export]
-#[cfg(not(debug_assertions))] // for release build
-macro_rules! md {
-    ($($arg:expr),* $(,)?) => {{
-        // do nothing
-    }};
-}
 
 #[macro_export]
 macro_rules! chmin {

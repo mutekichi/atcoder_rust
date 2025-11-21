@@ -26,6 +26,17 @@ fn main() {
     out.flush().unwrap();
 }
 
+fn f(a: isize) -> isize {
+    // let mut b = 0;
+    // let mut ac = a.to_owned();
+    // while ac != 0 {
+    //     b += ac % 10;
+    //     ac /= 10;
+    // }
+    // return b;
+    a.to_string().chars().map(|c| c.to_digit(10).unwrap() as isize).sum()
+}
+
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
@@ -35,35 +46,23 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
+    input!{
+        n: usize,
+    }
+
+    let mut s = vec![0; n + 1];
+    s[0] = 1;
+
+    for i in 1..=n {
+        for j in 0..i {
+            s[i] += f(s[j]);
+        }
+    }
+
+    wl!(s[n as usize]);
 }
 
 // --- Macros ---
-
-#[macro_export]
-#[cfg(debug_assertions)] // for debug build
-macro_rules! md { // stands for my_dbg
-    ($($arg:expr),* $(,)?) => {{
-        eprint!("[{}:{}] ", file!(), line!());
-        
-        let mut _first = true;
-        $(
-            if !_first {
-                eprint!(", ");
-            }
-            eprint!("{}: {}", stringify!($arg), $arg);
-            _first = false;
-        )*
-        eprintln!();
-    }};
-}
-
-#[macro_export]
-#[cfg(not(debug_assertions))] // for release build
-macro_rules! md {
-    ($($arg:expr),* $(,)?) => {{
-        // do nothing
-    }};
-}
 
 #[macro_export]
 macro_rules! chmin {

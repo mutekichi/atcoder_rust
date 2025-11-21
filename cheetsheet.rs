@@ -11,6 +11,18 @@ use std::io::{Write, BufWriter};
 // This function is just a container for snippets.
 fn snippets<W: Write>(out: &mut W) {
 
+
+    // ==========================================
+    // 0. Variable Initialization
+    // ==========================================
+    
+    // vector<vector<int>> v(n, vector<int>(m, initial_value));
+    let v: Vec<Vec<usize>> = vec![vec![0; 10]; 5]; // 5 x 10 zero matrix
+    // vector<vector<int>> graph(n);
+    let mut graph: Vec<Vec<usize>> = vec![Vec::new(); 5]; // 5 empty vectors
+    graph[2].push(7);
+
+
     // ==========================================
     // 1. Input Patterns (proconio)
     // ==========================================
@@ -83,6 +95,7 @@ fn snippets<W: Write>(out: &mut W) {
     // Permutations: nPk (e.g., 3P2)
     for p in (0..3).permutations(2) {
         // p is Vec<usize>
+        let (first, second) = (p[0], p[1]);
     }
 
     // Combinations: nCk (e.g., 5C3)
@@ -102,9 +115,50 @@ fn snippets<W: Write>(out: &mut W) {
         // key: 1, count: group.count() -> 2
     }
 
+    
+    // ==========================================
+    // 4. String Operations (Vec<char> mainly)
+    // ==========================================
+    
+    // Note: In AtCoder, usually treat string as Vec<char> for random access.
+    let mut s: Vec<char> = vec!['a', 'b', 'c', 'd', 'e'];
+
+    // 1. Conversion: Vec<char> <-> String
+    let s_string: String = s.iter().collect();
+    let s_back: Vec<char> = s_string.chars().collect();
+
+    // 2. Char <-> Integer (0-25) map for 'a'-'z'
+    // Useful for counting characters or graph nodes
+    let c = 'c';
+    let idx = (c as u8 - b'a') as usize; // 'a'->0, 'b'->1, ...
+    let c_restored = (b'a' + idx as u8) as char;
+
+    // 3. Char <-> Digit (numeric char)
+    let num_c = '9';
+    if let Some(d) = num_c.to_digit(10) {
+        // d is u32 (9)
+    }
+    // Convert number to char
+    let char_from_digit = std::char::from_digit(9, 10).unwrap(); // '9'
+
+    // 4. Basic Manipulation
+    s.reverse();            // ['e', 'd', 'c', 'b', 'a']
+    s.sort();               // ['a', 'b', 'c', 'd', 'e']
+    s.rotate_left(1);       // ['b', 'c', 'd', 'e', 'a'] (Cyclic shift)
+    s.rotate_right(1);      // ['a', 'b', 'c', 'd', 'e']
+    
+    // 5. Substring (Slice)
+    // Note: Slicing a String directly is dangerous (byte indices). 
+    // Slicing Vec<char> is safe.
+    let sub = &s[1..3]; // ['b', 'c'] (slice)
+    let sub_vec = s[1..3].to_vec(); // New vector
+
+    // 6. Check properties
+    let is_lower = 'a'.is_ascii_lowercase();
+    let upper = 'a'.to_ascii_uppercase(); // 'A'
 
     // ==========================================
-    // 4. Data Structures & Algorithms
+    // 5. Data Structures & Algorithms
     // ==========================================
 
     // Priority Queue (Max Heap)

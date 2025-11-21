@@ -13,8 +13,10 @@ use proconio::input;
 use itertools::Itertools;
 
 // Constants
-const INF: i64 = 1 << 60;
+const INF_I: i64 = 1 << 60;
+const INF_U: u64 = 1 << 60 as u64;
 const MOD: i64 = 998244353;
+const MOD2: i64 = 1_000_000_007;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 
 fn main() {
@@ -27,15 +29,38 @@ fn main() {
 }
 
 // Logic goes here
-#[allow(unused_macros)]
-#[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
+    input! {
+        n:usize,
+        m:usize,
+        edges: [(Usize1, Usize1); m],
+    }
 
+    let mut graph: Vec<Vec<usize>> = vec![vec![]; n];
+    for &(u, v) in &edges {
+        graph[u].push(v);
+        graph[v].push(u);
+    }
+
+    let mut ans = INF_U;
+    for i in 0..(1<<n) as usize {
+        let mut count = 0;
+        for &(u, v) in &edges {
+            if (i >> u) & 1 == (i >> v) & 1  {
+                count += 1;
+            }
+        }
+        chmin!(ans, count);
+        md!(ans);
+    }
+
+    wl!(ans);
 }
+
 
 // --- Macros ---
 
