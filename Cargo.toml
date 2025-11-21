@@ -1,0 +1,66 @@
+[package]
+name = "atcoder-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+proconio = "0.4.5"
+itertools = "0.13.0"
+superslice = "1.0.0"
+
+
+[[bin]]
+name = "abc001_a"
+path = "./src/abc/001/a.rs"
+
+[[bin]]
+name = "abc001_b"
+path = "./src/abc/001/b.rs"
+
+[[bin]]
+name = "abc001_c"
+path = "./src/abc/001/c.rs"
+
+[[bin]]
+name = "abc001_d"
+path = "./src/abc/001/d.rs"
+
+[[bin]]
+name = "abc001_e"
+path = "./src/abc/001/e.rs"
+
+[[bin]]
+name = "abc001_f"
+path = "./src/abc/001/f.rs"
+
+[[bin]]
+name = "abc001_g"
+path = "./src/abc/001/g.rs"
+
+[[bin]]
+name = "abc002_a"
+path = "./src/abc/002/a.rs"
+
+[[bin]]
+name = "abc002_b"
+path = "./src/abc/002/b.rs"
+
+[[bin]]
+name = "abc002_c"
+path = "./src/abc/002/c.rs"
+
+[[bin]]
+name = "abc002_d"
+path = "./src/abc/002/d.rs"
+
+[[bin]]
+name = "abc002_e"
+path = "./src/abc/002/e.rs"
+
+[[bin]]
+name = "abc002_f"
+path = "./src/abc/002/f.rs"
+
+[[bin]]
+name = "abc002_g"
+path = "./src/abc/002/g.rs"
