@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDequ
 use std::io::{stdout, BufWriter, Write};
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::Itertools;
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -33,7 +33,6 @@ fn main() {
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,9 +40,33 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        q: usize,
     }
-    
+
+    let mut oldest: usize = 0;
+    let mut versions: Vec<usize> = vec![0; n];
+    for i in 0..n {
+        versions[i] = i;
+    }
+
+    for i in 0..q {
+        input! {
+            x: Usize1,
+            y: Usize1,
+        }
+        let mut cnt = 0;
+        if oldest > x {
+            // nothing
+        } else {
+            for j in oldest..x {
+                versions[j] = y;
+                cnt += 1;
+                oldest += 1;
+            }
+        }
+        wl!(cnt);
+    }
 }
 
 // --- Macros ---

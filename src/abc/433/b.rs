@@ -42,8 +42,24 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        n: usize,
+        a: [i64; n],
     }
     
+    for i in 0..n {
+        let mut exists = false;
+        for j in (0..i).rev() {
+            if a[j] > a[i] {
+                wl!(j + 1);
+                exists = true;
+                break;
+            }
+        }
+        if exists {
+            continue;
+        }
+        wl!(-1);
+    }
 }
 
 // --- Macros ---

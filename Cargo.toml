@@ -8,6 +8,9 @@ proconio = "0.4.5"
 itertools = "0.13.0"
 superslice = "1.0.0"
 
+[[bin]]
+name = "template"
+path = "./template.rs"
 
 [[bin]]
 name = "abc001_a"
@@ -148,3 +151,87 @@ path = "./src/abc/428/f.rs"
 [[bin]]
 name = "abc428_g"
 path = "./src/abc/428/g.rs"
+
+[[bin]]
+name = "abc426_a"
+path = "./src/abc/426/a.rs"
+
+[[bin]]
+name = "abc426_b"
+path = "./src/abc/426/b.rs"
+
+[[bin]]
+name = "abc426_c"
+path = "./src/abc/426/c.rs"
+
+[[bin]]
+name = "abc426_d"
+path = "./src/abc/426/d.rs"
+
+[[bin]]
+name = "abc426_e"
+path = "./src/abc/426/e.rs"
+
+[[bin]]
+name = "abc426_f"
+path = "./src/abc/426/f.rs"
+
+[[bin]]
+name = "abc426_g"
+path = "./src/abc/426/g.rs"
+
+[[bin]]
+name = "abc425_a"
+path = "./src/abc/425/a.rs"
+
+[[bin]]
+name = "abc425_b"
+path = "./src/abc/425/b.rs"
+
+[[bin]]
+name = "abc425_c"
+path = "./src/abc/425/c.rs"
+
+[[bin]]
+name = "abc425_d"
+path = "./src/abc/425/d.rs"
+
+[[bin]]
+name = "abc425_e"
+path = "./src/abc/425/e.rs"
+
+[[bin]]
+name = "abc425_f"
+path = "./src/abc/425/f.rs"
+
+[[bin]]
+name = "abc425_g"
+path = "./src/abc/425/g.rs"
+
+[[bin]]
+name = "abc433_a"
+path = "./src/abc/433/a.rs"
+
+[[bin]]
+name = "abc433_b"
+path = "./src/abc/433/b.rs"
+
+[[bin]]
+name = "abc433_c"
+path = "./src/abc/433/c.rs"
+
+[[bin]]
+name = "abc433_d"
+path = "./src/abc/433/d.rs"
+
+[[bin]]
+name = "abc433_e"
+path = "./src/abc/433/e.rs"
+
+[[bin]]
+name = "abc433_f"
+path = "./src/abc/433/f.rs"
+
+[[bin]]
+name = "abc433_g"
+path = "./src/abc/433/g.rs"

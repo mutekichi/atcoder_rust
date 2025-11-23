@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDequ
 use std::io::{stdout, BufWriter, Write};
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::Itertools;
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -30,10 +30,19 @@ fn main() {
     out.flush().unwrap();
 }
 
+fn convert(s: &str) -> i64 {
+    if s == "Ocelot" {
+        return 1;
+    } else if s == "Serval" {
+        return 2;
+    } else {
+        return 3;
+    }
+}
+
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,9 +50,16 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        s1: String,
+        s2: String,
     }
-    
+
+    let n1 = convert(&s1);
+    let n2 = convert(&s2);
+
+    md!(n1);
+
+    wl!(if n1 >= n2 { "Yes" } else { "No" });
 }
 
 // --- Macros ---

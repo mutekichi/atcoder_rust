@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDequ
 use std::io::{stdout, BufWriter, Write};
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::Itertools;
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -33,7 +33,6 @@ fn main() {
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,9 +40,29 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        // INPUTS
+        s: Chars,
     }
-    
+
+    let mut m = BTreeMap::new();
+    for c in s {
+        m.entry(c).and_modify(|curr| *curr += 1).or_insert(1);
+    }
+
+    let keys = m.keys();
+    for &key in keys {
+        md!(key);
+    }
+    let values = m.values();
+    for &value in values {
+        md!(value);
+    }
+
+    for (&key, &value) in &m {
+        if value == 1 {
+            wl!(key);
+        }
+    }
 }
 
 // --- Macros ---

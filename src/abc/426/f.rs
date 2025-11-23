@@ -39,11 +39,44 @@ fn solve<W: Write>(out: &mut W) {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
-
     input! {
-        // INPUT
+        h: usize,
+        w: usize,
+        _grid: [Chars; h],
     }
-    
+
+    let mut q = VecDeque::new();
+
+    let mut grid = vec![vec![false; w]; h];
+    for (i, j) in iproduct!(0..h, 0..w) {
+        grid[i][j] = _grid[i][j] == '#';
+        if _grid[i][j] == '#' {
+            q.push_back((i, j, 0));
+        }
+    }
+
+    let mut ans = 0;
+
+    while let Some(val) = q.pop_front() {
+        let (y, x, tern) = val;
+        chmax!(ans, tern);
+        for (dy, dx) in DIR {
+            let mut ny = y as isize + dy;
+            chmax!(ny, 0);
+            chmin!(ny, h as isize - 1);
+            
+            let mut nx = x as isize + dx;
+            chmax!(nx, 0);
+            chmin!(nx, w as isize - 1);
+
+            if !grid[ny as usize][nx as usize] {
+                grid[ny as usize][nx as usize] = true;
+                q.push_back((ny as usize, nx as usize, tern + 1));
+            }
+        }
+    }
+
+    wl!(ans);
 }
 
 // --- Macros ---

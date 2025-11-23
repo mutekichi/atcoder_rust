@@ -35,7 +35,6 @@ for PROBLEM in a b c d e f g; do
     # ファイル作成
     if [ ! -f "$FILE_PATH" ]; then
         cp "$TEMPLATE" "$FILE_PATH"
-        echo "Created: $FILE_PATH"
     else
         echo "Skipped: $FILE_PATH (already exists)"
     fi
@@ -48,6 +47,8 @@ for PROBLEM in a b c d e f g; do
 name = "$BIN_NAME"
 path = "$FILE_PATH"
 EOL
-        echo "Registered '$BIN_NAME' to Cargo.toml"
+
     fi
 done
+
+echo "Setup completed for contest $PREFIX."

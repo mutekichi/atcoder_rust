@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDequ
 use std::io::{stdout, BufWriter, Write};
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::Itertools;
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -33,7 +33,6 @@ fn main() {
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,9 +40,46 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        t: usize,
     }
-    
+    for _ in 0..t {
+        input! {
+            n: usize,
+            s: Chars,
+        }
+        let mut max_zero_run = 0;
+        let mut max_one_run = 0;
+
+        let mut cur_zero_run = 0;
+        let mut cur_one_run = 0;
+
+        let mut zeros = 0;
+        let mut ones = 0;
+
+        for i in 0..n {
+            if s[i] == '0' {
+                cur_zero_run += 1;
+                cur_one_run = 0;
+                zeros += 1;
+                chmax!(max_zero_run, cur_zero_run);
+            } else {
+                cur_one_run += 1;
+                cur_zero_run = 0;
+                ones += 1;
+                chmax!(max_one_run, cur_one_run);
+            }
+        }
+
+        md!(ones);
+        md!(zeros);
+        md!(max_one_run);
+        md!(max_zero_run);
+
+        let ans_0 = ones + 2 * (zeros - max_zero_run);
+        let ans_1 = zeros + 2 * (ones - max_one_run);
+
+        wl!(min(ans_0, ans_1));
+    }
 }
 
 // --- Macros ---

@@ -42,6 +42,26 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        x: i64,
+        y: i64,
+        z: i64,
+    }
+
+    if x <= y {
+        wl!("No");
+    }
+
+    else {
+        let diff = x - y;
+        if diff % (z - 1) != 0 {
+            wl!("No");
+        } else {
+            if (diff / (z - 1)) < y {
+                wl!("No");
+            } else {
+                wl!("Yes");
+            }
+        }
     }
     
 }

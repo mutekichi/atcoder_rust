@@ -42,7 +42,38 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        s: Chars,
     }
+
+    let mut numbers = vec![];
+    for c in s {
+        numbers.push(c.to_digit(10).unwrap());
+    }
+
+    let mut current_run = 0;
+    let mut past_run = 0;
+    let mut before = 999;
+
+    let mut ans = 0;
+
+    for number in numbers {
+        if number == before {
+            current_run += 1;
+        } else if number == before + 1 {
+            ans += min(past_run, current_run);
+            past_run = current_run;
+            current_run = 1;
+            before = number;
+        } else {
+            ans += min(past_run, current_run);
+            past_run = 0;
+            current_run = 1;
+            before = number;
+        }
+        md!(current_run, past_run, before, number);
+    }
+            ans += min(past_run, current_run);
+    wl!(ans);
     
 }
 

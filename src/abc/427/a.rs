@@ -8,9 +8,9 @@ use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDequ
 use std::io::{stdout, BufWriter, Write};
 
 // External crates (Available in AtCoder)
-use proconio::marker::{Bytes, Chars, Usize1};
-use proconio::input;
 use itertools::Itertools;
+use proconio::input;
+use proconio::marker::{Bytes, Chars, Usize1};
 
 // Constants
 const INF: i64 = 1 << 60;
@@ -34,7 +34,6 @@ fn solve<W: Write>(out: &mut W) {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
-
 }
 
 // --- Macros ---

@@ -192,3 +192,41 @@ fn interactive_example() {
         // TODO: Implement interaction logic here
     }
 }
+
+{
+    //              0  1  2  3  4  5  6
+    let data = vec![1, 2, 4, 4, 4, 7, 9];
+
+    // 存在判定
+    let x = 4;
+    let found = data.binary_search(&x).is_ok();
+    let y = 5;
+    let not_found = data.binary_search(&y).is_err();
+    let idx_to_insert = data.binary_search(&y).err().unwrap(); // 5 を挿入すべきインデックス
+    assert_eq!(idx_to_insert, 5);
+
+    // 4 以上の最初の要素のインデックス (Lower Bound)
+    // "x < 4" is true for [1, 2]. The partition point is index 2 (value 4).
+    let idx_lower = data.partition_point(|&x| x < 4); 
+    
+    // 4 より大きい最初の要素のインデックス (Upper Bound)
+    // "x <= 4" is true for [1, 2, 4, 4, 4]. The partition point is index 5 (value 7).
+    let idx_upper = data.partition_point(|&x| x <= 4);
+}
+
+{
+    //              0   1  2  3  4
+    let data = vec![10, 8, 6, 4, 2];
+
+    // Find the first element that is <= 5.
+    // The partition point divides the slice into:
+    // Left (true): elements > 5
+    // Right (false): elements <= 5
+    let idx = data.partition_point(|&x| x > 5);
+
+    println!("Index: {}", idx); // Output: 3 (value is 4)
+    if idx < data.len() {
+        println!("Value: {}", data[idx]);
+    }
+}
+

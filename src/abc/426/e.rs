@@ -8,9 +8,9 @@ use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDequ
 use std::io::{stdout, BufWriter, Write};
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
-use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
+use proconio::input;
+use itertools::Itertools;
 
 // Constants
 const INF: i64 = 1 << 60;
@@ -30,21 +30,28 @@ fn main() {
     out.flush().unwrap();
 }
 
+
+
+
+
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {
-        // INPUT
-    }
     
+
+
 }
+
+
+
+
+
 
 // --- Macros ---
 
@@ -53,7 +60,7 @@ fn solve<W: Write>(out: &mut W) {
 macro_rules! md { // stands for my_dbg
     ($($arg:expr),* $(,)?) => {{
         eprint!("[{}:{}] ", file!(), line!());
-
+        
         let mut _first = true;
         $(
             if !_first {

@@ -42,8 +42,34 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        n: usize,
+        mut va: [isize; n],
     }
     
+    let mut vecbool = vec![false; n];
+
+    for &value in &va {
+        if value != -1 {
+            if vecbool[value as usize] {
+                wl!("No");
+                return;
+            }
+            else {
+                vecbool[value as usize] = true;
+            }
+        }
+    }
+
+    let mut yets = HashSet::new();
+    for i in 0..n {
+        if !vecbool[i] {
+            yets.insert(i);
+        }
+    }
+
+    for i in 0..n {
+
+    }
 }
 
 // --- Macros ---
