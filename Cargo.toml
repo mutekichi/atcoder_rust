@@ -235,3 +235,31 @@ path = "./src/abc/433/f.rs"
 [[bin]]
 name = "abc433_g"
 path = "./src/abc/433/g.rs"
+
+[[bin]]
+name = "abc434_a"
+path = "./src/abc/434/a.rs"
+
+[[bin]]
+name = "abc434_b"
+path = "./src/abc/434/b.rs"
+
+[[bin]]
+name = "abc434_c"
+path = "./src/abc/434/c.rs"
+
+[[bin]]
+name = "abc434_d"
+path = "./src/abc/434/d.rs"
+
+[[bin]]
+name = "abc434_e"
+path = "./src/abc/434/e.rs"
+
+[[bin]]
+name = "abc434_f"
+path = "./src/abc/434/f.rs"
+
+[[bin]]
+name = "abc434_g"
+path = "./src/abc/434/g.rs"

@@ -290,10 +290,9 @@ fn solve<W: Write>(out: &mut W) {
 
     let length = &s.len();
 
-    let mut ans = Mint998::new(0);
+    let ans = Mint998::new(0);
 
-    let mut numbers = vec![
-
+    dbg!(ans);
 
     
 }
