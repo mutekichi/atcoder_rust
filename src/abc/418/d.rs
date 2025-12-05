@@ -45,9 +45,22 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        s: Chars,
     }
-    
+
+    let mut cnt = if s[0] == '1' { 1 } else { 0 };
+    let mut ans = cnt;
+
+    for i in 1..n {
+        let is_zero = s[i] == '0';
+        if is_zero {
+            cnt = i - cnt;
+        }
+        md!(cnt);
+        ans += cnt;
+    }
+    wl!(ans);
 }
 
 // --- Macros ---

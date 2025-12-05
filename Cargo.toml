@@ -7,6 +7,7 @@ edition = "2021"
 proconio = "0.4.5"
 itertools = "0.13.0"
 superslice = "1.0.0"
+num-integer = "0.1.44"
 
 [[bin]]
 name = "template"
@@ -263,3 +264,171 @@ path = "./src/abc/434/f.rs"
 [[bin]]
 name = "abc434_g"
 path = "./src/abc/434/g.rs"
+
+[[bin]]
+name = "abc420_a"
+path = "./src/abc/420/a.rs"
+
+[[bin]]
+name = "abc420_b"
+path = "./src/abc/420/b.rs"
+
+[[bin]]
+name = "abc420_c"
+path = "./src/abc/420/c.rs"
+
+[[bin]]
+name = "abc420_d"
+path = "./src/abc/420/d.rs"
+
+[[bin]]
+name = "abc420_e"
+path = "./src/abc/420/e.rs"
+
+[[bin]]
+name = "abc420_f"
+path = "./src/abc/420/f.rs"
+
+[[bin]]
+name = "abc420_g"
+path = "./src/abc/420/g.rs"
+
+[[bin]]
+name = "abc421_a"
+path = "./src/abc/421/a.rs"
+
+[[bin]]
+name = "abc421_b"
+path = "./src/abc/421/b.rs"
+
+[[bin]]
+name = "abc421_c"
+path = "./src/abc/421/c.rs"
+
+[[bin]]
+name = "abc421_d"
+path = "./src/abc/421/d.rs"
+
+[[bin]]
+name = "abc421_e"
+path = "./src/abc/421/e.rs"
+
+[[bin]]
+name = "abc421_f"
+path = "./src/abc/421/f.rs"
+
+[[bin]]
+name = "abc421_g"
+path = "./src/abc/421/g.rs"
+
+[[bin]]
+name = "abc429_a"
+path = "./src/abc/429/a.rs"
+
+[[bin]]
+name = "abc429_b"
+path = "./src/abc/429/b.rs"
+
+[[bin]]
+name = "abc429_c"
+path = "./src/abc/429/c.rs"
+
+[[bin]]
+name = "abc429_d"
+path = "./src/abc/429/d.rs"
+
+[[bin]]
+name = "abc429_e"
+path = "./src/abc/429/e.rs"
+
+[[bin]]
+name = "abc429_f"
+path = "./src/abc/429/f.rs"
+
+[[bin]]
+name = "abc429_g"
+path = "./src/abc/429/g.rs"
+
+[[bin]]
+name = "abc419_a"
+path = "./src/abc/419/a.rs"
+
+[[bin]]
+name = "abc419_b"
+path = "./src/abc/419/b.rs"
+
+[[bin]]
+name = "abc419_c"
+path = "./src/abc/419/c.rs"
+
+[[bin]]
+name = "abc419_d"
+path = "./src/abc/419/d.rs"
+
+[[bin]]
+name = "abc419_e"
+path = "./src/abc/419/e.rs"
+
+[[bin]]
+name = "abc419_f"
+path = "./src/abc/419/f.rs"
+
+[[bin]]
+name = "abc419_g"
+path = "./src/abc/419/g.rs"
+
+[[bin]]
+name = "abc418_a"
+path = "./src/abc/418/a.rs"
+
+[[bin]]
+name = "abc418_b"
+path = "./src/abc/418/b.rs"
+
+[[bin]]
+name = "abc418_c"
+path = "./src/abc/418/c.rs"
+
+[[bin]]
+name = "abc418_d"
+path = "./src/abc/418/d.rs"
+
+[[bin]]
+name = "abc418_e"
+path = "./src/abc/418/e.rs"
+
+[[bin]]
+name = "abc418_f"
+path = "./src/abc/418/f.rs"
+
+[[bin]]
+name = "abc418_g"
+path = "./src/abc/418/g.rs"
+
+[[bin]]
+name = "abc417_a"
+path = "./src/abc/417/a.rs"
+
+[[bin]]
+name = "abc417_b"
+path = "./src/abc/417/b.rs"
+
+[[bin]]
+name = "abc417_c"
+path = "./src/abc/417/c.rs"
+
+[[bin]]
+name = "abc417_d"
+path = "./src/abc/417/d.rs"
+
+[[bin]]
+name = "abc417_e"
+path = "./src/abc/417/e.rs"
+
+[[bin]]
+name = "abc417_f"
+path = "./src/abc/417/f.rs"
+
+[[bin]]
+name = "abc417_g"
+path = "./src/abc/417/g.rs"

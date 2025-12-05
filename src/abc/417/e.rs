@@ -44,10 +44,66 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
+    
+    fn dfs(
+        graph: &Vec<Vec<usize>>,
+        from_list: &mut Vec<usize>,
+        node: usize,
+        found: &mut bool,
+    ) {
+        md!(node);
+        for &next_node in graph[node].iter() {
+            md!(next_node);
+            if from_list[next_node] == INF_USIZE {
+                from_list[next_node] = node;
+                dfs(graph, from_list, next_node, found);
+            }
+        }
+    }
+
     input! {
-        // INPUT
+        t: usize,
     }
     
+    for _ in 0..t {
+        input! {
+            n: usize,
+            m: usize,
+            start: Usize1,
+            goal: Usize1,
+            edges: [(Usize1, Usize1); m],
+        }
+
+        let mut graph: Vec<Vec<usize>> = vec![Vec::new(); n];
+        for (u, v) in edges {
+            graph[u].push(v);
+            graph[v].push(u);
+        }
+
+        for edges in graph.iter_mut() {
+            edges.sort();
+        }
+
+        let mut stack = Vec::new();
+        stack.push(start);
+
+        let mut from_list = vec![INF_USIZE; n];
+        from_list[start] = INF_USIZE - 1;
+        let mut found = false;
+
+        dfs(&graph, &mut from_list, start, &mut found);
+        
+        let mut node = goal;
+        let mut path = vec![];
+        while node != INF_USIZE - 1 {
+            path.push(node);
+            node = from_list[node];
+        }
+        
+        let ans = path.iter().rev().map(|i| { (i + 1).to_string() }).collect::<Vec<String>>().join(" ");
+
+        wl!(ans);
+    }
 }
 
 // --- Macros ---

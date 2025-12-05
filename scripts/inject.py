@@ -18,7 +18,7 @@ if not os.path.exists(template_path):
     print(f"Error: Template not found at {template_path}")
     sys.exit(1)
 
-with open(template_path, 'r') as f:
+with open(template_path, 'r', encoding="utf-8") as f:
     t_lines = f.readlines()
 
 # (スニペット抽出ロジックはそのまま)
@@ -43,7 +43,7 @@ if not os.path.exists(target_file):
     print(f"Error: Target file '{target_file}' not found")
     sys.exit(1)
 
-with open(target_file, 'r') as f:
+with open(target_file, 'r', encoding="utf-8") as f:
     target_lines = f.readlines()
 
 # 3. 挿入位置の決定 (fn solve の直前を推奨)
@@ -59,7 +59,7 @@ else:
     target_lines.insert(insert_idx, "".join(snippet) + "\n")
 
 # 4. 書き込み
-with open(target_file, 'w') as f:
+with open(target_file, 'w', encoding="utf-8") as f:
     f.writelines(target_lines)
 
 print(f"Successfully injected '{template_path}' into {target_file}")

@@ -3,6 +3,7 @@
 #![allow(dead_code)]
 
 // Common imports
+use num_integer::gcd;
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
@@ -34,6 +35,10 @@ fn main() {
     out.flush().unwrap();
 }
 
+fn hash(xdiff: i32, ydiff: i32) -> i64 {
+    return ((xdiff as i64) << 32) & ydiff as i64;
+}
+
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
@@ -45,9 +50,40 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        mut xy: [(i32, i32); n],
     }
-    
+    xy.sort();
+
+    let mut m = HashMap::<i64, Vec<i32>>::new();
+
+    for i in 0..(n-1) {
+        for j in (i+1)..n {
+            let (x1, y1) = xy[i];
+            let (x2, y2) = xy[j];
+            if x1 == x2 {
+                let key = hash(0, y2 - y1);
+                if m.contains_key(&key) {
+                    m.get_mut(&key).unwrap().push(y2 - y1);
+                } else {
+                    m.insert(key, vec![y2 - y1]);
+                }
+            } else if y2 == y1 {
+                
+            }
+            else {
+                let g = gcd(x2 - x1, (y2 - y1).abs());
+                let key = hash((x2 - x1) / g, (y2 - y1) / g);
+                let value = g * (if y2 - y1 > 0 { 1 } else {  -1 });
+                if m.contains_key(&key) {
+                    m.get_mut(&key).unwrap().push(value);
+                } else {
+                    m.insert(key, vec![value]);
+                }
+            }
+        }
+    }
+
 }
 
 // --- Macros ---

@@ -4,19 +4,19 @@
 
 /// Lazy Segment Tree (Range Update, Range Query)
 ///
-/// 作用付きモノイド（データ `T`, 作用素 `U`）に対する区間更新・区間クエリを O(log N) で処理します。
+/// Processes range updates and range queries in O(log N) for a Monoid with an Operator.
 ///
 /// # Generics
-/// - `T`: データの型 (Monoid の要素)
-/// - `U`: 作用素の型 (Operator Monoid の要素)
-/// - `F`: データの二項演算 `f(T, T) -> T`
-/// - `M`: 作用素をデータに適用する関数 `mapping(f(T), U) -> T`
-/// - `C`: 作用素の合成関数 `composition(f(U), g(U)) -> U` (f ∘ g)
+/// - `T`: Type of data (Element of Monoid)
+/// - `U`: Type of operator (Element of Operator Monoid)
+/// - `F`: Binary operation for data `f(T, T) -> T`
+/// - `M`: Function to apply operator to data `mapping(f(T), U) -> T`
+/// - `C`: Function to compose operators `composition(f(U), g(U)) -> U` (f ∘ g)
 ///
 /// # Examples
 ///
 /// ## 1. Range Update Query (RUQ) + Range Minimum Query (RMQ)
-/// 区間更新、区間最小値。
+/// Range update, Range minimum.
 /// - Data: `i64` (Inf)
 /// - Operator: `i64` (None if specialized value, here we use i64::MAX as 'None')
 ///
@@ -24,22 +24,22 @@
 /// use atcoder_rust::template::lazy_segment_tree::LazySegmentTree;
 ///
 /// let inf = std::i64::MAX;
-/// let id = std::i64::MAX; // 恒等写像（更新しないことを表す値）
+/// let id = std::i64::MAX; // Identity element (represents no update)
 ///
 /// let data = vec![1, 2, 3, 4, 5];
 ///
 /// let mut st = LazySegmentTree::new(
 ///     &data,
-///     |a, b| std::cmp::min(a, b), // op: min
-///     inf,                        // e: inf
-///     |acc, f| if f == id { acc } else { f }, // mapping: 更新値があれば上書き
-///     |f, g| if f == id { g } else { f },     // composition: 新しい操作fで上書き (f ∘ g)
-///     id                          // id: 更新なし
+///     |a, b| std::cmp::min(a, b),                     // op: min
+///     inf,                                            // e: inf
+///     |acc, f| if f == id { acc } else { f },         // mapping: update if valid
+///     |f, g| if f == id { g } else { f },             // composition: overwrite with new op f (f ∘ g)
+///     id                                              // id: no update
 /// );
 ///
 /// assert_eq!(st.prod(0, 5), 1);
 ///
-/// // Range Update: [1, 4) を 0 に更新 -> [1, 0, 0, 0, 5]
+/// // Range Update: update [1, 4) to 0 -> [1, 0, 0, 0, 5]
 /// st.apply_range(1, 4, 0);
 ///
 /// assert_eq!(st.prod(0, 5), 0);
@@ -49,14 +49,14 @@
 /// ```
 ///
 /// ## 2. Range Add Query (RAQ) + Range Sum Query (RSQ)
-/// 区間加算、区間和。
-/// **注意**: 区間和に一律加算する場合、作用素を適用する際に「区間の長さ」が必要です。
-/// そのため、データ型 `T` に `(value, size)` のようにサイズ情報を含めるのが定石です。
+/// Range add, Range sum.
+/// **Note**: When adding uniformly to a range sum, the "length of the range" is required when applying the operator.
+/// Therefore, it is standard to include size information in the data type `T`, e.g., `(value, size)`.
 ///
 /// ```
 /// use atcoder_rust::template::lazy_segment_tree::LazySegmentTree;
 ///
-/// // (値, 区間幅)
+/// // (value, size)
 /// #[derive(Clone, Copy, Debug)]
 /// struct S { val: i64, size: i64 }
 ///
@@ -65,30 +65,30 @@
 ///
 /// let mut st = LazySegmentTree::new(
 ///     &data,
-///     |a, b| S { val: a.val + b.val, size: a.size + b.size }, // op: 和
-///     S { val: 0, size: 0 },                                  // e
-///     |acc, f| S { val: acc.val + f * acc.size, size: acc.size }, // mapping: 加算 (f * 幅)
-///     |f, g| f + g,                                           // composition: 加算の合成
-///     0                                                       // id: 0
+///     |a, b| S { val: a.val + b.val, size: a.size + b.size },     // op: sum
+///     S { val: 0, size: 0 },                                      // e
+///     |acc, f| S { val: acc.val + f * acc.size, size: acc.size }, // mapping: add (f * width)
+///     |f, g| f + g,                                               // composition: sum of additions
+///     0                                                           // id: 0
 /// );
 ///
 /// assert_eq!(st.prod(0, 5).val, 15);
 ///
-/// // Range Add: [0, 5) に +1 -> [2, 3, 4, 5, 6]
+/// // Range Add: add +1 to [0, 5) -> [2, 3, 4, 5, 6]
 /// st.apply_range(0, 5, 1);
 /// assert_eq!(st.prod(0, 5).val, 20); // 15 + 1*5
 /// ```
 ///
 /// ## 3. Range Affine Update + Range Sum Query
-/// 区間アフィン変換 ($x \leftarrow bx + c$)、区間和。
-/// これも区間幅が必要なため、データ型 `T` にサイズを含めます。
+/// Range affine transformation (x <- bx + c), Range sum.
+/// This also requires range width, so we include size in data type `T`.
 ///
 /// ```
 /// use atcoder_rust::template::lazy_segment_tree::LazySegmentTree;
 ///
 /// #[derive(Clone, Copy, Debug)]
 /// struct S { val: i64, size: i64 }
-/// // 作用素: (b, c) -> x * b + c
+/// // Operator: (b, c) -> x * b + c
 /// type F = (i64, i64);
 ///
 /// let data_raw = vec![1, 2, 3, 4, 5];
@@ -130,14 +130,9 @@ where
     C: Fn(U, U) -> U,
 {
     /// Creates a new LazySegmentTree.
-    pub fn new(
-        data: &[T],
-        op: F,
-        e: T,
-        mapping: M,
-        composition: C,
-        id: U,
-    ) -> Self {
+    ///
+    /// C: (old, new) => composed
+    pub fn new(data: &[T], op: F, e: T, mapping: M, composition: C, id: U) -> Self {
         let n = data.len();
         let mut log = 0;
         while (1 << log) < n {

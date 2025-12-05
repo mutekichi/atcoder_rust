@@ -45,9 +45,19 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        vec_a: [i64; n],
     }
     
+    let vec_api: Vec<i64> = vec_a.iter().enumerate().map(
+        |(i, v)| { i as i64  + v }
+    ).collect();
+
+    let vec_ami: Vec<i64> = vec_a.iter().enumerate().map(
+        |(i, v)| { i as i64 - v }
+    ).collect();
+
+
 }
 
 // --- Macros ---

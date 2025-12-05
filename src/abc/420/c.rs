@@ -6,7 +6,6 @@
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
-use std::mem;
 
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
@@ -14,10 +13,7 @@ use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
 // Constants
-const INF_I64: i64 = 1 << 60;
-const INF_USIZE: usize = 1 << 60;
-const INF_F64: f64 = 1e18;
-const INF_I128: i128 = 1 << 120;
+const INF: i64 = 1 << 60;
 const MOD: i64 = 998244353;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 
@@ -45,9 +41,28 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize, q: usize,
+        mut a: [i128; n],
+        mut b: [i128; n],
+        cxv: [(char, Usize1, i128); q],
     }
-    
+
+    let mut ans = a.iter().zip(&b).map(|(&a, &b)| min(a, b)).sum::<i128>();
+
+    for &(c, x, v) in cxv.iter() {
+        if c == 'A' {
+            let before = min(a[x], b[x]);
+            let after = min(v, b[x]);
+            ans += after - before;
+            a[x] = v;
+        } else {
+            let before = min(a[x], b[x]);
+            let after = min(a[x], v);
+            ans += after - before;
+            b[x] = v;
+        }
+        wl!(ans);
+    }
 }
 
 // --- Macros ---
@@ -79,38 +94,6 @@ macro_rules! md {
 }
 
 #[macro_export]
-#[cfg(debug_assertions)]
-// Usage: mep!(val) (-> eprint without newline)
-// mep!("{:<1$}", val, width) (-> left align with width)
-// mep!("{:>1$}", val, width)
-macro_rules! mep {
-    ($x:expr) => { eprint!("{}", $x); };
-    ($($arg:tt)+) => { eprint!($($arg)+); };
-}
-
-#[macro_export]
-#[cfg(not(debug_assertions))]
-macro_rules! mep {
-    ($($arg:tt)*) => {};
-}
-
-#[macro_export]
-#[cfg(debug_assertions)]
-// Usage: mep!(val) (-> eprint with space)
-// mep!("{:<1$}", val, width) (-> left align with width)
-// mep!("{:>1$}", val, width)
-macro_rules! mepw { // stands for my_eprint_whitespace
-    ($x:expr) => { eprint!("{} ", $x); };
-    ($($arg:tt)+) => { eprint!($($arg)+); };
-}
-
-#[macro_export]
-#[cfg(not(debug_assertions))]
-macro_rules! mepw {
-    ($($arg:tt)*) => {};
-}
-
-#[macro_export]
 macro_rules! chmin {
     ($a:expr, $b:expr) => {
         if $a > $b {
@@ -132,33 +115,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-// Utility functions
-
-// Utility functions
-/// Returns valid neighbor coordinates within the grid (h x w).
-/// Usage:
-/// ```
-/// for (nh, nw) in get_next_positions(h, w, hh, ww, &DIR) {
-///     // process (nh, nw)
-/// }
-/// ```
-fn get_next_positions(
-    h: usize,
-    w: usize,
-    i: usize,
-    j: usize,
-    directions: &[(isize, isize)],
-) -> Vec<(usize, usize)> {
-    let mut next_positions = Vec::with_capacity(directions.len());
-
-    for &(di, dj) in directions {
-        let next_i = i.wrapping_add_signed(di);
-        let next_j = j.wrapping_add_signed(dj);
-        if next_i < h && next_j < w {
-            next_positions.push((next_i, next_j));
-        }
-    }
-    next_positions
 }

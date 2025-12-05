@@ -6,7 +6,6 @@
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
-use std::mem;
 
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
@@ -45,9 +44,30 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        s: Chars,
     }
     
+    let mut ans: usize = INF_USIZE;
+    let a_positions: Vec<usize> = s.iter().enumerate().filter(|&(i, &c)| {
+        c == 'A'
+    }).map(|(i, &c)| {
+        i
+    }).collect();
+
+    let vec1: Vec<usize> = (0..n).map(|i| 2 * i).collect();
+    let vec2: Vec<usize> = (0..n).map(|i| 2 * i + 1).collect();
+
+    ans = min(ans, a_positions.iter().zip(vec1).map(|v| {
+        v.0.abs_diff(v.1)
+    }).sum::<usize>());
+
+    ans = min(ans, a_positions.iter().zip(vec2).map(|v| {
+        v.0.abs_diff(v.1)
+    }).sum::<usize>());
+
+    wl!(ans);
+
 }
 
 // --- Macros ---

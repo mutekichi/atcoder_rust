@@ -6,7 +6,6 @@
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
-use std::mem;
 
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};

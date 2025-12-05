@@ -45,9 +45,35 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        m: usize,
+        s: Chars,
+        t: Chars,
+        lr: [(usize, usize); m],
     }
     
+    let mut v = vec![false; n];
+
+    for (l, r) in lr {
+        v[l - 1] ^= true;
+        if r == n {continue };
+        v[r] ^= true;
+    }
+
+    for i in 1..n {
+        v[i] ^= v[i - 1];
+    }
+
+    let mut ans = "".to_string();
+
+    for i in 0..n {
+        if v[i] {
+            ans += &t[i].to_string();
+        } else {
+            ans += &s[i].to_string();
+        }
+    }
+    wl!(ans);
 }
 
 // --- Macros ---

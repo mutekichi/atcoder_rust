@@ -6,7 +6,6 @@
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
-use std::mem;
 
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
@@ -45,13 +44,56 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        h: usize, w: usize,
+        grid: [Chars; h],
     }
+
     
+    let mut min_steps: Vec<Vec<Vec<usize>>>
+        = vec![vec![vec![INF_USIZE; 2]; w]; h];
+    
+    let mut q: VecDeque<(usize, usize, bool, usize)> = VecDeque::new();
+
+
+    for (i, j) in iproduct!(0..h, 0..w) {
+        if grid[i][j] == 'S' {
+            q.push_back((i, j, false, 0));
+            min_steps[i][j][0] = 0;
+        }
+    }
+
+    while !q.is_empty() {
+        let (hh, ww, can_move_to_x, step) = q.pop_front().unwrap();
+        md!(hh, ww, can_move_to_x, step);
+        if grid[hh][ww] == 'G' {
+            wl!(step);
+            return;
+        }
+        for (nh, nw) in get_next_positions(h, w, hh, ww, &DIR) {
+            let n_can_move_to_x = if grid[hh][ww] == '?' {!can_move_to_x} else {can_move_to_x};
+            if min_steps[nh][nw][if n_can_move_to_x {1} else {0}] != INF_USIZE {
+                continue;
+            }
+            if grid[nh][nw] == '#' {
+                continue;
+            }
+            if grid[nh][nw] == 'x' && !n_can_move_to_x {
+                continue;
+            }
+            if grid[nh][nw] == 'o' && n_can_move_to_x {
+                continue;
+            }
+            min_steps[nh][nw][if n_can_move_to_x {1} else {0}] = step + 1;
+            q.push_back((nh, nw, n_can_move_to_x, step + 1)); 
+        }
+    }
+    wl!(-1);
+
 }
 
 // --- Macros ---
 
+/// Usage: md!(var1, var2, ...)
 #[macro_export]
 #[cfg(debug_assertions)] // for debug build
 macro_rules! md { // stands for my_dbg
@@ -78,12 +120,12 @@ macro_rules! md {
     }};
 }
 
-#[macro_export]
-#[cfg(debug_assertions)]
 // Usage: mep!(val) (-> eprint without newline)
 // mep!("{:<1$}", val, width) (-> left align with width)
 // mep!("{:>1$}", val, width)
-macro_rules! mep {
+#[macro_export]
+#[cfg(debug_assertions)]
+macro_rules! mep { // stands for my_eprint
     ($x:expr) => { eprint!("{}", $x); };
     ($($arg:tt)+) => { eprint!($($arg)+); };
 }
@@ -96,9 +138,6 @@ macro_rules! mep {
 
 #[macro_export]
 #[cfg(debug_assertions)]
-// Usage: mep!(val) (-> eprint with space)
-// mep!("{:<1$}", val, width) (-> left align with width)
-// mep!("{:>1$}", val, width)
 macro_rules! mepw { // stands for my_eprint_whitespace
     ($x:expr) => { eprint!("{} ", $x); };
     ($($arg:tt)+) => { eprint!($($arg)+); };
@@ -133,8 +172,6 @@ macro_rules! chmax {
         }
     };
 }
-
-// Utility functions
 
 // Utility functions
 /// Returns valid neighbor coordinates within the grid (h x w).

@@ -45,9 +45,33 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: i64,
+        m: i64,
+        l: i64,
+        v: [i64; n],
     }
     
+    // dp[i][j] = the cost of making the sum of v[0]..v[i - 1] = j mod m
+    let mut dp = vec![vec![INF_I64; m as usize]; l as usize + 1];
+
+    dp[0][0] = 0;
+
+    for i in 0..l as usize {
+        for j in 0..m as usize {
+            for k in 0..m as usize {
+                let target = (j as i64 + m - k as i64) % m;
+                let mut cost = 0;
+                let mut idx = i;
+                while idx < n as usize {
+                    cost += (target + m - v[idx]) % m;
+                    idx += l as usize;
+                }
+                chmin!(dp[i + 1][j], cost + dp[i][k]);
+            }
+        }
+    }
+
+    wl!(dp[l as usize][0]);
 }
 
 // --- Macros ---
