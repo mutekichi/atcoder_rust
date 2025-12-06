@@ -432,3 +432,59 @@ path = "./src/abc/417/f.rs"
 [[bin]]
 name = "abc417_g"
 path = "./src/abc/417/g.rs"
+
+[[bin]]
+name = "abc416_a"
+path = "./src/abc/416/a.rs"
+
+[[bin]]
+name = "abc416_b"
+path = "./src/abc/416/b.rs"
+
+[[bin]]
+name = "abc416_c"
+path = "./src/abc/416/c.rs"
+
+[[bin]]
+name = "abc416_d"
+path = "./src/abc/416/d.rs"
+
+[[bin]]
+name = "abc416_e"
+path = "./src/abc/416/e.rs"
+
+[[bin]]
+name = "abc416_f"
+path = "./src/abc/416/f.rs"
+
+[[bin]]
+name = "abc416_g"
+path = "./src/abc/416/g.rs"
+
+[[bin]]
+name = "abc220_a"
+path = "./src/abc/220/a.rs"
+
+[[bin]]
+name = "abc220_b"
+path = "./src/abc/220/b.rs"
+
+[[bin]]
+name = "abc220_c"
+path = "./src/abc/220/c.rs"
+
+[[bin]]
+name = "abc220_d"
+path = "./src/abc/220/d.rs"
+
+[[bin]]
+name = "abc220_e"
+path = "./src/abc/220/e.rs"
+
+[[bin]]
+name = "abc220_f"
+path = "./src/abc/220/f.rs"
+
+[[bin]]
+name = "abc220_g"
+path = "./src/abc/220/g.rs"

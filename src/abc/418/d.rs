@@ -55,7 +55,7 @@ fn solve<W: Write>(out: &mut W) {
     for i in 1..n {
         let is_zero = s[i] == '0';
         if is_zero {
-            cnt = i - cnt;
+            cnt = i + 1 - cnt;
         }
         md!(cnt);
         ans += cnt;

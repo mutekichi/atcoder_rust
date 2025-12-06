@@ -69,7 +69,7 @@ fn solve<W: Write>(out: &mut W) {
                     m.insert(key, vec![y2 - y1]);
                 }
             } else if y2 == y1 {
-                
+                let key = hash(x2 - x1, 0);
             }
             else {
                 let g = gcd(x2 - x1, (y2 - y1).abs());

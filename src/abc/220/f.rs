@@ -1,3 +1,4 @@
+#![cfg_attr(rustfmt, fn_params_layout = "Vertical")]
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
@@ -34,6 +35,63 @@ fn main() {
     out.flush().unwrap();
 }
 
+fn dp_size(
+    v: usize,
+    from: usize,
+    tree: &Vec<Vec<usize>>,
+    sizes: &mut Vec<usize>,
+    depths: &mut Vec<usize>,
+    depth: usize,
+) -> usize {
+    let mut size = 1;
+    for next in &tree[v] {
+        if *next == from {
+            continue;
+        }
+        size += dp_size(*next, v, tree, sizes, depths, depth + 1);
+    }
+    depths[v] = depth;
+    sizes[v] = size;
+    size
+}
+
+fn dp_1(
+    v: usize,
+    from: usize,
+    tree: &Vec<Vec<usize>>,
+    sizes: &Vec<usize>,
+    size_sum_root_0: &mut Vec<usize>,
+) -> usize {
+    let mut size_sum = 0;
+    for next in &tree[v] {
+        if *next == from {
+            continue;
+        }
+        let sub_size_sum = dp_1(*next, v, tree, sizes, size_sum_root_0);
+        size_sum += sub_size_sum + sizes[*next];
+    }
+    size_sum_root_0[v] = size_sum;
+    size_sum
+}
+
+fn dp_2(
+    v: usize,
+    from: usize,
+    tree: &Vec<Vec<usize>>,
+    sizes: &Vec<usize>,
+    ans: &mut Vec<usize>,
+    n: usize,
+) {
+    let size = sizes[v];
+    ans[v] = ans[from] + n - 2 * size;
+    for next in &tree[v] {
+        if *next == from {
+            continue;
+        }
+        dp_2(*next, v, tree, sizes, ans, n);
+    }
+}
+
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
@@ -46,17 +104,36 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         n: usize,
-        vec_a: [i64; n],
+        uv: [(Usize1, Usize1); n - 1],
     }
     
-    let vec_api: Vec<i64> = vec_a.iter().enumerate().map(
-        |(i, v)| { i as i64  + v }
-    ).collect();
+    let mut tree = vec![Vec::new(); n];
+    for (u, v) in uv {
+        tree[u].push(v);
+        tree[v].push(u);
+    }
 
-    let vec_ami: Vec<i64> = vec_a.iter().enumerate().map(
-        |(i, v)| { i as i64 - v }
-    ).collect();
+    let mut sizes = vec![INF_USIZE; n];
+    let mut depths = vec![INF_USIZE; n];
+    let mut size_sum_root_0 = vec![INF_USIZE; n];
 
+    dp_size(0, INF_USIZE, &tree, &mut sizes, &mut depths, 0);
+    dp_1(0, INF_USIZE, &tree, &sizes, &mut size_sum_root_0);
+
+    for (i, d) in size_sum_root_0.iter().enumerate() {
+        md!(i, d);
+    }
+    
+    let mut answers = vec![INF_USIZE; n];
+    answers[0] = size_sum_root_0[0];
+    
+    for next in &tree[0] {
+        dp_2(*next, 0, &tree, &sizes, &mut answers, n);
+    }
+
+    for ans in answers {
+        wl!(ans);
+    }
 }
 
 // --- Macros ---

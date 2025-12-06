@@ -179,7 +179,7 @@ fn snippets<W: Write>(out: &mut W) {
 
     // Lower Bound (using partition_point)
     // Find the first index where x >= 5
-    let idx = sorted_vec.partition_point(|&x| x < 5);
+    let idx = sorted_vec.partition_point(|&x| x < 5); // idx = 2
     
     // Deque (Double-ended queue)
     let mut deque = VecDeque::new();

@@ -45,18 +45,38 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        n: usize,
-        vec_a: [i64; n],
+        // INPUT
+        t: usize,
+    }
+    for _ in 0..t {
+        input! {
+            n: usize,
+            m: i64,
+            mut vec_a: [i64; n],
+            mut vec_b: [i64; n],
+        }
+
+        vec_a.sort_unstable();
+        vec_b.sort_unstable();
+
+        let mut ans = 0;
+        let mut idx_low = 0 as usize;
+        let mut idx_high = n as usize - 1;
+
+        for a in vec_a {
+            if vec_b[idx_high] + a >= m {
+                ans += vec_b[idx_high] + a - m;
+                if idx_high > 0 {
+                    idx_high -= 1;
+                }
+            } else {
+                ans += (vec_b[idx_low] + a) % m;
+                idx_low += 1;
+            }
+        }
+        wl!(ans);
     }
     
-    let vec_api: Vec<i64> = vec_a.iter().enumerate().map(
-        |(i, v)| { i as i64  + v }
-    ).collect();
-
-    let vec_ami: Vec<i64> = vec_a.iter().enumerate().map(
-        |(i, v)| { i as i64 - v }
-    ).collect();
-
 }
 
 // --- Macros ---

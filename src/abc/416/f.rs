@@ -46,17 +46,21 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         n: usize,
+        k: usize,
         vec_a: [i64; n],
+        uv: [(Usize1, Usize1); n - 1],
     }
-    
-    let vec_api: Vec<i64> = vec_a.iter().enumerate().map(
-        |(i, v)| { i as i64  + v }
-    ).collect();
 
-    let vec_ami: Vec<i64> = vec_a.iter().enumerate().map(
-        |(i, v)| { i as i64 - v }
-    ).collect();
+    let mut tree = vec![Vec::new(); n];
 
+    for (u, v) in uv {
+        tree[u].push(v);
+        tree[v].push(u);
+    }
+
+    fn dp(v: usize, from: usize) {
+        
+    }
 }
 
 // --- Macros ---
