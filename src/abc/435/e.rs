@@ -7,7 +7,6 @@ use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
-use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
@@ -18,7 +17,6 @@ use proconio::marker::{Bytes, Chars, Usize1};
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
-const INF_I128: i128 = 1 << 120;
 const MOD: i64 = 998244353;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 
@@ -46,9 +44,44 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        q: usize,
+        lr: [(Usize1, usize); q],
     }
     
+    // [start, end)
+    let mut set: BTreeSet<(usize, usize)> = BTreeSet::new();
+    set.insert((0, n));
+
+    let mut ans = n;
+
+    for (l, r) in lr {
+        for l_or_r in [l, r] {
+            let key = (l_or_r, 0);
+            if let Some(last) = set.range(..key).next_back() {
+                let (last_l, last_r) = *last;
+                md!(last_l, last_r);
+                if last_r > l_or_r {
+                    set.insert((last_l, l_or_r));
+                    set.insert((l_or_r, last_r));
+                    set.remove(&(last_l, last_r));
+                }
+            }
+        }
+
+        
+        let key_start = (l, 0);
+        let key_end = (r, 0);
+        let mut elems_to_remove = vec![];
+        for &elem in set.range(key_start..key_end) {
+            ans -= elem.1 - elem.0;
+            elems_to_remove.push(elem);
+        }
+        for elem in elems_to_remove {
+            set.remove(&elem);
+        }
+        wl!(ans);
+    }
 }
 
 // --- Macros ---

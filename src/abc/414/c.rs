@@ -35,6 +35,55 @@ fn main() {
     out.flush().unwrap();
 }
 
+fn convert(
+    digits: i128,
+    base: i128,
+) -> i128 {
+    let mut keta: i128 = 1;
+    let mut res = digits;
+    let mut ans = 0;
+    while res > 0 {
+        ans += keta * (res % base);
+        keta *= 10;
+        res /= base;
+    }
+    ans
+}
+
+fn is_kaibun(a: i128) -> bool {
+    let mut orig = a;
+    let mut reversed = 0;
+
+    while orig > 0 {
+        reversed *= 10;
+        reversed += orig % 10;
+        orig /= 10;
+    }
+    reversed == a
+}
+
+fn to_kaibun(a: i128) -> (i128, i128) {
+    let mut orig = a;
+    let mut kaibun_1 = orig % 10;
+    let mut kaibun_2 = orig % 10 * 11;
+
+    let mut power = 100;
+
+    orig /= 10;
+    while orig > 0 {
+        kaibun_1 *= 10;
+        kaibun_2 *= 10;
+        let suuji = orig % 10;
+        kaibun_1 += suuji;
+        kaibun_1 += power * suuji;
+        kaibun_2 += suuji;
+        kaibun_2 += power * 10 * suuji;
+        orig /= 10;
+        power *= 100;
+    }
+    (kaibun_1, kaibun_2)
+}
+
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
@@ -46,9 +95,25 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        a: i128,
+        n: i128,
     }
+
+    let mut ans = 0;
     
+    for i in (1 as i128)..(1000000 as i128) {
+        let (kaibun_1, kaibun_2) = to_kaibun(i as i128);
+        if kaibun_1 <= n && is_kaibun(kaibun_1) && is_kaibun(convert(kaibun_1, a)) {
+            md!(kaibun_1);
+            ans += kaibun_1;
+        }
+        if kaibun_2 <= n && is_kaibun(kaibun_2) && is_kaibun(convert(kaibun_2, a)) {
+            md!(kaibun_2);
+            ans += kaibun_2;
+        }
+    } 
+
+    wl!(ans);
 }
 
 // --- Macros ---

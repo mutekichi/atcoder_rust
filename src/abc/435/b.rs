@@ -7,7 +7,6 @@ use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
-use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
@@ -46,9 +45,32 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        vec_a: [i64; n],
     }
+
+    let mut ans = 0;
     
+    for i in 0..n {
+        for j in i..n {
+            let mut sum = 0;
+            let mut ok = true;
+            for k in i..(j + 1) {
+                sum += vec_a[k];
+            }
+            for k in i..(j+1) {
+                if sum % vec_a[k] == 0 {
+                    ok = false;
+                    continue;
+                }
+            }
+            if ok {
+                md!(i, j);
+                ans += 1;
+            }
+        }
+    }
+    wl!(ans);
 }
 
 // --- Macros ---

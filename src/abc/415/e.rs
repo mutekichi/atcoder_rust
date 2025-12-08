@@ -20,7 +20,7 @@ const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
 const MOD: i64 = 998244353;
-const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const DIR: [(isize, isize); 2] = [(0, -1), (-1, 0)];
 
 // FOR TEMPLATE INJECTIONS
 
@@ -46,9 +46,33 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        h: usize,
+        w: usize,
+        grid: [[i64; w]; h],
+        vec_p: [i64; h + w - 1],
     }
-    
+
+    let mut q: VecDeque<(usize, usize)> = VecDeque::new();
+    let mut costs = vec![vec![INF_I64; w]; h];
+
+    q.push_back((h - 1, w - 1));
+    costs[h - 1][w - 1] = max(0, vec_p[(h - 1) + (w - 1)] - grid[h - 1][w - 1]);
+
+    md!(costs[h-1][w-1]);
+
+    while let Some((i, j)) = q.pop_front() {
+        let prev_cost = costs[i][j];
+        for (ni, nj) in get_next_positions(h, w, i, j, &DIR) {
+            let next_cost = max(0, prev_cost + vec_p[ni + nj] - grid[ni][nj]);
+            if costs[ni][nj] == INF_I64 {
+                q.push_back((ni, nj));
+            }
+            costs[ni][nj] = min(next_cost, costs[ni][nj]);
+            md!(ni, nj, next_cost);
+        }
+    }
+
+    wl!(costs[0][0]);
 }
 
 // --- Macros ---

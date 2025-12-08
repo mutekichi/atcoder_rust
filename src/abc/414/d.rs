@@ -46,9 +46,25 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        m: usize,
+        mut vec_x: [i128; n],
     }
-    
+    vec_x.sort_unstable();
+    vec_x.dedup();
+
+    let size = vec_x.len();
+    let ans = vec_x[size - 1] - vec_x[0];
+
+    let mut intervals: Vec<i128> = vec_x.windows(2).map(
+        |w| { w[1] - w[0] }
+    ).collect();
+
+    let interval_count = m - 1;
+    intervals.sort_unstable();
+    let to_sub: i128 = intervals.iter().rev().take(min(m - 1, size - 1)).sum();
+    wl!(ans - to_sub);
+
 }
 
 // --- Macros ---

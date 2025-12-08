@@ -7,7 +7,6 @@ use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
-use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
@@ -46,9 +45,49 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize,
+        m: usize,
+        xy: [(Usize1, Usize1); m],
+        q: usize,
+        qtype_v: [(usize, Usize1); q],
     }
     
+    let mut graph = vec![vec![]; n];
+    let mut blacks = vec![false; n];
+
+    for (x, y) in xy {
+        graph[y].push(x);
+    }
+
+    let mut queue = VecDeque::new();
+
+    for (qtype, vv) in qtype_v {
+        md!(qtype, vv);
+        if qtype == 1 {
+            if blacks[vv] {
+                continue;
+            }
+            queue.push_back(vv);
+            blacks[vv] = true;
+            md!(vv);
+            while let Some(v) = queue.pop_front() {
+                for next in &graph[v] {
+                    if blacks[*next] {
+                        continue;
+                    }
+                    blacks[*next] = true;
+                    md!(*next);
+                    queue.push_back(*next);
+                }
+            } 
+        } else {
+            if blacks[vv] {
+                wl!("Yes");
+            } else {
+                wl!("No");
+            }
+        }
+    }
 }
 
 // --- Macros ---

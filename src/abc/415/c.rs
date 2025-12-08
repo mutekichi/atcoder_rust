@@ -46,9 +46,48 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        t: usize,
     }
-    
+    for _ in 0..t {
+        input! {
+            n: usize,
+            ss: Chars,
+        }
+        let mut s = vec!['0'];
+        for c in ss {
+            s.push(c);
+        }
+        let mut seen = vec![false; 1<<n];
+        let mut q = VecDeque::new();
+        q.push_back(0);
+
+        let mut ok = false;
+        while let Some(c) = q.pop_front() {
+            let state = c;
+            if state == (1<<n) - 1 {
+                wl!("Yes");
+                ok = true;
+                break;
+            }
+            for i in 0..n {
+                if (state >> i) & 1 == 1 {
+                    continue;
+                }
+                let next = state | ((1 as usize) << i);
+                if seen[next] {
+                    continue;
+                }
+                seen[next] = true;
+                if s[next] == '0' {
+                    seen[next] = true;
+                    q.push_back(next);
+                }
+            }
+        }
+        if !ok {
+            wl!("No");
+        }
+    }
 }
 
 // --- Macros ---

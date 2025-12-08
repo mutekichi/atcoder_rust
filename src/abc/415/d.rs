@@ -46,9 +46,29 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: i64,
+        m: usize,
+        ab: [(i64, i64); m],
     }
     
+    let mut map: BTreeMap<i64, i64> = BTreeMap::new();
+
+    for (a, b) in ab {
+        let diff = a - b;
+        map.entry(diff).and_modify(|e| *e = min(*e, a)).or_insert(a);
+    }
+    let mut left = n;
+    let mut ans = 0;
+    for (diff, cap) in map {
+        if left < cap {
+            continue;
+        }
+        let ceals = (left - cap) / diff + 1;
+        ans += ceals;
+        left -= diff * ceals;
+    }
+
+    wl!(ans);
 }
 
 // --- Macros ---
