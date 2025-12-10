@@ -46,60 +46,61 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
-        t: usize,
+        h: usize,
+        w: usize,
+        k: usize,
+        rc: [(Usize1, Usize1); k],
     }
-
-    // 辺の通過回数について上限回数を決めるような BFS は，次数の大きすぎる
-    // 頂点があるときに，Θ(N^2) 回のループとなってしまう可能性があるので注意
     
-    for _ in 0..t {
-        input! {
-            n: usize,
-            k: usize,
-            uv: [(Usize1, Usize1); n - 1],
+    let mut grid: Vec<Vec<i64>> = vec![vec![-1; w]; h];
+    let mut s = BTreeSet::new();
+    for (r, c) in rc {
+        grid[r][c] = 0;
+        s.insert((r, c));
+    }
+    let mut count = 1;
+    loop {
+        if s.is_empty() {
+            break;
         }
-        let mut graph = vec![vec![]; n];
-        for (i, (u, v)) in uv.iter().enumerate() {
-            graph[*u].push((*v, i * 2));
-            graph[*v].push((*u, i * 2 + 1));
-        }
-        let mut edge_min_steps = vec![vec![INF_USIZE; k]; 2*(n-1)];
-        let mut ans = vec![INF_USIZE; n];
-        let mut node_times = vec![vec![0; k]; n];
-
-        let mut q = VecDeque::new();
-        q.push_back((0, 0, 0, INF_USIZE)); // (node, tern, step, from)
-        while let Some(f) = q.pop_front() {
-            let (node, tern, step, from) = f;
-            node_times[node][step] += 1;
-            if node_times[node][step] > 2 {
-                continue;
-            }
-            md!(node, tern, step);
-            let next_tern = if step == k - 1 { tern + 1 } else { tern };
-            let next_step = if step == k - 1 { 0 } else { step + 1 };
-            if step == 0 {
-                chmin!(ans[node], tern);
-            }
-            for &(next_node, i_edge) in &graph[node] {
-                if step != 0 && from == next_node {
+        let mut new_s = BTreeSet::new();
+        for &(r, c) in s.iter() {
+            let next_positions = get_next_positions(h, w, r, c, &DIR);
+            for (nr, nc) in next_positions {
+                if grid[nr][nc] != -1 {
                     continue;
                 }
-                if edge_min_steps[i_edge][step] == INF_USIZE {
-                    edge_min_steps[i_edge][step] = tern;
-                    q.push_back((next_node, next_tern, next_step, node));
+                let next_positions = get_next_positions(h, w, nr, nc, &DIR);
+                if next_positions.iter().filter(
+                    |(nnr, nnc)| grid[*nnr][*nnc] >= 0 && grid[*nnr][*nnc] < count
+                ).count() > 1 {
+                    new_s.insert((nr, nc));
+                    grid[nr][nc] = count;
+                } else if next_positions.len() == 1 {
+                    let (nnr, nnc) = next_positions[0];
+                    if grid[nnr][nnc] >= 0 && grid[nnr][nnc] < count {
+                        new_s.insert((nr, nc));
+                        grid[nr][nc] = count;
+                    }
                 }
             }
         }
-        let ans_str = ans[1..n].iter().map(
-            |x| {
-                if *x == INF_USIZE { "-1".to_string() } else { x.to_string() }
-            }
-        ).collect::<Vec<_>>().join(" ");
-        md!("==");
-        wl!(ans_str);
+        count += 1;
+        s = new_s;
+        md!(count);
     }
+    let mut ans: i64 = 0;
+
+    for i in 0..h {
+        for j in 0..w {
+            mepw!(grid[i][j]);
+            if grid[i][j] != -1 {
+                ans += grid[i][j] as i64;
+            }
+        }
+        eprintln!();
+    }
+    wl!(ans);
 }
 
 // --- Macros ---

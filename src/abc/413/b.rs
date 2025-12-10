@@ -47,59 +47,8 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
-        t: usize,
     }
-
-    // 辺の通過回数について上限回数を決めるような BFS は，次数の大きすぎる
-    // 頂点があるときに，Θ(N^2) 回のループとなってしまう可能性があるので注意
     
-    for _ in 0..t {
-        input! {
-            n: usize,
-            k: usize,
-            uv: [(Usize1, Usize1); n - 1],
-        }
-        let mut graph = vec![vec![]; n];
-        for (i, (u, v)) in uv.iter().enumerate() {
-            graph[*u].push((*v, i * 2));
-            graph[*v].push((*u, i * 2 + 1));
-        }
-        let mut edge_min_steps = vec![vec![INF_USIZE; k]; 2*(n-1)];
-        let mut ans = vec![INF_USIZE; n];
-        let mut node_times = vec![vec![0; k]; n];
-
-        let mut q = VecDeque::new();
-        q.push_back((0, 0, 0, INF_USIZE)); // (node, tern, step, from)
-        while let Some(f) = q.pop_front() {
-            let (node, tern, step, from) = f;
-            node_times[node][step] += 1;
-            if node_times[node][step] > 2 {
-                continue;
-            }
-            md!(node, tern, step);
-            let next_tern = if step == k - 1 { tern + 1 } else { tern };
-            let next_step = if step == k - 1 { 0 } else { step + 1 };
-            if step == 0 {
-                chmin!(ans[node], tern);
-            }
-            for &(next_node, i_edge) in &graph[node] {
-                if step != 0 && from == next_node {
-                    continue;
-                }
-                if edge_min_steps[i_edge][step] == INF_USIZE {
-                    edge_min_steps[i_edge][step] = tern;
-                    q.push_back((next_node, next_tern, next_step, node));
-                }
-            }
-        }
-        let ans_str = ans[1..n].iter().map(
-            |x| {
-                if *x == INF_USIZE { "-1".to_string() } else { x.to_string() }
-            }
-        ).collect::<Vec<_>>().join(" ");
-        md!("==");
-        wl!(ans_str);
-    }
 }
 
 // --- Macros ---

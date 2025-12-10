@@ -3,12 +3,12 @@
 #![allow(dead_code)]
 
 // Common imports
+use num_integer::gcd;
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
-
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
 use proconio::input;
@@ -46,59 +46,62 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
         t: usize,
     }
-
-    // 辺の通過回数について上限回数を決めるような BFS は，次数の大きすぎる
-    // 頂点があるときに，Θ(N^2) 回のループとなってしまう可能性があるので注意
-    
     for _ in 0..t {
         input! {
             n: usize,
-            k: usize,
-            uv: [(Usize1, Usize1); n - 1],
+            vec_a: [i128; n],
         }
-        let mut graph = vec![vec![]; n];
-        for (i, (u, v)) in uv.iter().enumerate() {
-            graph[*u].push((*v, i * 2));
-            graph[*v].push((*u, i * 2 + 1));
+        if n == 1 {
+            wl!("Yes");
+            continue;
         }
-        let mut edge_min_steps = vec![vec![INF_USIZE; k]; 2*(n-1)];
-        let mut ans = vec![INF_USIZE; n];
-        let mut node_times = vec![vec![0; k]; n];
+        if vec_a.iter().all(|x| *x == 0) {
+            wl!("Yes");
+            continue;
+        }
+        if vec_a.iter().any(|x| *x == 0) {
+            wl!("No");
+            continue;
+        }
+        md!("here");
+        let mut data = vec_a.iter().map(
+            |&a| (a.abs(), a > 0)
+        ).collect::<Vec<_>>();
+        
+        let has_same_abs = data.iter().all(|(v, _)| *v == data[0].0);
+        if has_same_abs {
+            let pos_count = data.iter().filter(|(_, sign)| *sign).count();
+            if pos_count == 0 || pos_count == n || pos_count == n / 2 || (n % 2 == 1 && pos_count == n / 2 + 1) {
+                wl!("Yes");
+            }
+            else {
+                wl!("No");
+            }
+            continue;
+        }
 
-        let mut q = VecDeque::new();
-        q.push_back((0, 0, 0, INF_USIZE)); // (node, tern, step, from)
-        while let Some(f) = q.pop_front() {
-            let (node, tern, step, from) = f;
-            node_times[node][step] += 1;
-            if node_times[node][step] > 2 {
-                continue;
+        data.sort_unstable();
+
+        let is_all_pos = data.iter().all(|(_, sign)| *sign);
+        let is_all_neg = data.iter().all(|(_, sign)| !*sign);
+        let is_flipping_sign = data.windows(2).all(
+            |w| {
+                w[0].1 != w[1].1
             }
-            md!(node, tern, step);
-            let next_tern = if step == k - 1 { tern + 1 } else { tern };
-            let next_step = if step == k - 1 { 0 } else { step + 1 };
-            if step == 0 {
-                chmin!(ans[node], tern);
+        );
+        let is_same_abs_ratio = data.windows(2).all(
+            |w| {
+                w[1].0 * data[0].0 == w[0].0 * data[1].0
             }
-            for &(next_node, i_edge) in &graph[node] {
-                if step != 0 && from == next_node {
-                    continue;
-                }
-                if edge_min_steps[i_edge][step] == INF_USIZE {
-                    edge_min_steps[i_edge][step] = tern;
-                    q.push_back((next_node, next_tern, next_step, node));
-                }
-            }
+        );
+        md!(is_all_pos, is_all_neg, is_flipping_sign, is_same_abs_ratio);
+        if (is_all_pos || is_all_neg || is_flipping_sign) && is_same_abs_ratio {
+            wl!("Yes");
+        } else {
+            wl!("No");
         }
-        let ans_str = ans[1..n].iter().map(
-            |x| {
-                if *x == INF_USIZE { "-1".to_string() } else { x.to_string() }
-            }
-        ).collect::<Vec<_>>().join(" ");
-        md!("==");
-        wl!(ans_str);
     }
 }
 
