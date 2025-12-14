@@ -13,6 +13,12 @@ num-integer = "0.1.44"
 name = "template"
 path = "./template.rs"
 
+# AtCoder Heuristics Contest
+[[bin]]
+name = "ahc_introduction_a"
+path = "./src/ahc/introduction/a.rs"
+
+# AtCoder Beginner Contest
 [[bin]]
 name = "abc001_a"
 path = "./src/abc/001/a.rs"
@@ -600,3 +606,59 @@ path = "./src/abc/413/f.rs"
 [[bin]]
 name = "abc413_g"
 path = "./src/abc/413/g.rs"
+
+[[bin]]
+name = "abc412_a"
+path = "./src/abc/412/a.rs"
+
+[[bin]]
+name = "abc412_b"
+path = "./src/abc/412/b.rs"
+
+[[bin]]
+name = "abc412_c"
+path = "./src/abc/412/c.rs"
+
+[[bin]]
+name = "abc412_d"
+path = "./src/abc/412/d.rs"
+
+[[bin]]
+name = "abc412_e"
+path = "./src/abc/412/e.rs"
+
+[[bin]]
+name = "abc412_f"
+path = "./src/abc/412/f.rs"
+
+[[bin]]
+name = "abc412_g"
+path = "./src/abc/412/g.rs"
+
+[[bin]]
+name = "abc436_a"
+path = "./src/abc/436/a.rs"
+
+[[bin]]
+name = "abc436_b"
+path = "./src/abc/436/b.rs"
+
+[[bin]]
+name = "abc436_c"
+path = "./src/abc/436/c.rs"
+
+[[bin]]
+name = "abc436_d"
+path = "./src/abc/436/d.rs"
+
+[[bin]]
+name = "abc436_e"
+path = "./src/abc/436/e.rs"
+
+[[bin]]
+name = "abc436_f"
+path = "./src/abc/436/f.rs"
+
+[[bin]]
+name = "abc436_g"
+path = "./src/abc/436/g.rs"

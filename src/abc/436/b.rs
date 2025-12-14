@@ -1,22 +1,25 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
-#![allow(non_snake_case)]
 
+// Common imports
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
+// External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
+// Constants
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
+const MOD: i64 = 998244353;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 
 // FOR TEMPLATE INJECTIONS
@@ -32,6 +35,8 @@ fn main() {
     out.flush().unwrap();
 }
 
+// Logic goes here
+#[allow(unused_macros)]
 #[allow(unused_variables)]
 #[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
@@ -41,9 +46,35 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
     }
-    
+
+    let mut grid = vec![vec![0; n]; n];
+
+    let mut prev = (0, (n - 1) / 2);
+    grid[prev.0][prev.1] = 1;
+    let mut number = 1;
+    for _ in 0..(n * n - 1) {
+        let (r, c) = prev;
+        if grid[(r + n - 1) % n][(c + 1) % n] == 0 {
+            number += 1;
+            grid[(r + n - 1) % n][(c + 1) % n] = number;
+            prev = ((r + n - 1) % n, (c + 1) % n);
+        }
+        else {
+            number += 1;
+            grid[(r + 1) % n][c % n] = number;
+            prev = ((r + 1) % n, c % n);
+        }
+    }
+
+    for i in 0..n {
+        let mut line = vec![];
+        for j in 0..n {
+            line.push(grid[i][j]);
+        }   
+            wl!(line.iter().map(|x| x.to_string()).join(" "));
+    }
 }
 
 // --- Macros ---

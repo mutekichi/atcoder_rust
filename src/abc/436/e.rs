@@ -3,20 +3,24 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
+// Common imports
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
+// External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
+// Constants
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
+const MOD: i64 = 998244353;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 
 // FOR TEMPLATE INJECTIONS
@@ -32,6 +36,8 @@ fn main() {
     out.flush().unwrap();
 }
 
+// Logic goes here
+#[allow(unused_macros)]
 #[allow(unused_variables)]
 #[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
@@ -41,9 +47,36 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        A: [Usize1; n],
     }
-    
+
+    let mut loop_ls = vec![INF_USIZE; n];
+    let mut ans = 0;
+    for i in 0..n {
+        if loop_ls[i] != INF_USIZE {
+            continue;
+        }
+        if A[i] == i {
+            continue;
+        }
+        let mut indices = vec![i];
+        let mut idx = A[i];
+        while idx != i {
+            // md!(i, idx);
+            idx = A[idx];
+            indices.push(idx);
+        }
+        let l = indices.len() as usize;
+        for ii in indices {
+            loop_ls[ii] = l;
+        }
+        let ll = l as i64;
+        md!(ll, i);
+        ans += ll * (ll - 1) / 2;
+    }
+
+    wl!(ans / 2);
 }
 
 // --- Macros ---

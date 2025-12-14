@@ -3,20 +3,24 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
+// Common imports
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+// External crates (Available in AtCoder)
+use itertools::{iproduct, sorted, Itertools};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
+// Constants
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
+const MOD: i64 = 998244353;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 
 // FOR TEMPLATE INJECTIONS
@@ -32,6 +36,8 @@ fn main() {
     out.flush().unwrap();
 }
 
+// Logic goes here
+#[allow(unused_macros)]
 #[allow(unused_variables)]
 #[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
@@ -41,9 +47,40 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        t: usize,
     }
-    
+    for _ in 0..t {
+        input! {
+            n: usize,
+            mut S: [i64; n],
+        }
+        let mut prev_size = S[0];
+        
+        let mut dominos: BTreeSet<(i64, usize)> = BTreeSet::new();
+        for i in 1..n {
+            dominos.insert((S[i], i));
+        }
+        let target_size = S[n-1];
+        let mut ans = 1;
+        
+        for i in 1..n {
+            if let Some(&found) = dominos.range(..(prev_size * 2, INF_USIZE)).next_back() {
+                let (size, _) = found;
+                md!(size);
+                ans += 1;
+                if target_size <= size {
+                    break;
+                }
+                prev_size = size;
+                dominos.remove(&found);
+            }
+            else {
+                ans = -1;
+                break;
+            }
+        }
+        wl!(ans);
+    } 
 }
 
 // --- Macros ---

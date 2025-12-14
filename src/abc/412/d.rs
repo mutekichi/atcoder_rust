@@ -1,22 +1,25 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
-#![allow(non_snake_case)]
 
+// Common imports
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
-use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
+use std::{iter, mem};
 
+// External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
+// Constants
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
+const MOD: i64 = 998244353;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 
 // FOR TEMPLATE INJECTIONS
@@ -32,6 +35,8 @@ fn main() {
     out.flush().unwrap();
 }
 
+// Logic goes here
+#[allow(unused_macros)]
 #[allow(unused_variables)]
 #[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
@@ -41,9 +46,43 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        m: usize,
+        ab: [(Usize1, Usize1); m],
     }
     
+    let mut graph = vec![vec![false; n]; n];
+    for (a,b) in ab { 
+        graph[a][b] = true;
+        graph[b][a] = true;
+    }
+
+    let mut ansans = INF_USIZE;
+    for p in (0..n).permutations(n) {
+        let mut ok = true;
+        for (i, v) in p.iter().enumerate() {
+            if i == *v {
+                ok = false;
+                break;
+            }
+        }
+        if !ok {
+            continue;
+        }
+        // md!();
+        let mut ans = 0;
+        for comb in (0..n).combinations(2) {
+            let ii = comb[0]; let jj = comb[1];
+            let to_connect = p[ii] == jj || p[jj] == ii;
+            if to_connect ^ graph[ii][jj] {                
+                // md!(ii, jj);
+                ans += 1;
+            }
+        }
+        ansans = min(ansans, ans);
+        // break;
+    }
+    wl!(ansans);
 }
 
 // --- Macros ---

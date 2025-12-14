@@ -7,6 +7,7 @@ use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
@@ -34,6 +35,30 @@ fn main() {
     out.flush().unwrap();
 }
 
+static N_CONTESTS: usize = 26;
+
+fn calculate_score(
+    n_days: usize,
+    vec_c: Vec<i64>,
+    mat_s: Vec<Vec<i64>>,
+    tests: Vec<usize>,
+) -> i64 {
+    let mut last_held = vec![0; N_CONTESTS];
+    let mut total_score = 0;
+
+    for day in 0..n_days {
+        let contest = tests[day];
+        total_score += mat_s[day][contest];
+        last_held[contest] = day + 1;
+
+        for c in 0..N_CONTESTS {
+            total_score -= vec_c[c] * ((day + 1) as i64 - last_held[c] as i64);
+        }
+    }
+
+    total_score
+}
+
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
@@ -45,9 +70,14 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n_days: usize,
+        vec_c: [i64; N_CONTESTS],
+        mat_s: [[i64; N_CONTESTS]; n_days],
+        tests: [Usize1; n_days],
     }
-    
+
+    let total_score = calculate_score(n_days, vec_c, mat_s, tests);
+    wl!(total_score);
 }
 
 // --- Macros ---
@@ -132,33 +162,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-// Utility functions
-
-// Utility functions
-/// Returns valid neighbor coordinates within the grid (h x w).
-/// Usage:
-/// ```
-/// for (nh, nw) in get_next_positions(h, w, hh, ww, &DIR) {
-///     // process (nh, nw)
-/// }
-/// ```
-fn get_next_positions(
-    h: usize,
-    w: usize,
-    i: usize,
-    j: usize,
-    directions: &[(isize, isize)],
-) -> Vec<(usize, usize)> {
-    let mut next_positions = Vec::with_capacity(directions.len());
-
-    for &(di, dj) in directions {
-        let next_i = i.wrapping_add_signed(di);
-        let next_j = j.wrapping_add_signed(dj);
-        if next_i < h && next_j < w {
-            next_positions.push((next_i, next_j));
-        }
-    }
-    next_positions
 }
