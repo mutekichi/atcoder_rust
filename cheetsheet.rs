@@ -1,27 +1,24 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
+use itertools::Itertools;
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
-use itertools::Itertools;
-use std::cmp::{Reverse, max, min};
+use std::cmp::{max, min, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{Write, BufWriter};
+use std::io::{BufWriter, Write};
 
 // This function is just a container for snippets.
 fn snippets<W: Write>(out: &mut W) {
-
-
     // ==========================================
     // 0. Variable Initialization
     // ==========================================
-    
+
     // vector<vector<int>> v(n, vector<int>(m, initial_value));
     let v: Vec<Vec<usize>> = vec![vec![0; 10]; 5]; // 5 x 10 zero matrix
-    // vector<vector<int>> graph(n);
+                                                   // vector<vector<int>> graph(n);
     let mut graph: Vec<Vec<usize>> = vec![Vec::new(); 5]; // 5 empty vectors
     graph[2].push(7);
-
 
     // ==========================================
     // 1. Input Patterns (proconio)
@@ -46,7 +43,7 @@ fn snippets<W: Write>(out: &mut W) {
 
         // Grid (H x W character matrix)
         h: usize, w: usize,
-        grid: [Chars; h], 
+        grid: [Chars; h],
 
         // Graph edges (u_i, v_i) * m rows (1-based -> 0-based)
         edges: [(Usize1, Usize1); m],
@@ -61,13 +58,12 @@ fn snippets<W: Write>(out: &mut W) {
     //     v: [usize; k], // Read k, then read k elements
     // }
 
-
     // ==========================================
     // 2. Output Patterns
     // ==========================================
 
     let ans = 42;
-    
+
     // Basic output with newline
     writeln!(out, "{}", ans).unwrap();
 
@@ -86,7 +82,6 @@ fn snippets<W: Write>(out: &mut W) {
 
     // Interactive flush (for interactive problems)
     // out.flush().unwrap();
-
 
     // ==========================================
     // 3. Itertools Patterns
@@ -115,11 +110,10 @@ fn snippets<W: Write>(out: &mut W) {
         // key: 1, count: group.count() -> 2
     }
 
-    
     // ==========================================
     // 4. String Operations (Vec<char> mainly)
     // ==========================================
-    
+
     // Note: In AtCoder, usually treat string as Vec<char> for random access.
     let mut s: Vec<char> = vec!['a', 'b', 'c', 'd', 'e'];
 
@@ -142,13 +136,13 @@ fn snippets<W: Write>(out: &mut W) {
     let char_from_digit = std::char::from_digit(9, 10).unwrap(); // '9'
 
     // 4. Basic Manipulation
-    s.reverse();            // ['e', 'd', 'c', 'b', 'a']
-    s.sort();               // ['a', 'b', 'c', 'd', 'e']
-    s.rotate_left(1);       // ['b', 'c', 'd', 'e', 'a'] (Cyclic shift)
-    s.rotate_right(1);      // ['a', 'b', 'c', 'd', 'e']
-    
+    s.reverse(); // ['e', 'd', 'c', 'b', 'a']
+    s.sort(); // ['a', 'b', 'c', 'd', 'e']
+    s.rotate_left(1); // ['b', 'c', 'd', 'e', 'a'] (Cyclic shift)
+    s.rotate_right(1); // ['a', 'b', 'c', 'd', 'e']
+
     // 5. Substring (Slice)
-    // Note: Slicing a String directly is dangerous (byte indices). 
+    // Note: Slicing a String directly is dangerous (byte indices).
     // Slicing Vec<char> is safe.
     let sub = &s[1..3]; // ['b', 'c'] (slice)
     let sub_vec = s[1..3].to_vec(); // New vector
@@ -164,7 +158,7 @@ fn snippets<W: Write>(out: &mut W) {
     // Priority Queue (Max Heap)
     let mut heap = BinaryHeap::new();
     heap.push(10);
-    
+
     // Priority Queue (Min Heap)
     let mut min_heap = BinaryHeap::new();
     min_heap.push(Reverse(10)); // Wrap with Reverse
@@ -180,7 +174,7 @@ fn snippets<W: Write>(out: &mut W) {
     // Lower Bound (using partition_point)
     // Find the first index where x >= 5
     let idx = sorted_vec.partition_point(|&x| x < 5); // idx = 2
-    
+
     // Deque (Double-ended queue)
     let mut deque = VecDeque::new();
     deque.push_front(1);
@@ -193,40 +187,39 @@ fn interactive_example() {
     }
 }
 
-{
-    //              0  1  2  3  4  5  6
-    let data = vec![1, 2, 4, 4, 4, 7, 9];
+// {
+//     //              0  1  2  3  4  5  6
+//     let data = vec![1, 2, 4, 4, 4, 7, 9];
 
-    // 存在判定
-    let x = 4;
-    let found = data.binary_search(&x).is_ok();
-    let y = 5;
-    let not_found = data.binary_search(&y).is_err();
-    let idx_to_insert = data.binary_search(&y).err().unwrap(); // 5 を挿入すべきインデックス
-    assert_eq!(idx_to_insert, 5);
+//     // 存在判定
+//     let x = 4;
+//     let found = data.binary_search(&x).is_ok();
+//     let y = 5;
+//     let not_found = data.binary_search(&y).is_err();
+//     let idx_to_insert = data.binary_search(&y).err().unwrap(); // 5 を挿入すべきインデックス
+//     assert_eq!(idx_to_insert, 5);
 
-    // 4 以上の最初の要素のインデックス (Lower Bound)
-    // "x < 4" is true for [1, 2]. The partition point is index 2 (value 4).
-    let idx_lower = data.partition_point(|&x| x < 4); 
-    
-    // 4 より大きい最初の要素のインデックス (Upper Bound)
-    // "x <= 4" is true for [1, 2, 4, 4, 4]. The partition point is index 5 (value 7).
-    let idx_upper = data.partition_point(|&x| x <= 4);
-}
+//     // 4 以上の最初の要素のインデックス (Lower Bound)
+//     // "x < 4" is true for [1, 2]. The partition point is index 2 (value 4).
+//     let idx_lower = data.partition_point(|&x| x < 4);
 
-{
-    //              0   1  2  3  4
-    let data = vec![10, 8, 6, 4, 2];
+//     // 4 より大きい最初の要素のインデックス (Upper Bound)
+//     // "x <= 4" is true for [1, 2, 4, 4, 4]. The partition point is index 5 (value 7).
+//     let idx_upper = data.partition_point(|&x| x <= 4);
+// }
 
-    // Find the first element that is <= 5.
-    // The partition point divides the slice into:
-    // Left (true): elements > 5
-    // Right (false): elements <= 5
-    let idx = data.partition_point(|&x| x > 5);
+// {
+//     //              0   1  2  3  4
+//     let data = vec![10, 8, 6, 4, 2];
 
-    println!("Index: {}", idx); // Output: 3 (value is 4)
-    if idx < data.len() {
-        println!("Value: {}", data[idx]);
-    }
-}
+//     // Find the first element that is <= 5.
+//     // The partition point divides the slice into:
+//     // Left (true): elements > 5
+//     // Right (false): elements <= 5
+//     let idx = data.partition_point(|&x| x > 5);
 
+//     println!("Index: {}", idx); // Output: 3 (value is 4)
+//     if idx < data.len() {
+//         println!("Value: {}", data[idx]);
+//     }
+// }

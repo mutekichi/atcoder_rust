@@ -3,7 +3,6 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use num_integer::gcd;
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};

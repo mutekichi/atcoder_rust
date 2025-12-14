@@ -1,23 +1,24 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
-#![allow(non_snake_case)]
 
-use num_integer::gcd;
+// Common imports
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
-use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
+// External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
+// Constants
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
+const MOD: i64 = 998244353;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 
 // FOR TEMPLATE INJECTIONS
@@ -33,6 +34,8 @@ fn main() {
     out.flush().unwrap();
 }
 
+// Logic goes here
+#[allow(unused_macros)]
 #[allow(unused_variables)]
 #[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
@@ -42,7 +45,7 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        // INPUT
     }
     
 }
@@ -129,4 +132,33 @@ macro_rules! chmax {
             false
         }
     };
+}
+
+// Utility functions
+
+// Utility functions
+/// Returns valid neighbor coordinates within the grid (h x w).
+/// Usage:
+/// ```
+/// for (nh, nw) in get_next_positions(h, w, hh, ww, &DIR) {
+///     // process (nh, nw)
+/// }
+/// ```
+fn get_next_positions(
+    h: usize,
+    w: usize,
+    i: usize,
+    j: usize,
+    directions: &[(isize, isize)],
+) -> Vec<(usize, usize)> {
+    let mut next_positions = Vec::with_capacity(directions.len());
+
+    for &(di, dj) in directions {
+        let next_i = i.wrapping_add_signed(di);
+        let next_j = j.wrapping_add_signed(dj);
+        if next_i < h && next_j < w {
+            next_positions.push((next_i, next_j));
+        }
+    }
+    next_positions
 }

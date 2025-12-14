@@ -3,14 +3,14 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use num_integer::gcd;
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{stdout, BufWriter, Write};
-use std::mem;
+use std::mem::swap;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
 use itertools::{iproduct, Itertools};
+use num_integer::gcd;
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -32,6 +32,42 @@ fn main() {
 
     out.flush().unwrap();
 }
+fn calc(
+    a: i128,
+    b: i128,
+    c: i128,
+) -> Option<(i128, i128)> {
+    if c < max(a, b) || a + b < c {
+        None
+    } else {
+        let (x, y) = if a + b == c {
+            (10i128.pow(a as u32) - 1, 10i128.pow(b as u32) - 2)
+        } else {
+            let small = min(a, b);
+            let large = max(a, b);
+            let v = 10i128.pow((small - 1) as u32);
+            let w_mul = 10i128.pow((small + large - c - 1) as u32);
+            let w_base = 10i128.pow((c - small + 1) as u32) - 1;
+            let w = w_base * w_mul;
+            if a < b {
+                (v, w)
+            } else {
+                (w, v)
+            }
+        };
+        Some((x, y))
+    }
+}
+
+fn ketasuu(n: i128) -> usize {
+    let mut keta = 0usize;
+    let mut v = n;
+    while v > 0 {
+        v /= 10;
+        keta += 1;
+    }
+    keta
+}
 
 #[allow(unused_variables)]
 #[rustfmt::skip]
@@ -41,10 +77,34 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
+
+    // for i in 1..=17 {
+    //     for j in 1..17 {
+    //         for k in 1..17 {
+    //             if let Some((x, y)) = calc(i as i128, j as i128, k as i128) {
+    //                 let z = x / gcd(x, y) * y;
+    //                 if ketasuu(z) != k {
+    //                     md!(i, j, k, x, y, z);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // } 
     input! {
-        
+       t: usize, 
     }
     
+    for _ in 0..t {
+        input! {
+            a: i128, b: i128, c: i128,
+        }
+        if let Some((x, y)) = calc(a, b, c) {
+            wl!("Yes");
+            wl!("{} {}", x, y);
+        } else {
+            wl!("No");
+        }
+    }
 }
 
 // --- Macros ---

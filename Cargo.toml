@@ -13,67 +13,16 @@ num-integer = "0.1.44"
 name = "template"
 path = "./template.rs"
 
+# [[bin]]
+# name = "cheetsheet"
+# path = "./cheetsheet.rs"
+
 # AtCoder Heuristics Contest
 [[bin]]
 name = "ahc_introduction_a"
 path = "./src/ahc/introduction/a.rs"
 
 # AtCoder Beginner Contest
-[[bin]]
-name = "abc001_a"
-path = "./src/abc/001/a.rs"
-
-[[bin]]
-name = "abc001_b"
-path = "./src/abc/001/b.rs"
-
-[[bin]]
-name = "abc001_c"
-path = "./src/abc/001/c.rs"
-
-[[bin]]
-name = "abc001_d"
-path = "./src/abc/001/d.rs"
-
-[[bin]]
-name = "abc001_e"
-path = "./src/abc/001/e.rs"
-
-[[bin]]
-name = "abc001_f"
-path = "./src/abc/001/f.rs"
-
-[[bin]]
-name = "abc001_g"
-path = "./src/abc/001/g.rs"
-
-[[bin]]
-name = "abc002_a"
-path = "./src/abc/002/a.rs"
-
-[[bin]]
-name = "abc002_b"
-path = "./src/abc/002/b.rs"
-
-[[bin]]
-name = "abc002_c"
-path = "./src/abc/002/c.rs"
-
-[[bin]]
-name = "abc002_d"
-path = "./src/abc/002/d.rs"
-
-[[bin]]
-name = "abc002_e"
-path = "./src/abc/002/e.rs"
-
-[[bin]]
-name = "abc002_f"
-path = "./src/abc/002/f.rs"
-
-[[bin]]
-name = "abc002_g"
-path = "./src/abc/002/g.rs"
 
 [[bin]]
 name = "abc427_a"
@@ -102,34 +51,6 @@ path = "./src/abc/427/f.rs"
 [[bin]]
 name = "abc427_g"
 path = "./src/abc/427/g.rs"
-
-[[bin]]
-name = "abc42u_a"
-path = "./src/abc/42u/a.rs"
-
-[[bin]]
-name = "abc42u_b"
-path = "./src/abc/42u/b.rs"
-
-[[bin]]
-name = "abc42u_c"
-path = "./src/abc/42u/c.rs"
-
-[[bin]]
-name = "abc42u_d"
-path = "./src/abc/42u/d.rs"
-
-[[bin]]
-name = "abc42u_e"
-path = "./src/abc/42u/e.rs"
-
-[[bin]]
-name = "abc42u_f"
-path = "./src/abc/42u/f.rs"
-
-[[bin]]
-name = "abc42u_g"
-path = "./src/abc/42u/g.rs"
 
 [[bin]]
 name = "abc428_a"
@@ -662,3 +583,31 @@ path = "./src/abc/436/f.rs"
 [[bin]]
 name = "abc436_g"
 path = "./src/abc/436/g.rs"
+
+[[bin]]
+name = "arc200_a"
+path = "./src/arc/200/a.rs"
+
+[[bin]]
+name = "arc200_b"
+path = "./src/arc/200/b.rs"
+
+[[bin]]
+name = "arc200_c"
+path = "./src/arc/200/c.rs"
+
+[[bin]]
+name = "arc200_d"
+path = "./src/arc/200/d.rs"
+
+[[bin]]
+name = "arc200_e"
+path = "./src/arc/200/e.rs"
+
+[[bin]]
+name = "arc200_f"
+path = "./src/arc/200/f.rs"
+
+[[bin]]
+name = "arc200_g"
+path = "./src/arc/200/g.rs"
