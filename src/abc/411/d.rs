@@ -9,6 +9,7 @@ use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDequ
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
+use std::thread::current;
 
 use itertools::{iproduct, Itertools};
 use proconio::input;
@@ -40,11 +41,72 @@ fn solve<W: Write>(out: &mut W) {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
+    #[derive(Clone)]
+    enum Query {
+        Query1(usize),
+        Query2(usize, Vec<char>),
+        Query3(usize),
+    }
 
     input! {
-        
+        n: usize,
+        q: usize,
     }
+    let mut queries = vec![];
     
+    for _ in 0..q {
+        input! {
+            qtype: usize,
+        }
+        if qtype == 1 {
+            input! {
+                p: Usize1,
+            }
+            queries.push(Query::Query1(p));
+        }
+        else if qtype == 2 {
+            input! {
+                p: Usize1,
+                s: Chars,
+            }
+            queries.push(Query::Query2(p, s));
+        }
+        else {
+            input! {
+                p: Usize1,
+            }
+            queries.push(Query::Query3(p));
+        }
+    }
+    let mut current_string = VecDeque::new();
+    let mut to_trace = n;
+    for i in (0..q).rev() {
+        let query = &queries[i];
+        match query {
+            Query::Query1(p) => {
+                if to_trace == *p {
+                    to_trace = n;
+                }
+            }
+            Query::Query2(p, s) => {
+                if to_trace == *p {
+                    for i in (0..s.len()).rev() {
+                        current_string.push_front(s[i]);
+                    }
+                }
+            }
+            Query::Query3(p) => {
+                if to_trace == n {
+                    to_trace = *p;
+                }
+            }
+        }
+    }
+    let mut ans = vec![];
+    while let Some(f) = current_string.pop_front() {
+        ans.push(f);
+    }
+    wl!(ans.into_iter().collect::<String>());
 }
 
 // --- Macros ---
@@ -129,11 +191,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-fn join_with_space<T: ToString>(arr: &[T]) -> String {
-    arr.iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<_>>()
-        .join(" ")
 }

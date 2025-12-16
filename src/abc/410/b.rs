@@ -42,9 +42,31 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        q: usize,
+        X: [usize; q],
     }
     
+    let mut box_states = vec![0; n];
+
+    let mut ans = vec![];
+    for x in X {
+        if x == 0 {
+            let mincount = box_states.iter().min().unwrap().clone();
+            for i in 0..n {
+                if box_states[i] == mincount {
+                    box_states[i] += 1;
+                    ans.push(i + 1);
+                    break;
+                }
+            }
+        }
+        else {
+            box_states[x-1] += 1;
+            ans.push(x);
+        }
+    }
+    wl!(join_with_space(&ans));
 }
 
 // --- Macros ---

@@ -130,10 +130,3 @@ macro_rules! chmax {
         }
     };
 }
-
-fn join_with_space<T: ToString>(arr: &[T]) -> String {
-    arr.iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<_>>()
-        .join(" ")
-}

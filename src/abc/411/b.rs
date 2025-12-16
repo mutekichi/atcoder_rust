@@ -42,9 +42,20 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+       n: usize,
+       D: [i64; n - 1], 
     }
     
+    for i in 0..n-1 {
+        let mut dist_sum = 0;
+        let mut list = vec![];
+        for j in i..n-1 {
+            dist_sum += D[j];
+            list.push(dist_sum);
+        }
+        wl!(list.iter().map(|x| x.to_string()).join(" "));
+    }
+
 }
 
 // --- Macros ---
@@ -129,11 +140,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-fn join_with_space<T: ToString>(arr: &[T]) -> String {
-    arr.iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<_>>()
-        .join(" ")
 }

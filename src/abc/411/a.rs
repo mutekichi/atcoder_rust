@@ -42,9 +42,11 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        p: Chars,
+        l: usize,
     }
     
+    wl!(if p.len() >= l { "Yes" } else { "No" });
 }
 
 // --- Macros ---
@@ -129,11 +131,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-fn join_with_space<T: ToString>(arr: &[T]) -> String {
-    arr.iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<_>>()
-        .join(" ")
 }

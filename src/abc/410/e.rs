@@ -42,9 +42,34 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        h: usize,
+        m: usize,
+        AB: [(usize, usize); n],
     }
-    
+    let mut dp = vec![vec![0; 3010]; n + 1];
+    let mut max_tern = 0;
+    if h < AB[0].0 && m < AB[0].1 {
+        wl!(0);
+        return;
+    }
+    dp[0][h] = m + 1;
+    for i in 0..n {
+        let &(a, b) = &AB[i];
+        for j in 0..3010 {
+            if dp[i][j] != 0 {
+                if dp[i][j] >= b + 1 {
+                    dp[i + 1][j] = max(dp[i][j] - b, dp[i + 1][j]);
+                    max_tern = i;
+                }
+                if j >= a {
+                    dp[i + 1][j - a] = max(dp[i][j], dp[i + 1][j - a]);
+                    max_tern = i;
+                }
+            }
+        }
+    }
+    wl!(max_tern + 1);
 }
 
 // --- Macros ---
@@ -129,11 +154,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-fn join_with_space<T: ToString>(arr: &[T]) -> String {
-    arr.iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<_>>()
-        .join(" ")
 }

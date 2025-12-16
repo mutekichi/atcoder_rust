@@ -66,10 +66,27 @@ fn solve<W: Write>(out: &mut W) {
                 break;
             }
         }
+        let mut seen = vec![false; n];
+        for i in 0..n {
+            if seen[i] {
+                continue;
+            }
+            seen[i] = true;
+            let mut loop_length = 1;
+            let mut current = p[i];
+            while current != i {
+                seen[current] = true;
+                current = p[current];
+                loop_length += 1;
+            }
+            if loop_length == 2 {
+                ok = false;
+                break;
+            }
+        }
         if !ok {
             continue;
         }
-        // md!();
         let mut ans = 0;
         for comb in (0..n).combinations(2) {
             let ii = comb[0]; let jj = comb[1];
@@ -167,4 +184,11 @@ macro_rules! chmax {
             false
         }
     };
+}
+
+fn join_with_space<T: ToString>(arr: &[T]) -> String {
+    arr.iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<_>>() // Create a temporary Vec<String> to use join
+        .join(" ")
 }

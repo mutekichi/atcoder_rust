@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
 // Common imports
 use std::cmp::{max, min, Ordering, Reverse};
@@ -11,6 +12,7 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
 // External crates (Available in AtCoder)
 use itertools::{iproduct, Itertools};
+use num_integer::gcd;
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -35,6 +37,7 @@ fn main() {
     out.flush().unwrap();
 }
 
+const TEN7: usize = 10000010;
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
@@ -46,9 +49,70 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        L: i128,
+        R: i128,
+    }
+
+    if R - L == 0 {
+        wl!("1");
+        return;
+    }
+
+    let mut eratosthenes = vec![true; TEN7 as usize];
+    eratosthenes[0] = false;
+    eratosthenes[1] = false;
+    md!(L, R);
+
+    for i in 0..TEN7 {
+        if eratosthenes[i] {
+            let mut iu = i + i;
+            while iu < TEN7 {
+                eratosthenes[iu] = false;
+                iu += i;
+            }
+        }
+    }
+    let mut ext_eratosthenes = vec![true; TEN7 as usize];
+
+    for i in 0..TEN7 {
+        let i_128 = i as i128;
+        if eratosthenes[i] {
+            let min_number = (L + i_128 - 1) / i_128 * i_128;
+            let min_idx = (min_number - L) as usize;
+            let mut current_idx = min_idx;
+            while current_idx < TEN7 {
+                ext_eratosthenes[current_idx] = false;
+                current_idx += i;
+            }
+            if min_number == i_128 {
+                ext_eratosthenes[min_idx] = true;
+            }
+        }
     }
     
+    let mut ans: i128 = 0;
+
+    for i in 0..TEN7 {
+        if eratosthenes[i] {
+            let val = i as i128;
+            let mut current = val * val;
+            while current <= R {
+                if L + 1 <= current && current <= R {
+                    let idx = (current - L) as usize;
+                    ext_eratosthenes[idx] = true;
+                }
+                current *= val;
+            }
+        }
+    }
+
+    for i in 1..=((R-L) as usize) {
+        if ext_eratosthenes[i] {
+            ans += 1;
+        }
+    }
+
+    wl!(ans + 1);
 }
 
 // --- Macros ---

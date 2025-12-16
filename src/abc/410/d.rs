@@ -42,9 +42,38 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        m: usize,
+        ABW: [(Usize1, Usize1, usize); m],
     }
     
+    let mut reachable = vec![vec![false; 2usize.pow(10)]; n];
+    let mut graph = vec![vec![]; n];
+    for (a, b, w) in ABW {
+        graph[a].push((b, w));
+    }
+
+    let mut queue = VecDeque::new();
+    queue.push_back((0usize, 0usize));
+    reachable[0][0] = true;
+
+    while let Some(front) = queue.pop_front() {
+        let (v, w) = front;
+        for &(next_v, edge_w) in &graph[v] {
+            let next_w = w ^ edge_w;
+            if !reachable[next_v][next_w] {
+                reachable[next_v][next_w] = true;
+                queue.push_back((next_v, next_w));
+            }
+        }
+    }
+    for i in 0..2usize.pow(10) {
+        if reachable[n-1][i] {
+            wl!(i);
+            return;
+        }
+    }
+    wl!(-1);
 }
 
 // --- Macros ---
@@ -129,11 +158,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-fn join_with_space<T: ToString>(arr: &[T]) -> String {
-    arr.iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<_>>()
-        .join(" ")
 }

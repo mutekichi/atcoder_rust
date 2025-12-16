@@ -42,9 +42,12 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        A: [usize; n],
+        k: usize,
     }
     
+    wl!(A.into_iter().filter(|a| *a >= k).count());
 }
 
 // --- Macros ---
@@ -129,11 +132,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-fn join_with_space<T: ToString>(arr: &[T]) -> String {
-    arr.iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<_>>()
-        .join(" ")
 }

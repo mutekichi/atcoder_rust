@@ -42,9 +42,39 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        q: usize,
     }
     
+    let mut top: usize = 0;
+    let mut A = (1..=n).collect::<Vec<_>>();
+
+    for _ in 0..q {
+        input! {
+            qtype: usize,
+        }
+        if qtype == 1 {
+            input! {
+                p: Usize1,
+                x: usize,
+            }
+            let idx = (p + top) % n;
+            A[idx] = x;
+        }
+        else if qtype == 2 {
+            input! {
+                p: Usize1,
+            }
+            let idx = (p + top) % n;
+            wl!(A[idx]);
+        }
+        else {
+            input! {
+                k: i64,
+            }
+            top = ((top as i64 + k) % n as i64) as usize;
+        }
+    }
 }
 
 // --- Macros ---
@@ -129,11 +159,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-fn join_with_space<T: ToString>(arr: &[T]) -> String {
-    arr.iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<_>>()
-        .join(" ")
 }

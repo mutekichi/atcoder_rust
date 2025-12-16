@@ -42,9 +42,39 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+       n: usize,
+       q: usize,
+       A: [Usize1; q], 
     }
     
+    let mut blacks = vec![false; n]; 
+    let mut count = 0;
+
+    for j  in 0..q {
+        let i = A[j];
+        md!(i);
+        let before_is_black = i > 0 && blacks[i - 1];
+        let after_is_black = i < n - 1 && blacks[i + 1];
+        if blacks[i] {
+           if before_is_black && after_is_black {
+            count += 1;
+           }
+           else if !before_is_black && !after_is_black {
+            count -= 1;
+           }
+        }
+        else {
+            if before_is_black && after_is_black {
+                count -= 1;
+            }
+            else if !before_is_black && !after_is_black {
+                count += 1;
+            }
+        }
+        blacks[i] ^= true;
+
+        wl!(count);
+    }
 }
 
 // --- Macros ---
@@ -129,11 +159,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-fn join_with_space<T: ToString>(arr: &[T]) -> String {
-    arr.iter()
-        .map(|x| x.to_string())
-        .collect::<Vec<_>>()
-        .join(" ")
 }

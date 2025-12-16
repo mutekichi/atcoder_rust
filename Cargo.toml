@@ -611,3 +611,58 @@ path = "./src/arc/200/f.rs"
 [[bin]]
 name = "arc200_g"
 path = "./src/arc/200/g.rs"
+[[bin]]
+name = "abc411_a"
+path = "./src/abc/411/a.rs"
+
+[[bin]]
+name = "abc411_b"
+path = "./src/abc/411/b.rs"
+
+[[bin]]
+name = "abc411_c"
+path = "./src/abc/411/c.rs"
+
+[[bin]]
+name = "abc411_d"
+path = "./src/abc/411/d.rs"
+
+[[bin]]
+name = "abc411_e"
+path = "./src/abc/411/e.rs"
+
+[[bin]]
+name = "abc411_f"
+path = "./src/abc/411/f.rs"
+
+[[bin]]
+name = "abc411_g"
+path = "./src/abc/411/g.rs"
+
+[[bin]]
+name = "abc410_a"
+path = "./src/abc/410/a.rs"
+
+[[bin]]
+name = "abc410_b"
+path = "./src/abc/410/b.rs"
+
+[[bin]]
+name = "abc410_c"
+path = "./src/abc/410/c.rs"
+
+[[bin]]
+name = "abc410_d"
+path = "./src/abc/410/d.rs"
+
+[[bin]]
+name = "abc410_e"
+path = "./src/abc/410/e.rs"
+
+[[bin]]
+name = "abc410_f"
+path = "./src/abc/410/f.rs"
+
+[[bin]]
+name = "abc410_g"
+path = "./src/abc/410/g.rs"
