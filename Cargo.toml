@@ -666,3 +666,87 @@ path = "./src/abc/410/f.rs"
 [[bin]]
 name = "abc410_g"
 path = "./src/abc/410/g.rs"
+
+[[bin]]
+name = "abc409_a"
+path = "./src/abc/409/a.rs"
+
+[[bin]]
+name = "abc409_b"
+path = "./src/abc/409/b.rs"
+
+[[bin]]
+name = "abc409_c"
+path = "./src/abc/409/c.rs"
+
+[[bin]]
+name = "abc409_d"
+path = "./src/abc/409/d.rs"
+
+[[bin]]
+name = "abc409_e"
+path = "./src/abc/409/e.rs"
+
+[[bin]]
+name = "abc409_f"
+path = "./src/abc/409/f.rs"
+
+[[bin]]
+name = "abc409_g"
+path = "./src/abc/409/g.rs"
+
+[[bin]]
+name = "ab408_a"
+path = "./src/ab/408/a.rs"
+
+[[bin]]
+name = "ab408_b"
+path = "./src/ab/408/b.rs"
+
+[[bin]]
+name = "ab408_c"
+path = "./src/ab/408/c.rs"
+
+[[bin]]
+name = "ab408_d"
+path = "./src/ab/408/d.rs"
+
+[[bin]]
+name = "ab408_e"
+path = "./src/ab/408/e.rs"
+
+[[bin]]
+name = "ab408_f"
+path = "./src/ab/408/f.rs"
+
+[[bin]]
+name = "ab408_g"
+path = "./src/ab/408/g.rs"
+
+[[bin]]
+name = "abc408_a"
+path = "./src/abc/408/a.rs"
+
+[[bin]]
+name = "abc408_b"
+path = "./src/abc/408/b.rs"
+
+[[bin]]
+name = "abc408_c"
+path = "./src/abc/408/c.rs"
+
+[[bin]]
+name = "abc408_d"
+path = "./src/abc/408/d.rs"
+
+[[bin]]
+name = "abc408_e"
+path = "./src/abc/408/e.rs"
+
+[[bin]]
+name = "abc408_f"
+path = "./src/abc/408/f.rs"
+
+[[bin]]
+name = "abc408_g"
+path = "./src/abc/408/g.rs"
