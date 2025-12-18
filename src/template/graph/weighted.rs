@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-use std::collections::BinaryHeap;
 use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 
 const INF: i64 = 1 << 60;
 
@@ -88,14 +88,24 @@ impl WeightedGraph {
         }
     }
 
-    /// Adds a directed edge.
-    pub fn add_edge(&mut self, u: usize, v: usize, weight: i64) {
+    /// Adds a directed
+    pub fn add_edge(
+        &mut self,
+        u: usize,
+        v: usize,
+        weight: i64,
+    ) {
         self.adj[u].push((v, weight));
         self.edges.push(Edge { u, v, weight });
     }
 
     /// Adds an undirected edge.
-    pub fn add_undirected_edge(&mut self, u: usize, v: usize, weight: i64) {
+    pub fn add_undirected_edge(
+        &mut self,
+        u: usize,
+        v: usize,
+        weight: i64,
+    ) {
         self.adj[u].push((v, weight));
         self.adj[v].push((u, weight));
         self.edges.push(Edge { u, v, weight }); // For Kruskal, typically one direction is enough or handle duplication
@@ -106,7 +116,10 @@ impl WeightedGraph {
     // ====================================================
 
     /// Runs Dijkstra's algorithm. O(E log V)
-    pub fn dijkstra(&self, start: usize) -> Vec<i64> {
+    pub fn dijkstra(
+        &self,
+        start: usize,
+    ) -> Vec<i64> {
         let mut dist = vec![INF; self.n];
         let mut pq = BinaryHeap::new();
 
@@ -114,7 +127,10 @@ impl WeightedGraph {
         pq.push(Reverse((0, start)));
 
         while let Some(Reverse((d, u))) = pq.pop() {
-            if d > dist[u] { continue; }
+            if d > dist[u] {
+                continue;
+            }
+
             for &(v, w) in &self.adj[u] {
                 if dist[u] + w < dist[v] {
                     dist[v] = dist[u] + w;
@@ -131,7 +147,10 @@ impl WeightedGraph {
 
     /// Runs Bellman-Ford algorithm. O(V * E)
     /// Returns None if a negative cycle is reachable.
-    pub fn bellman_ford(&self, start: usize) -> Option<Vec<i64>> {
+    pub fn bellman_ford(
+        &self,
+        start: usize,
+    ) -> Option<Vec<i64>> {
         let mut dist = vec![INF; self.n];
         dist[start] = 0;
 
@@ -146,7 +165,9 @@ impl WeightedGraph {
                     }
                 }
             }
-            if !updated { break; }
+            if !updated {
+                break;
+            }
         }
         Some(dist)
     }
@@ -159,8 +180,10 @@ impl WeightedGraph {
     /// Returns a 2D vector of shortest paths.
     pub fn warshall_floyd(&self) -> Vec<Vec<i64>> {
         let mut dist = vec![vec![INF; self.n]; self.n];
-        for i in 0..self.n { dist[i][i] = 0; }
-        
+        for i in 0..self.n {
+            dist[i][i] = 0;
+        }
+
         // Initialize from adjacency list
         for u in 0..self.n {
             for &(v, w) in &self.adj[u] {
@@ -205,7 +228,6 @@ impl WeightedGraph {
     }
 }
 
-
 pub struct UnionFind {
     parent: Vec<usize>,
     size: Vec<usize>,
@@ -223,7 +245,10 @@ impl UnionFind {
     }
 
     /// Finds the root of the element `x` with path compression.
-    pub fn find(&mut self, x: usize) -> usize {
+    pub fn find(
+        &mut self,
+        x: usize,
+    ) -> usize {
         if self.parent[x] == x {
             x
         } else {
@@ -234,7 +259,11 @@ impl UnionFind {
     }
 
     /// Unites the sets containing elements `x` and `y`.
-    pub fn unite(&mut self, x: usize, y: usize) -> bool {
+    pub fn unite(
+        &mut self,
+        x: usize,
+        y: usize,
+    ) -> bool {
         let root_x = self.find(x);
         let root_y = self.find(y);
         if root_x == root_y {
@@ -254,13 +283,20 @@ impl UnionFind {
     }
 
     /// Returns the size of the set containing element `x`.
-    pub fn size(&mut self, x: usize) -> usize {
+    pub fn size(
+        &mut self,
+        x: usize,
+    ) -> usize {
         let root = self.find(x);
         self.size[root]
     }
 
     /// Checks if elements `x` and `y` are in the same set.
-    pub fn same(&mut self, x: usize, y: usize) -> bool {
+    pub fn same(
+        &mut self,
+        x: usize,
+        y: usize,
+    ) -> bool {
         self.find(x) == self.find(y)
     }
 }
