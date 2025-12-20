@@ -81,7 +81,10 @@ impl<const M: u64> ModInt<M> {
     ///
     /// # Complexity
     /// - O(log exp)
-    pub fn pow(&self, mut exp: u64) -> Self {
+    pub fn pow(
+        &self,
+        mut exp: u64,
+    ) -> Self {
         let mut base = self.val;
         let mut res = 1;
         while exp > 0 {
@@ -106,13 +109,19 @@ impl<const M: u64> ModInt<M> {
 // --- Trait Implementations ---
 
 impl<const M: u64> fmt::Display for ModInt<M> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
         write!(f, "{}", self.val)
     }
 }
 
 impl<const M: u64> fmt::Debug for ModInt<M> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
         write!(f, "{}", self.val)
     }
 }
@@ -143,7 +152,10 @@ impl<const M: u64> From<i32> for ModInt<M> {
 
 impl<const M: u64> Add for ModInt<M> {
     type Output = Self;
-    fn add(self, other: Self) -> Self {
+    fn add(
+        self,
+        other: Self,
+    ) -> Self {
         let mut res = self.val + other.val;
         if res >= M {
             res -= M;
@@ -154,26 +166,38 @@ impl<const M: u64> Add for ModInt<M> {
 
 impl<const M: u64> Add<i64> for ModInt<M> {
     type Output = Self;
-    fn add(self, other: i64) -> Self {
+    fn add(
+        self,
+        other: i64,
+    ) -> Self {
         self + ModInt::new(other)
     }
 }
 
 impl<const M: u64> AddAssign for ModInt<M> {
-    fn add_assign(&mut self, other: Self) {
+    fn add_assign(
+        &mut self,
+        other: Self,
+    ) {
         *self = *self + other;
     }
 }
 
 impl<const M: u64> AddAssign<i64> for ModInt<M> {
-    fn add_assign(&mut self, other: i64) {
+    fn add_assign(
+        &mut self,
+        other: i64,
+    ) {
         *self = *self + ModInt::new(other);
     }
 }
 
 impl<const M: u64> Sub for ModInt<M> {
     type Output = Self;
-    fn sub(self, other: Self) -> Self {
+    fn sub(
+        self,
+        other: Self,
+    ) -> Self {
         let mut res = self.val;
         if res < other.val {
             res += M;
@@ -185,20 +209,29 @@ impl<const M: u64> Sub for ModInt<M> {
 
 impl<const M: u64> Sub<i64> for ModInt<M> {
     type Output = Self;
-    fn sub(self, other: i64) -> Self {
+    fn sub(
+        self,
+        other: i64,
+    ) -> Self {
         self - ModInt::new(other)
     }
 }
 
 impl<const M: u64> SubAssign for ModInt<M> {
-    fn sub_assign(&mut self, other: Self) {
+    fn sub_assign(
+        &mut self,
+        other: Self,
+    ) {
         *self = *self - other;
     }
 }
 
 impl<const M: u64> Mul for ModInt<M> {
     type Output = Self;
-    fn mul(self, other: Self) -> Self {
+    fn mul(
+        self,
+        other: Self,
+    ) -> Self {
         ModInt {
             val: (self.val * other.val) % M,
         }
@@ -207,26 +240,38 @@ impl<const M: u64> Mul for ModInt<M> {
 
 impl<const M: u64> Mul<i64> for ModInt<M> {
     type Output = Self;
-    fn mul(self, other: i64) -> Self {
+    fn mul(
+        self,
+        other: i64,
+    ) -> Self {
         self * ModInt::new(other)
     }
 }
 
 impl<const M: u64> MulAssign for ModInt<M> {
-    fn mul_assign(&mut self, other: Self) {
+    fn mul_assign(
+        &mut self,
+        other: Self,
+    ) {
         *self = *self * other;
     }
 }
 
 impl<const M: u64> Div for ModInt<M> {
     type Output = Self;
-    fn div(self, other: Self) -> Self {
+    fn div(
+        self,
+        other: Self,
+    ) -> Self {
         self * other.inv()
     }
 }
 
 impl<const M: u64> DivAssign for ModInt<M> {
-    fn div_assign(&mut self, other: Self) {
+    fn div_assign(
+        &mut self,
+        other: Self,
+    ) {
         *self = *self / other;
     }
 }
@@ -237,5 +282,11 @@ impl<const M: u64> proconio::source::Readable for ModInt<M> {
     fn read<R: std::io::BufRead, S: proconio::source::Source<R>>(source: &mut S) -> Self {
         let val = i64::read(source);
         ModInt::new(val)
+    }
+}
+
+impl<const M: u64> Default for ModInt<M> {
+    fn default() -> Self {
+        ModInt::new(0)
     }
 }

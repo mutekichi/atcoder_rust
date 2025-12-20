@@ -778,3 +778,59 @@ path = "./src/abc/424/f.rs"
 [[bin]]
 name = "abc424_g"
 path = "./src/abc/424/g.rs"
+
+[[bin]]
+name = "abc407_a"
+path = "./src/abc/407/a.rs"
+
+[[bin]]
+name = "abc407_b"
+path = "./src/abc/407/b.rs"
+
+[[bin]]
+name = "abc407_c"
+path = "./src/abc/407/c.rs"
+
+[[bin]]
+name = "abc407_d"
+path = "./src/abc/407/d.rs"
+
+[[bin]]
+name = "abc407_e"
+path = "./src/abc/407/e.rs"
+
+[[bin]]
+name = "abc407_f"
+path = "./src/abc/407/f.rs"
+
+[[bin]]
+name = "abc407_g"
+path = "./src/abc/407/g.rs"
+
+[[bin]]
+name = "abc406_a"
+path = "./src/abc/406/a.rs"
+
+[[bin]]
+name = "abc406_b"
+path = "./src/abc/406/b.rs"
+
+[[bin]]
+name = "abc406_c"
+path = "./src/abc/406/c.rs"
+
+[[bin]]
+name = "abc406_d"
+path = "./src/abc/406/d.rs"
+
+[[bin]]
+name = "abc406_e"
+path = "./src/abc/406/e.rs"
+
+[[bin]]
+name = "abc406_f"
+path = "./src/abc/406/f.rs"
+
+[[bin]]
+name = "abc406_g"
+path = "./src/abc/406/g.rs"

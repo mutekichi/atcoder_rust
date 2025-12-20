@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
 use super::modint::{Mint998, ModInt};
+
+/// --- SNAP START ---
 use std::ops::{Add, Div, Mul, Sub};
 
 /// Trait for types suitable for Number Theoretic Transform (NTT).

@@ -2,13 +2,14 @@
 .PHONY: help
 help:
 	@echo "Usage:"
-	@echo "  make new 341 abc               : Create environment for ABC341"
-	@echo "  make new 108 arc               : Create environment for ARC108"
-	@echo "  make run 341 a abc             : Run solution for ABC341 problem A"
-	@echo "  make prun 341 a abc            : Paste input from clipboard and run solution"
-	@echo "  make clear 341 abc             : Remove environment for ABC341"
+	@echo "  make new 341 abc                : Create environment for ABC341"
+	@echo "  make new 108 arc                : Create environment for ARC108"
+	@echo "  make run 341 a abc              : Run solution for ABC341 problem A"
+	@echo "  make prun 341 a abc             : Paste input from clipboard and run solution"
+	@echo "  make data                       : Generate test data using make_data.py"
+	@echo "  make clear 341 abc              : Remove environment for ABC341"
 	@echo "  make use src/tmpl.rs 341 a abc : Inject template"
-	@echo "  make open 341 a abc            : Open solution for ABC341 problem A in VSCode"
+	@echo "  make open 341 a abc             : Open solution for ABC341 problem A in VSCode"
 
 INPUT_FILE = input.txt
 
@@ -67,6 +68,13 @@ prun:
 	$(eval T := $(ARG3))
 	$(eval PREFIX := $(T)$(C))
 	@cat $(INPUT_FILE) | cargo run --quiet --bin $(PREFIX)_$(P)
+
+# Generate test data
+# Usage: make data
+.PHONY: data
+data:
+	@python make_data.py > $(INPUT_FILE)
+	@echo "Generated test data from make_data.py to $(INPUT_FILE)"
 
 # Remove environment
 # Usage: make clear <contest_id> <contest_type>
