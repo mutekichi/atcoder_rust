@@ -34,6 +34,7 @@ fn main() {
 }
 
 #[allow(unused_variables)]
+#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };

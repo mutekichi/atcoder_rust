@@ -34,6 +34,7 @@ fn main() {
 }
 
 #[allow(unused_variables)]
+#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,7 +42,70 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        t: usize,
+    }
+    for _ in 0..t {
+        input! {
+            h: usize,
+            w: usize,
+            S: Chars,
+        }
+        let mut ans: usize = 0;
+        let d_count = S.iter().filter(
+            |c| **c == 'D'
+        ).count();
+        let r_count = S.iter().filter(
+            |c| **c == 'R'
+        ).count();
+        {
+            let mut length = 1;
+            let mut remain = h - 1 - d_count;
+            md!(remain);
+            for i in 0..(h + w - 2) {
+                if S[i] == 'D' {
+                    length += 1;
+                }
+                else if S[i] == '?' {
+                    if remain > 0 {
+                        length += 1;
+                        remain -= 1;
+                    }
+                    else {
+                        ans += length;
+                        md!(ans);
+                    }
+                }
+                else {
+                    ans += length;
+                    md!(ans);
+                }
+            }
+            ans += length
+        }
+
+        {
+            let mut length = 1;
+            let mut remain = w - 1 - r_count;
+            for i in 0..(h + w - 2) {
+                if S[i] == 'R' {
+                    length += 1;
+                }
+                else if S[i] == '?' {
+                    if remain > 0 {
+                        length += 1;
+                        remain -= 1;
+                    }
+                    else {
+                        ans += length;
+                    }
+                }
+                else {
+                    ans += length;
+                }
+            }
+            ans += length;
+        }
+        wl!(ans - h * w);
     }
     
 }

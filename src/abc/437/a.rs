@@ -34,6 +34,7 @@ fn main() {
 }
 
 #[allow(unused_variables)]
+#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,9 +42,11 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        a: usize,
+        b: usize,
     }
     
+    wl!(a * 12 + b);
 }
 
 // --- Macros ---

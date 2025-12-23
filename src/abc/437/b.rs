@@ -34,6 +34,7 @@ fn main() {
 }
 
 #[allow(unused_variables)]
+#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,8 +42,29 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        h: usize,
+        w: usize,
+        n: usize,
+        A: [[usize; w]; h],
+        B: [usize; n],
     }
+    let mut counts = vec![0; h];
+
+    for b in B {
+        for i in 0..h {
+            for j in 0..w {
+                if b == A[i][j] {
+                    counts[i] += 1;
+                }
+            }
+        }
+    }
+    let mut ans: i64 = 0;
+
+    for i in 0..h {
+        ans = max(ans, counts[i]);
+    }
+    wl!(ans);
     
 }
 

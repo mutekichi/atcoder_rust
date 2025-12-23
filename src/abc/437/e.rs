@@ -6,6 +6,7 @@
 use num_integer::gcd;
 use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::fmt::Binary;
 use std::io::{stdout, BufWriter, Write};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
@@ -34,6 +35,7 @@ fn main() {
 }
 
 #[allow(unused_variables)]
+#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,9 +43,54 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        XY: [(usize, i64); n],
     }
-    
+
+    let mut stack = VecDeque::new();
+    let mut first_max_heap = BinaryHeap::new();
+    let mut ans = vec![];
+
+    let mut graph = vec![vec![]; n];
+    for i in 0..n {
+        let (x, y) = XY[i];
+        if x == 0 {
+            first_max_heap.push(Reverse((y, i)));
+        }
+        else {
+            graph[x - 1].push((y, i));
+        }
+    }
+
+    stack.push_back(first_max_heap);
+
+    while let Some(top_heap) = stack.back_mut() {
+        md!("top heap");
+        let mut before_value = INF_I64;
+        let mut same_values = BinaryHeap::new();
+        while let Some(Reverse((value, index))) = top_heap.pop() {
+            md!(value, index);
+            if before_value == INF_I64 || before_value == value {
+                for &(next_y, next_i) in &graph[index] {
+                    same_values.push(Reverse((next_y, next_i)));
+                    md!("pushed", next_y, next_i);
+                }
+                ans.push(index + 1);
+                before_value = value;
+            } else {
+                top_heap.push(Reverse((value, index)));
+                break;
+            }
+        }
+        if top_heap.is_empty() {
+            md!("pop back!!!!!!!!!!!!!!");
+            stack.pop_back();
+        }
+        if !same_values.is_empty() {
+            stack.push_back(same_values);
+        }
+    }
+    wl!(join_with_space(&ans));
 }
 
 // --- Macros ---

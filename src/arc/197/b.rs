@@ -34,6 +34,7 @@ fn main() {
 }
 
 #[allow(unused_variables)]
+#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,7 +42,48 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        t: usize,
+    }
+    for _ in 0..t {
+        input! {
+            n: usize,
+            mut A: [i64; n],
+        }
+        A.sort_unstable();
+
+        let mut accum_sums = vec![0];
+        for &a in &A {
+            accum_sums.push(accum_sums[accum_sums.len() - 1] + a);
+        }
+
+        if A.iter().all(
+            |a| *a == A[0]
+        ) {
+            wl!(0);
+            continue;
+        }
+        let mut ans = 0;
+        for i in 1..n {
+            let mut ng = n;
+            let mut ok = i - 1;
+            md!(i);
+
+            while ok.abs_diff(ng) > 1 {
+                let mid = (ok + ng) / 2;
+                md!(mid);
+                let diff_low = A[i] * i as i64 - accum_sums[i];
+                let diff_high = accum_sums[mid + 1] - accum_sums[i + 1]  - A[i] * (mid - i) as i64;
+                md!(diff_low, diff_high);
+                if diff_high < diff_low {
+                    ok = mid;
+                } else {
+                    ng = mid;
+                }
+            }
+            ans = max(ans, ok - i + 1);
+        }
+        wl!(ans);
+
     }
     
 }

@@ -34,6 +34,7 @@ fn main() {
 }
 
 #[allow(unused_variables)]
+#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,8 +42,43 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        m: usize,
+        mut A: [i128; n],
+        mut B: [i128; m],
     }
+
+    B.sort_unstable();
+    let mut b_set = BTreeSet::new();
+    let mut b_accum = vec![];
+    let mut b_sum = 0;
+    b_accum.push(0);
+    for (i, b) in B.iter().enumerate() {
+        b_accum.push(b_accum.last().unwrap() + b);
+        b_set.insert((*b, i));
+        b_sum += b;
+    }
+    for i in 0..b_accum.len() {
+        md!(b_accum[i]);
+    }
+    let mut ans = 0;
+    for a in A {
+        md!(a);
+        if let Some((value, index)) = &b_set.range(..(a, 0)).next_back() {
+            md!(value, index);
+            let before_sum = b_accum[index + 1];
+            let after_sum = b_sum - before_sum;
+            ans += a * (index + 1) as i128 - before_sum;
+            ans += after_sum - a * (m - index - 1) as i128;
+            md!(ans);
+        }
+        else {
+            ans += b_sum - a * m as i128;
+            md!(ans);
+        }
+        ans %= 998244353i128;
+    }
+    wl!(ans);
     
 }
 

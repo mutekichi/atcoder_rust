@@ -34,6 +34,7 @@ fn main() {
 }
 
 #[allow(unused_variables)]
+#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -41,7 +42,30 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
+        t: usize,
+
+    }
+    for _ in 0..t {
+        input! {
+            n: usize,
+            WP: [(i64, i64); n],
+        }
+        let mut weights_sum = 0;
+        let mut power_sum = 0;
+        let mut pq = BinaryHeap::new();
+        for &(w, p) in &WP {
+            weights_sum += w;
+            pq.push((w + p, w, p));
+        }
+        let mut count: usize = 0;
         
+        while power_sum < weights_sum {
+            let top = pq.pop().unwrap();
+            weights_sum -= top.1;
+            power_sum += top.2;
+            count += 1;
+        }
+        wl!(n - count);
     }
     
 }
