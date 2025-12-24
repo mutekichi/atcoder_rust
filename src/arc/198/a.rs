@@ -34,80 +34,76 @@ fn main() {
 }
 
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
+    // for n in 2..=12 {
+    //     md!(n);
+    // let mut max_count = 0;
+    // for i in 0..(1 << n) {
+    //     let mut v = vec![];
+    //     for j in 0..n {
+    //         if (i >> j) & 1 == 1 {
+    //             v.push(j + 1 as i64);
+    //         }
+    //     }
+    //     let mut ok = true;
+    //     for &v1 in &v {
+    //         for &v2 in &v {
+    //             if v1 % v2 == 1 {
+    //                 ok = false;
+    //                 break;
+    //             }
+    //         }
+    //         if !ok {
+    //             break;
+    //         }
+    //     }
+    //     if ok {
+    //         max_count = max(max_count, v.len());
+    //     }
+    // }
+    // for i in 0..(1 << n) {
+    //     let mut v = vec![];
+    //     for j in 0..n {
+    //         if (i >> j) & 1 == 1 {
+    //             v.push(j + 1 as i64);
+    //         }
+    //     }
+    //     let mut ok = true;
+    //     for &v1 in &v {
+    //         for &v2 in &v {
+    //             if v1 % v2 == 1 {
+    //                 ok = false;
+    //                 break;
+    //             }
+    //         }
+    //         if !ok {
+    //             break;
+    //         }
+    //     }
+    //     if ok {
+    //         if v.len() == max_count {
+    //             eprintln!("{}", join_with_space(&v));
+    //         }
+    //     }
+    // }
     input! {
-        t: usize,
+        n: i64,
     }
-    for _ in 0..t {
-        input! {
-            _h: usize,
-            _w: usize,
-            S: [Chars; _h],
+    if n <= 3 {
+        wl!(1);
+        wl!(1);
+    } else {
+        wl!(n/2);
+        let mut ans = vec![];
+        for i in 1..=(n/2) {
+            ans.push(i * 2);
         }
-        // ensures  h <= w
-        let h = min(_h, _w);
-        let w = max(_h ,_w);
-        let mut grid: Vec<Vec<i64>> = vec![vec![0; w]; h];
-        if _h < _w {
-            for i in 0..h {
-                for j in 0..w {
-                    if S[i][j] == '#' {
-                        grid[i][j] = 1;
-                    } else {
-                        grid[i][j] = -1;
-                    }
-                }
-            }
-        } else {
-            for i in 0..h {
-                for j in 0..w {
-                    if S[j][i] == '#' {
-                        grid[i][j] = 1;
-                    }
-                    else {
-                        grid[i][j] = -1;
-                    }
-                }
-            }
-        }
-
-        for i in 1..h {
-            for j in 0..w {
-                grid[i][j] += grid[i - 1][j];
-            }
-        }
-        for i in 0..h {
-            for j in 1..w {
-                grid[i][j] += grid[i][j - 1];
-            }
-        }
-
-        let mut ans: i64 = 0;
-        let offset = h * w;
-        let mut counts = vec![0; h * w * 2 + 1];
-        for i in 0..h {
-            for j in i..h {
-                counts[offset] = 1;
-                let mut used_list = vec![];
-                for k in 0..w {
-                    let count = (grid[j][k] - if i > 0 { grid[i - 1][k] } else {0} + offset as i64) as usize;
-                    ans += counts[count];
-                    counts[count] += 1;
-                    used_list.push(count);
-                }
-                for used in used_list {
-                    counts[used] = 0;
-                }
-            }
-        }
-        md!(ans);
-        wl!(ans);
+        wl!(join_with_space(&ans));
     }
 }
 
@@ -193,4 +189,11 @@ macro_rules! chmax {
             false
         }
     };
+}
+
+fn join_with_space<T: ToString>(arr: &[T]) -> String {
+    arr.iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<_>>()
+        .join(" ")
 }

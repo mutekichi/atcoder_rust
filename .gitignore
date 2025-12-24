@@ -12,3 +12,4 @@ Cargo.lock
 Thumbs.db
 
 input.txt
+make_data.py

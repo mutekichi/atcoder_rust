@@ -918,3 +918,31 @@ path = "./src/arc/197/f.rs"
 [[bin]]
 name = "arc197_g"
 path = "./src/arc/197/g.rs"
+
+[[bin]]
+name = "arc198_a"
+path = "./src/arc/198/a.rs"
+
+[[bin]]
+name = "arc198_b"
+path = "./src/arc/198/b.rs"
+
+[[bin]]
+name = "arc198_c"
+path = "./src/arc/198/c.rs"
+
+[[bin]]
+name = "arc198_d"
+path = "./src/arc/198/d.rs"
+
+[[bin]]
+name = "arc198_e"
+path = "./src/arc/198/e.rs"
+
+[[bin]]
+name = "arc198_f"
+path = "./src/arc/198/f.rs"
+
+[[bin]]
+name = "arc198_g"
+path = "./src/arc/198/g.rs"

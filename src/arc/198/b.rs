@@ -34,7 +34,6 @@ fn main() {
 }
 
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -43,71 +42,30 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         t: usize,
+        XYZ: [(i64, i64, i64); t],
     }
-    for _ in 0..t {
-        input! {
-            _h: usize,
-            _w: usize,
-            S: [Chars; _h],
-        }
-        // ensures  h <= w
-        let h = min(_h, _w);
-        let w = max(_h ,_w);
-        let mut grid: Vec<Vec<i64>> = vec![vec![0; w]; h];
-        if _h < _w {
-            for i in 0..h {
-                for j in 0..w {
-                    if S[i][j] == '#' {
-                        grid[i][j] = 1;
-                    } else {
-                        grid[i][j] = -1;
-                    }
+    for (x, y, z) in XYZ {
+        if z == 0 {
+            if y % 2 == 1 {
+                wl!("No");
+            } else {
+                if y > 2 * x {
+                    wl!("No");
+                } else {
+                    wl!("Yes");
                 }
             }
+        }
+        else if x < z {
+            wl!("No");
+            continue;
         } else {
-            for i in 0..h {
-                for j in 0..w {
-                    if S[j][i] == '#' {
-                        grid[i][j] = 1;
-                    }
-                    else {
-                        grid[i][j] = -1;
-                    }
-                }
+            if y > 2 * x {
+                wl!("No");
+            } else {
+                wl!("Yes");
             }
         }
-
-        for i in 1..h {
-            for j in 0..w {
-                grid[i][j] += grid[i - 1][j];
-            }
-        }
-        for i in 0..h {
-            for j in 1..w {
-                grid[i][j] += grid[i][j - 1];
-            }
-        }
-
-        let mut ans: i64 = 0;
-        let offset = h * w;
-        let mut counts = vec![0; h * w * 2 + 1];
-        for i in 0..h {
-            for j in i..h {
-                counts[offset] = 1;
-                let mut used_list = vec![];
-                for k in 0..w {
-                    let count = (grid[j][k] - if i > 0 { grid[i - 1][k] } else {0} + offset as i64) as usize;
-                    ans += counts[count];
-                    counts[count] += 1;
-                    used_list.push(count);
-                }
-                for used in used_list {
-                    counts[used] = 0;
-                }
-            }
-        }
-        md!(ans);
-        wl!(ans);
     }
 }
 
@@ -193,4 +151,11 @@ macro_rules! chmax {
             false
         }
     };
+}
+
+fn join_with_space<T: ToString>(arr: &[T]) -> String {
+    arr.iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<_>>()
+        .join(" ")
 }
