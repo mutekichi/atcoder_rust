@@ -1,11 +1,26 @@
+#![allow(unused_imports)]
+#![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
-use std::cmp::Reverse;
-use std::collections::BinaryHeap;
+use num_integer::gcd;
+use std::cmp::{max, min, Ordering, Reverse};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::io::{stdout, BufWriter, Write};
+use std::mem;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-const INF_I64: i64 = 1 << 60;
+use itertools::{iproduct, Itertools};
+use proconio::input;
+use proconio::marker::{Bytes, Chars, Usize1};
 
-// --- SNAP START ---
+const INF: i64 = 1 << 60;
+const INF_USIZE: usize = 1 << 60;
+const INF_F64: f64 = 1e18;
+const INF_I128: i128 = 1 << 120;
+const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+
+// FOR TEMPLATE INJECTIONS
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Edge {
@@ -88,7 +103,7 @@ impl WeightedGraph {
         }
     }
 
-    /// Adds a directed edge from `u` to `v` with given `weight`.
+    /// Adds a directed e
     pub fn add_edge(
         &mut self,
         u: usize,
@@ -120,7 +135,7 @@ impl WeightedGraph {
         &self,
         start: usize,
     ) -> Vec<i64> {
-        let mut dist = vec![INF_I64; self.n];
+        let mut dist = vec![INF; self.n];
         let mut pq = BinaryHeap::new();
 
         dist[start] = 0;
@@ -151,13 +166,13 @@ impl WeightedGraph {
         &self,
         start: usize,
     ) -> Option<Vec<i64>> {
-        let mut dist = vec![INF_I64; self.n];
+        let mut dist = vec![INF; self.n];
         dist[start] = 0;
 
         for i in 0..self.n {
             let mut updated = false;
             for e in &self.edges {
-                if dist[e.u] != INF_I64 && dist[e.u] + e.weight < dist[e.v] {
+                if dist[e.u] != INF && dist[e.u] + e.weight < dist[e.v] {
                     dist[e.v] = dist[e.u] + e.weight;
                     updated = true;
                     if i == self.n - 1 {
@@ -179,7 +194,7 @@ impl WeightedGraph {
     /// Runs Warshall-Floyd algorithm. O(V^3)
     /// Returns a 2D vector of shortest paths.
     pub fn warshall_floyd(&self) -> Vec<Vec<i64>> {
-        let mut dist = vec![vec![INF_I64; self.n]; self.n];
+        let mut dist = vec![vec![INF; self.n]; self.n];
         for i in 0..self.n {
             dist[i][i] = 0;
         }
@@ -194,7 +209,7 @@ impl WeightedGraph {
         for k in 0..self.n {
             for i in 0..self.n {
                 for j in 0..self.n {
-                    if dist[i][k] != INF_I64 && dist[k][j] != INF_I64 {
+                    if dist[i][k] != INF && dist[k][j] != INF {
                         dist[i][j] = dist[i][j].min(dist[i][k] + dist[k][j]);
                     }
                 }
@@ -301,17 +316,134 @@ impl UnionFind {
     }
 }
 
-// --- SNAP END ---
 
-#[cfg(test)]
-mod tests {
-    use super::*;
 
-    #[test]
-    fn test_union_find() {
-        let mut uf = UnionFind::new(5);
-        uf.unite(0, 1);
-        assert!(uf.same(0, 1));
-        assert!(!uf.same(0, 2));
+// END TEMPLATE INJECTIONS
+
+fn main() {
+    let stdout = stdout();
+    let mut out = BufWriter::new(stdout.lock());
+
+    solve(&mut out);
+
+    out.flush().unwrap();
+}
+
+#[allow(unused_variables)]
+fn solve<W: Write>(out: &mut W) {
+    macro_rules! wl {
+        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
+        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
+
+    input! {
+        n: usize,
+        m: usize,
+        LRS: [(usize, usize, i64); m],
+    }
+    let mut graph = WeightedGraph::new(n + 1);
+    for i in 0..n {
+        graph.add_edge(i + 1, i, -1);
+    }
+    for (l, r, s) in LRS {
+        graph.add_edge(r, l - 1, -s);
+        graph.add_edge(l - 1, r, s);
+    }
+    if let Some(min_dists) = graph.bellman_ford(n) {
+        wl!(-min_dists[0]);
+    }
+    else {
+        wl!(-1);
+    }
+}
+
+// --- Macros ---
+
+#[macro_export]
+#[cfg(debug_assertions)] // for debug build
+macro_rules! md { // stands for my_dbg
+    ($($arg:expr),* $(,)?) => {{
+        eprint!("[{}:{}] ", file!(), line!());
+
+        let mut _first = true;
+        $(
+            if !_first {
+                eprint!(", ");
+            }
+            eprint!("{}: {}", stringify!($arg), $arg);
+            _first = false;
+        )*
+        eprintln!();
+    }};
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))] // for release build
+macro_rules! md {
+    ($($arg:expr),* $(,)?) => {{
+        // do nothing
+    }};
+}
+
+#[macro_export]
+#[cfg(debug_assertions)]
+// Usage: mep!(val) (-> eprint without newline)
+// mep!("{:<1$}", val, width) (-> left align with width)
+// mep!("{:>1$}", val, width)
+macro_rules! mep {
+    ($x:expr) => { eprint!("{}", $x); };
+    ($($arg:tt)+) => { eprint!($($arg)+); };
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))]
+macro_rules! mep {
+    ($($arg:tt)*) => {};
+}
+
+#[macro_export]
+#[cfg(debug_assertions)]
+// Usage: mep!(val) (-> eprint with space)
+// mep!("{:<1$}", val, width) (-> left align with width)
+// mep!("{:>1$}", val, width)
+macro_rules! mepw { // stands for my_eprint_whitespace
+    ($x:expr) => { eprint!("{} ", $x); };
+    ($($arg:tt)+) => { eprint!($($arg)+); };
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))]
+macro_rules! mepw {
+    ($($arg:tt)*) => {};
+}
+
+#[macro_export]
+macro_rules! chmin {
+    ($a:expr, $b:expr) => {
+        if $a > $b {
+            $a = $b;
+            true
+        } else {
+            false
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! chmax {
+    ($a:expr, $b:expr) => {
+        if $a < $b {
+            $a = $b;
+            true
+        } else {
+            false
+        }
+    };
+}
+
+fn join_with_space<T: ToString>(arr: &[T]) -> String {
+    arr.iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<_>>()
+        .join(" ")
 }
