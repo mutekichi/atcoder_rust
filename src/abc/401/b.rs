@@ -41,8 +41,23 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        S: [String; n],
     }
+    let mut logged_in = false;
+    let mut count = 0;
+    for s in S {
+        if s == "login" {
+            logged_in = true;
+        } else if s == "logout" {
+            logged_in = false;
+        } else if s == "private" {
+            if !logged_in {
+                count += 1;
+            }
+        }
+    }
+    wl!(count);
 }
 
 // --- Macros ---

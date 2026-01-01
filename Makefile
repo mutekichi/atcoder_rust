@@ -1,65 +1,60 @@
-# Default target
 .PHONY: help
 help:
 	@echo "Usage:"
-	@echo "  make new 341 abc                : Create environment for ABC341"
-	@echo "  make new 108 arc                : Create environment for ARC108"
-	@echo "  make run 341 abc a              : Run solution for ABC341 problem A"
-	@echo "  make run 341 abc a release      : Run solution in release mode"
-	@echo "  make prun 341 abc a             : Paste input from clipboard and run solution"
-	@echo "  make data                       : Generate test data using make_data.py"
-	@echo "  make clear 341 abc              : Remove environment for ABC341"
-	@echo "  make use src/tmpl.rs 341 abc a  : Inject template"
-	@echo "  make open 341 abc a             : Open solution for ABC341 problem A in VSCode"
+	@echo "  make new abc 341                : Create environment for ABC341"
+	@echo "  make run abc 341 a              : Run solution for ABC341 problem A"
+	@echo "  make run abc 341 a p            : Paste from clipboard and run"
+	@echo "  make run abc 341 a release      : Run solution in release mode"
+	@echo "  make data                       : Generate test data"
+	@echo "  make clear abc 341              : Remove environment"
+	@echo "  make use src/tmpl.rs abc 341 a  : Inject template"
+	@echo "  make open abc 341 a             : Open solution in VSCode"
 
 INPUT_FILE = input.txt
 
-# Detect release mode (using "release" as a target/keyword)
+# Keywords to be excluded from positional arguments
+KEYWORDS = new run clear use open data release p
+
+# Extract arguments that are not make targets or functional keywords
+ARGS = $(filter-out $(KEYWORDS) $@,$(MAKECMDGOALS))
+
+# Mode detection
 CARGO_FLAGS =
-# Define executable directory based on mode
 BIN_DIR = target/debug
 ifneq (,$(filter release,$(MAKECMDGOALS)))
 	CARGO_FLAGS := --release
 	BIN_DIR := target/release
 endif
 
-# Get list of arguments excluding the target itself ($@) and keywords
-ARGS = $(filter-out $@ release,$(MAKECMDGOALS))
+# Check if "p" is provided as an argument
+DO_PASTE = $(filter p,$(MAKECMDGOALS))
 
-# Variables to capture arguments
-ARG1 = $(word 1, $(ARGS))
-ARG2 = $(word 2, $(ARGS))
-ARG3 = $(word 3, $(ARGS))
-ARG4 = $(word 4, $(ARGS))
-
-# Dummy target to allow "make ... release" without error
-.PHONY: release
-release:
+.PHONY: release p
+release p:
 	@:
 
-# Create contest environment
 .PHONY: new
 new:
-	@if [ -z "$(ARG1)" ] || [ -z "$(ARG2)" ]; then \
-		echo "Error: Contest ID and Type required."; \
-		exit 1; \
-	fi
-	@./mkrs.sh $(ARG1) $(ARG2)
+	$(eval T := $(word 1, $(ARGS)))
+	$(eval C := $(word 2, $(ARGS)))
+	@if [ -z "$(T)" ] || [ -z "$(C)" ]; then echo "Error: Type and ID required."; exit 1; fi
+	@./mkrs.sh $(C) $(T)
 
-# Run solution
 .PHONY: run
 run:
-	@if [ -z "$(ARG1)" ] || [ -z "$(ARG2)" ] || [ -z "$(ARG3)" ]; then \
-		echo "Error: Contest ID, Type, and Problem ID required."; \
-		exit 1; \
-	fi
-	$(eval C := $(ARG1))
-	$(eval T := $(ARG2))
-	$(eval P := $(ARG3))
+	$(eval T := $(word 1, $(ARGS)))
+	$(eval C := $(word 2, $(ARGS)))
+	$(eval P := $(word 3, $(ARGS)))
+	@if [ -z "$(T)" ] || [ -z "$(C)" ] || [ -z "$(P)" ]; then echo "Error: Type, ID, and Prob required."; exit 1; fi
 	$(eval PREFIX := $(T)$(C))
-	@# 1. Compile first (exclude from timing)
+	@# Paste if "p" keyword exists
+	@if [ -n "$(DO_PASTE)" ]; then \
+		powershell.exe -command "Get-Clipboard" | tr -d '\r' > $(INPUT_FILE); \
+		echo "Copied clipboard content to $(INPUT_FILE)"; \
+	fi
+	@# Compile
 	@cargo build $(CARGO_FLAGS) --quiet --bin $(PREFIX)_$(P)
-	@# 2. Determine binary path and Run in a SINGLE shell block to preserve variables
+	@# Execute
 	@BIN_PATH="./$(BIN_DIR)/$(PREFIX)_$(P)"; \
 	if [ -f "$${BIN_PATH}.exe" ]; then BIN_PATH="$${BIN_PATH}.exe"; fi; \
 	echo "Starting execution at $$(date +'%H:%M:%S')"; \
@@ -75,86 +70,46 @@ run:
 	python -c "print(f'Execution time: {$$end_time - $$start_time:.4f}s')"; \
 	exit $$RET
 
-# Paste from clipboard and Run solution
-.PHONY: prun
-prun:
-	@if [ -z "$(ARG1)" ] || [ -z "$(ARG2)" ] || [ -z "$(ARG3)" ]; then \
-		echo "Error: Contest ID, Type, and Problem ID required."; \
-		exit 1; \
-	fi
-	@# Paste logic
-	@powershell.exe -command "Get-Clipboard" | tr -d '\r' > $(INPUT_FILE)
-	@echo "Copied clipboard content to $(INPUT_FILE)"
-	$(eval C := $(ARG1))
-	$(eval T := $(ARG2))
-	$(eval P := $(ARG3))
-	$(eval PREFIX := $(T)$(C))
-	@# 1. Compile first
-	@cargo build $(CARGO_FLAGS) --quiet --bin $(PREFIX)_$(P)
-	@# 2. Determine binary path and Run in a SINGLE shell block
-	@BIN_PATH="./$(BIN_DIR)/$(PREFIX)_$(P)"; \
-	if [ -f "$${BIN_PATH}.exe" ]; then BIN_PATH="$${BIN_PATH}.exe"; fi; \
-	echo "Starting execution at $$(date +'%H:%M:%S')"; \
-	start_time=$$(python -c 'import time; print(time.time())'); \
-	cat $(INPUT_FILE) | "$$BIN_PATH"; \
-	RET=$$?; \
-	end_time=$$(python -c 'import time; print(time.time())'); \
-	python -c "print(f'Execution time: {$$end_time - $$start_time:.4f}s')"; \
-	exit $$RET
-
-# Generate test data
 .PHONY: data
 data:
 	@python make_data.py > $(INPUT_FILE)
-	@echo "Generated test data from make_data.py to $(INPUT_FILE)"
+	@echo "Generated test data to $(INPUT_FILE)"
 
-# Remove environment
 .PHONY: clear
 clear:
-	@if [ -z "$(ARG1)" ] || [ -z "$(ARG2)" ]; then \
-		echo "Error: Contest ID and Type required."; \
-		exit 1; \
-	fi
-	@./rmrs.sh $(ARG1) $(ARG2)
+	$(eval T := $(word 1, $(ARGS)))
+	$(eval C := $(word 2, $(ARGS)))
+	@if [ -z "$(T)" ] || [ -z "$(C)" ]; then echo "Error: Type and ID required."; exit 1; fi
+	@./rmrs.sh $(C) $(T)
 
-# Inject template
 .PHONY: use
 use:
-	@if [ -z "$(ARG1)" ] || [ -z "$(ARG2)" ] || [ -z "$(ARG3)" ] || [ -z "$(ARG4)" ]; then \
-		echo "Error: Usage: make use <template_path> <contest_id> <contest_type> <problem_id>"; \
-		exit 1; \
+	$(eval TMPL := $(word 1, $(ARGS)))
+	$(eval T := $(word 2, $(ARGS)))
+	$(eval C := $(word 3, $(ARGS)))
+	$(eval P := $(word 4, $(ARGS)))
+	@if [ -z "$(TMPL)" ] || [ -z "$(T)" ] || [ -z "$(C)" ] || [ -z "$(P)" ]; then \
+		echo "Error: Usage: make use <tmpl> <type> <id> <prob>"; exit 1; \
 	fi
-	$(eval TEMPLATE_PATH := $(ARG1))
-	$(eval C := $(ARG2))
-	$(eval T := $(ARG3))
-	$(eval P := $(ARG4))
 	$(eval TARGET_FILE := src/$(T)/$(C)/$(P).rs)
-	@python scripts/inject.py "$(TEMPLATE_PATH)" "$(TARGET_FILE)"
+	@python scripts/inject.py "$(TMPL)" "$(TARGET_FILE)"
 
-# Open in VSCode
 .PHONY: open
 open:
-	@if [ -z "$(ARG1)" ] || [ -z "$(ARG2)" ] || [ -z "$(ARG3)" ]; then \
-		echo "Error: Contest ID, Type, and Problem ID required."; \
-		exit 1; \
-	fi
-	$(eval C := $(ARG1))
-	$(eval T := $(ARG2))
-	$(eval P := $(ARG3))
+	$(eval T := $(word 1, $(ARGS)))
+	$(eval C := $(word 2, $(ARGS)))
+	$(eval P := $(word 3, $(ARGS)))
 	$(eval TARGET_PATH := src/$(T)/$(C)/$(P).rs)
 	@if [ -f "$(TARGET_PATH)" ]; then \
 		code "$(TARGET_PATH)"; \
 	else \
-		echo "Error: File '$(TARGET_PATH)' does not exist."; \
-		exit 1; \
+		echo "Error: File '$(TARGET_PATH)' does not exist."; exit 1; \
 	fi
 
-# Paste clipboard content to input file only
 .PHONY: paste
 paste:
 	@powershell.exe -command "Get-Clipboard" | tr -d '\r' > $(INPUT_FILE)
 	@echo "Copied clipboard content to $(INPUT_FILE)"
 
-# Dummy rule
 %:
 	@:

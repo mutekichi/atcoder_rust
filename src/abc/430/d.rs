@@ -4,13 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use std::cmp::{Ordering, Reverse, max, min};
+use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{BufWriter, Write, stdout};
+use std::io::{stdout, BufWriter, Write};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{Itertools, iproduct};
+use itertools::{iproduct, Itertools};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -41,8 +41,43 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        X: [i64; n],
     }
+
+    let mut set = BTreeMap::new();
+    set.insert(0, INF_I64);
+    set.insert(INF_I64, INF_I64);
+    let mut ans = 0i64;
+    for x in X {
+        let left = set.range(..x).next_back().unwrap();
+        let right = set.range(x..).next().unwrap();
+        let near_left = *left.0;
+        let near_left_diff = *left.1;
+        let near_right = *right.0;
+        let near_right_diff = *right.1;
+        let left_diff = x - near_left;
+        let right_diff = near_right - x;
+        md!(x, near_left, near_right);
+
+        if near_left_diff > left_diff {
+            if near_left == 0 && near_left_diff == INF_I64 {
+                ans += left_diff;
+            }
+            else {
+                ans -= near_left_diff - left_diff;
+            }
+            set.insert(near_left, left_diff);
+        }
+        if near_right_diff > right_diff && near_right != INF_I64 {
+            ans -= near_right_diff - right_diff;
+            set.insert(near_right, right_diff);
+        }
+        let diff = min(left_diff, right_diff);
+        ans += diff;
+        set.insert(x, diff);
+        wl!(ans);
+    } 
 }
 
 // --- Macros ---
@@ -129,72 +164,9 @@ macro_rules! chmax {
     };
 }
 
-trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
-}
-
-impl<I> JoinExtended for I
-where
-    I: Iterator,
-    I::Item: Joinable,
-{
-    fn join_with(self, sep: &str) -> String {
-        let mut peekable = self.peekable();
-        let is_2d = if let Some(first) = peekable.peek() {
-            first.is_container()
-        } else {
-            false
-        };
-
-        let res = peekable
-            .map(|item| item.join_item(sep))
-            .collect::<Vec<_>>();
-        
-        // Use newline for 2D rows, provided sep for 1D elements
-        res.join(if is_2d { "\n" } else { sep })
-    }
-}
-
-trait Joinable {
-    fn join_item(&self, sep: &str) -> String;
-    fn is_container(&self) -> bool;
-}
-
-macro_rules! impl_joinable_scalar {
-    ($($t:ty),*) => {
-        $(
-            impl Joinable for &$t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-            impl Joinable for $t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-        )*
-    };
-}
-
-impl_joinable_scalar!(
-    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
-);
-
-impl<T: std::fmt::Display> Joinable for &Vec<T> {
-    fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool { true }
-}
-
-impl<T: std::fmt::Display> Joinable for &[T] {
-    fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool { true }
+fn join_with_space<T: ToString>(arr: &[T]) -> String {
+    arr.iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<_>>()
+        .join(" ")
 }

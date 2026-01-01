@@ -4,13 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use std::cmp::{Ordering, Reverse, max, min};
+use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{BufWriter, Write, stdout};
+use std::io::{stdout, BufWriter, Write};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{Itertools, iproduct};
+use itertools::{iproduct, Itertools};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -41,8 +41,36 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        qcount: usize,
+        A: [Usize1; n],
+        TB: [(i64, Usize1); qcount],
     }
+    let mut db_table = vec![vec![(0, 0); 30]; n];
+    for exp in 0..30 {
+        for i in 0..n {
+            if exp == 0 {
+                db_table[i][exp] = (A[i], (i + 1) as i64);
+            }
+            else {
+                let (via, water_first) = db_table[i][exp - 1];
+                let (terminal, water_second) = db_table[via][exp - 1];
+                db_table[i][exp] = (terminal, water_first + water_second);
+            }
+        }
+    }
+    for (t, b) in TB {
+        let mut ans = 0;
+        let mut current = b;
+        for exp in 0..30 {
+            if (t >> exp) & 1 == 1 {
+                ans += db_table[current][exp].1;
+                current = db_table[current][exp].0;
+            }
+        }
+        wl!(ans);
+    }
+
 }
 
 // --- Macros ---
@@ -129,72 +157,9 @@ macro_rules! chmax {
     };
 }
 
-trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
-}
-
-impl<I> JoinExtended for I
-where
-    I: Iterator,
-    I::Item: Joinable,
-{
-    fn join_with(self, sep: &str) -> String {
-        let mut peekable = self.peekable();
-        let is_2d = if let Some(first) = peekable.peek() {
-            first.is_container()
-        } else {
-            false
-        };
-
-        let res = peekable
-            .map(|item| item.join_item(sep))
-            .collect::<Vec<_>>();
-        
-        // Use newline for 2D rows, provided sep for 1D elements
-        res.join(if is_2d { "\n" } else { sep })
-    }
-}
-
-trait Joinable {
-    fn join_item(&self, sep: &str) -> String;
-    fn is_container(&self) -> bool;
-}
-
-macro_rules! impl_joinable_scalar {
-    ($($t:ty),*) => {
-        $(
-            impl Joinable for &$t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-            impl Joinable for $t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-        )*
-    };
-}
-
-impl_joinable_scalar!(
-    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
-);
-
-impl<T: std::fmt::Display> Joinable for &Vec<T> {
-    fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool { true }
-}
-
-impl<T: std::fmt::Display> Joinable for &[T] {
-    fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool { true }
+fn join_with_space<T: ToString>(arr: &[T]) -> String {
+    arr.iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<_>>()
+        .join(" ")
 }

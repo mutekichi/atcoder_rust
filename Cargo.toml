@@ -1,7 +1,7 @@
 [package]
 name = "atcoder-rust"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 proconio = "0.4.5"
@@ -1002,3 +1002,199 @@ path = "./src/abc/404/f.rs"
 [[bin]]
 name = "abc404_g"
 path = "./src/abc/404/g.rs"
+
+[[bin]]
+name = "abc403_a"
+path = "./src/abc/403/a.rs"
+
+[[bin]]
+name = "abc403_b"
+path = "./src/abc/403/b.rs"
+
+[[bin]]
+name = "abc403_c"
+path = "./src/abc/403/c.rs"
+
+[[bin]]
+name = "abc403_d"
+path = "./src/abc/403/d.rs"
+
+[[bin]]
+name = "abc403_e"
+path = "./src/abc/403/e.rs"
+
+[[bin]]
+name = "abc403_f"
+path = "./src/abc/403/f.rs"
+
+[[bin]]
+name = "abc403_g"
+path = "./src/abc/403/g.rs"
+
+[[bin]]
+name = "abc438_a"
+path = "./src/abc/438/a.rs"
+
+[[bin]]
+name = "abc438_b"
+path = "./src/abc/438/b.rs"
+
+[[bin]]
+name = "abc438_c"
+path = "./src/abc/438/c.rs"
+
+[[bin]]
+name = "abc438_d"
+path = "./src/abc/438/d.rs"
+
+[[bin]]
+name = "abc438_e"
+path = "./src/abc/438/e.rs"
+
+[[bin]]
+name = "abc438_f"
+path = "./src/abc/438/f.rs"
+
+[[bin]]
+name = "abc438_g"
+path = "./src/abc/438/g.rs"
+
+[[bin]]
+name = "abc430_a"
+path = "./src/abc/430/a.rs"
+
+[[bin]]
+name = "abc430_b"
+path = "./src/abc/430/b.rs"
+
+[[bin]]
+name = "abc430_c"
+path = "./src/abc/430/c.rs"
+
+[[bin]]
+name = "abc430_d"
+path = "./src/abc/430/d.rs"
+
+[[bin]]
+name = "abc430_e"
+path = "./src/abc/430/e.rs"
+
+[[bin]]
+name = "abc430_f"
+path = "./src/abc/430/f.rs"
+
+[[bin]]
+name = "abc430_g"
+path = "./src/abc/430/g.rs"
+
+[[bin]]
+name = "abc402_a"
+path = "./src/abc/402/a.rs"
+
+[[bin]]
+name = "abc402_b"
+path = "./src/abc/402/b.rs"
+
+[[bin]]
+name = "abc402_c"
+path = "./src/abc/402/c.rs"
+
+[[bin]]
+name = "abc402_d"
+path = "./src/abc/402/d.rs"
+
+[[bin]]
+name = "abc402_e"
+path = "./src/abc/402/e.rs"
+
+[[bin]]
+name = "abc402_f"
+path = "./src/abc/402/f.rs"
+
+[[bin]]
+name = "abc402_g"
+path = "./src/abc/402/g.rs"
+
+[[bin]]
+name = "401abc_a"
+path = "./src/401/abc/a.rs"
+
+[[bin]]
+name = "401abc_b"
+path = "./src/401/abc/b.rs"
+
+[[bin]]
+name = "401abc_c"
+path = "./src/401/abc/c.rs"
+
+[[bin]]
+name = "401abc_d"
+path = "./src/401/abc/d.rs"
+
+[[bin]]
+name = "401abc_e"
+path = "./src/401/abc/e.rs"
+
+[[bin]]
+name = "401abc_f"
+path = "./src/401/abc/f.rs"
+
+[[bin]]
+name = "401abc_g"
+path = "./src/401/abc/g.rs"
+
+[[bin]]
+name = "402abc_a"
+path = "./src/402/abc/a.rs"
+
+[[bin]]
+name = "402abc_b"
+path = "./src/402/abc/b.rs"
+
+[[bin]]
+name = "402abc_c"
+path = "./src/402/abc/c.rs"
+
+[[bin]]
+name = "402abc_d"
+path = "./src/402/abc/d.rs"
+
+[[bin]]
+name = "402abc_e"
+path = "./src/402/abc/e.rs"
+
+[[bin]]
+name = "402abc_f"
+path = "./src/402/abc/f.rs"
+
+[[bin]]
+name = "402abc_g"
+path = "./src/402/abc/g.rs"
+
+[[bin]]
+name = "abc401_a"
+path = "./src/abc/401/a.rs"
+
+[[bin]]
+name = "abc401_b"
+path = "./src/abc/401/b.rs"
+
+[[bin]]
+name = "abc401_c"
+path = "./src/abc/401/c.rs"
+
+[[bin]]
+name = "abc401_d"
+path = "./src/abc/401/d.rs"
+
+[[bin]]
+name = "abc401_e"
+path = "./src/abc/401/e.rs"
+
+[[bin]]
+name = "abc401_f"
+path = "./src/abc/401/f.rs"
+
+[[bin]]
+name = "abc401_g"
+path = "./src/abc/401/g.rs"

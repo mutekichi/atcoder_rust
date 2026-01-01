@@ -41,8 +41,19 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        m: usize,
+        AB: [(Usize1, Usize1); m],
     }
+    let mut counts = vec![0; n];
+    for (a, b) in AB {
+        let diff = n - a;
+        let b_next = (b + n - diff) % n;
+        md!(b_next);
+        counts[b_next] += 1;
+    }
+    let to_sub = counts.iter().map(|c| if *c != 0 {c * (c - 1) / 2} else { 0 }).sum::<usize>();
+    wl!(m * (m - 1) / 2 - to_sub);
 }
 
 // --- Macros ---
@@ -130,7 +141,7 @@ macro_rules! chmax {
 }
 
 trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
+    fn join_w(self, sep: &str) -> String;
 }
 
 impl<I> JoinExtended for I
@@ -138,7 +149,7 @@ where
     I: Iterator,
     I::Item: Joinable,
 {
-    fn join_with(self, sep: &str) -> String {
+    fn join_w(self, sep: &str) -> String {
         let mut peekable = self.peekable();
         let is_2d = if let Some(first) = peekable.peek() {
             first.is_container()

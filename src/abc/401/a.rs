@@ -41,7 +41,13 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        s: usize,
+    }
+    if 200 <= s && s <= 299 {
+        wl!("Success");
+    }
+    else {
+        wl!("Failure");
     }
 }
 

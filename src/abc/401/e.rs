@@ -41,7 +41,63 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        m: usize,
+        UV: [(Usize1, Usize1); m],
+    }
+    let mut graph = vec![vec![]; n];
+    for (u, v) in UV {
+        graph[u].push(v);
+        graph[v].push(u);
+    }
+
+
+
+    let mut pq = BinaryHeap::new();
+    let mut seen = vec![false; n];
+    let mut visited = vec![false; n];
+    let mut mex = 0;
+
+    pq.push(Reverse(0));
+    seen[0] = true;
+
+    let mut ans = vec![INF_USIZE; n];
+    let mut max_included = -1;
+
+    while let Some(Reverse(v)) = pq.pop() {
+        visited[v] = true;
+        let prev_len = pq.len();
+        for &nv in &graph[v] {
+            if !seen[nv] {
+                pq.push(Reverse(nv));
+                seen[nv] = true;
+            }
+        }
+        max_included = max(max_included, v as i64);
+        if v == mex {
+            if mex == max_included as usize + 1 {
+                ans[mex] = pq.len();
+            }
+            loop {
+                mex += 1;
+                if mex == n {
+                    ans[mex - 1] = 0;
+                    break;
+                }
+                if visited[mex] == false {
+                    break;
+                }
+            }
+            if mex == max_included as usize + 1 {
+                ans[max_included as usize] = prev_len;
+            }
+        } else {
+            ans[v] = INF_USIZE;
+        }
+    }
+    for i in 0..n {
+        let a = ans[i];
+        wl!(if a == INF_USIZE { -1 } else { a as i64 });
     }
 }
 
@@ -130,7 +186,10 @@ macro_rules! chmax {
 }
 
 trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
+    fn join_with(
+        self,
+        sep: &str,
+    ) -> String;
 }
 
 impl<I> JoinExtended for I
@@ -138,7 +197,10 @@ where
     I: Iterator,
     I::Item: Joinable,
 {
-    fn join_with(self, sep: &str) -> String {
+    fn join_with(
+        self,
+        sep: &str,
+    ) -> String {
         let mut peekable = self.peekable();
         let is_2d = if let Some(first) = peekable.peek() {
             first.is_container()
@@ -146,17 +208,18 @@ where
             false
         };
 
-        let res = peekable
-            .map(|item| item.join_item(sep))
-            .collect::<Vec<_>>();
-        
+        let res = peekable.map(|item| item.join_item(sep)).collect::<Vec<_>>();
+
         // Use newline for 2D rows, provided sep for 1D elements
         res.join(if is_2d { "\n" } else { sep })
     }
 }
 
 trait Joinable {
-    fn join_item(&self, sep: &str) -> String;
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String;
     fn is_container(&self) -> bool;
 }
 
@@ -180,21 +243,31 @@ impl_joinable_scalar!(
 );
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
-    fn join_item(&self, sep: &str) -> String {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String {
         self.iter()
             .map(|x| x.to_string())
             .collect::<Vec<_>>()
             .join(sep)
     }
-    fn is_container(&self) -> bool { true }
+    fn is_container(&self) -> bool {
+        true
+    }
 }
 
 impl<T: std::fmt::Display> Joinable for &[T] {
-    fn join_item(&self, sep: &str) -> String {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String {
         self.iter()
             .map(|x| x.to_string())
             .collect::<Vec<_>>()
             .join(sep)
     }
-    fn is_container(&self) -> bool { true }
+    fn is_container(&self) -> bool {
+        true
+    }
 }

@@ -14,12 +14,6 @@ use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
-const INF_I64: i64 = 1 << 60;
-const INF_USIZE: usize = 1 << 60;
-const INF_F64: f64 = 1e18;
-const INF_I128: i128 = 1 << 120;
-const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
-
 // FOR TEMPLATE INJECTIONS
 
 // END TEMPLATE INJECTIONS
@@ -33,6 +27,35 @@ fn main() {
     out.flush().unwrap();
 }
 
+fn create_mod_set(
+    x: usize,
+    y: usize,
+    n: usize,
+    m: i128,
+    downs: usize,
+    rights: usize,
+    a_mods: &Vec<Vec<i128>>,
+    set: &mut BTreeSet<i128>,
+    accum: i128,
+) {
+    if downs == 0 && rights == 0 {
+        set.insert(accum);
+        return;
+    }
+    if downs != 0 {
+        create_mod_set(
+            x, y + 1, n, m, downs - 1, rights, a_mods, set,
+            (accum + a_mods[x][y + 1]) % m,
+        );
+    }
+    if rights != 0 {
+        create_mod_set(
+            x + 1, y, n, m, downs, rights - 1, a_mods, set,
+            (accum + a_mods[x + 1][y]) % m
+        );
+    }
+}
+
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
@@ -41,8 +64,62 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        M: i128,
+        A: [[i128; n]; n],
     }
+    if n == 1 {
+        wl!(A[0][0] % M);
+        return;
+    }
+    let mut ans = 0;
+    let mut mod_table = vec![1; 42];
+    for i in 1..42 {
+        mod_table[i] = mod_table[i - 1] * 10 % M;
+    }
+    let mut a_mods = vec![vec![0; n]; n];
+    for i in 0..n {
+        for j in 0..n {
+            a_mods[i][j] = A[i][j] * mod_table[2 * n - 2 - i - j] % M;
+        }
+    }
+    for i in 0..n {
+        let mut res_mod_set = BTreeSet::new();
+        create_mod_set(
+            n - 1 - i,
+            i,
+            n,
+            M,
+            n - 1 - i,
+            i,
+            &a_mods,
+            &mut res_mod_set,
+            0
+        );
+        let mut first_mod_set = BTreeSet::new();
+        create_mod_set(
+            0,
+            0,
+            n,
+            M,
+            i,
+            n - 1 - i,
+            &a_mods,
+            &mut first_mod_set,
+            a_mods[0][0],
+        );
+        for first in first_mod_set.iter() {
+            let res_max = M - first - 1;
+            if let Some(next) = res_mod_set.range(0..=res_max).next_back() {
+                ans = max(first + next, ans);
+            } else {
+                if let Some(largest) = res_mod_set.iter().next_back() {
+                    ans = max((first + largest) % M, ans);
+                }
+            }
+        }
+    }
+    wl!(ans);
 }
 
 // --- Macros ---
@@ -127,74 +204,4 @@ macro_rules! chmax {
             false
         }
     };
-}
-
-trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
-}
-
-impl<I> JoinExtended for I
-where
-    I: Iterator,
-    I::Item: Joinable,
-{
-    fn join_with(self, sep: &str) -> String {
-        let mut peekable = self.peekable();
-        let is_2d = if let Some(first) = peekable.peek() {
-            first.is_container()
-        } else {
-            false
-        };
-
-        let res = peekable
-            .map(|item| item.join_item(sep))
-            .collect::<Vec<_>>();
-        
-        // Use newline for 2D rows, provided sep for 1D elements
-        res.join(if is_2d { "\n" } else { sep })
-    }
-}
-
-trait Joinable {
-    fn join_item(&self, sep: &str) -> String;
-    fn is_container(&self) -> bool;
-}
-
-macro_rules! impl_joinable_scalar {
-    ($($t:ty),*) => {
-        $(
-            impl Joinable for &$t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-            impl Joinable for $t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-        )*
-    };
-}
-
-impl_joinable_scalar!(
-    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
-);
-
-impl<T: std::fmt::Display> Joinable for &Vec<T> {
-    fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool { true }
-}
-
-impl<T: std::fmt::Display> Joinable for &[T] {
-    fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool { true }
 }

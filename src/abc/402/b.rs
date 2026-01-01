@@ -41,7 +41,22 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        qcount: usize,
+    }
+    let mut q = VecDeque::new();
+    for _ in 0..qcount {
+        input! {
+            qtype: usize,
+        }
+        if qtype == 1 {
+            input! {
+                x: usize,
+            }
+            q.push_back(x);
+        }
+        else {
+            wl!(q.pop_front().unwrap());
+        }
     }
 }
 
@@ -130,7 +145,7 @@ macro_rules! chmax {
 }
 
 trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
+    fn join_w(self, sep: &str) -> String;
 }
 
 impl<I> JoinExtended for I
@@ -138,7 +153,7 @@ where
     I: Iterator,
     I::Item: Joinable,
 {
-    fn join_with(self, sep: &str) -> String {
+    fn join_w(self, sep: &str) -> String {
         let mut peekable = self.peekable();
         let is_2d = if let Some(first) = peekable.peek() {
             first.is_container()

@@ -41,8 +41,34 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        mut T: Chars,
+        U: String,
     }
+
+    let qmark_indices = T
+        .iter()
+        .enumerate()
+        .filter(|&(_, &val)| val == '?')
+        .map(|(i, _)| i)
+        .collect::<Vec<_>>();
+
+    for i in 'a'..='z' {
+        T[qmark_indices[0]] = i;
+        for j in 'a'..='z' {
+            T[qmark_indices[1]] = j;
+            for k in 'a'..='z' {
+                T[qmark_indices[2]] = k;
+                for l in 'a'..='z' {
+                    T[qmark_indices[3]] = l;
+                    if T.iter().collect::<String>().contains(&U) {
+                        wl!("Yes");
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    wl!("No");
 }
 
 // --- Macros ---
@@ -129,72 +155,9 @@ macro_rules! chmax {
     };
 }
 
-trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
-}
-
-impl<I> JoinExtended for I
-where
-    I: Iterator,
-    I::Item: Joinable,
-{
-    fn join_with(self, sep: &str) -> String {
-        let mut peekable = self.peekable();
-        let is_2d = if let Some(first) = peekable.peek() {
-            first.is_container()
-        } else {
-            false
-        };
-
-        let res = peekable
-            .map(|item| item.join_item(sep))
-            .collect::<Vec<_>>();
-        
-        // Use newline for 2D rows, provided sep for 1D elements
-        res.join(if is_2d { "\n" } else { sep })
-    }
-}
-
-trait Joinable {
-    fn join_item(&self, sep: &str) -> String;
-    fn is_container(&self) -> bool;
-}
-
-macro_rules! impl_joinable_scalar {
-    ($($t:ty),*) => {
-        $(
-            impl Joinable for &$t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-            impl Joinable for $t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-        )*
-    };
-}
-
-impl_joinable_scalar!(
-    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
-);
-
-impl<T: std::fmt::Display> Joinable for &Vec<T> {
-    fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool { true }
-}
-
-impl<T: std::fmt::Display> Joinable for &[T] {
-    fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool { true }
+fn join_with_space<T: ToString>(arr: &[T]) -> String {
+    arr.iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<_>>()
+        .join(" ")
 }

@@ -33,6 +33,33 @@ fn main() {
     out.flush().unwrap();
 }
 
+fn f(
+    res_money: i64,
+    res_problems: usize,
+    memo: &mut Vec<Vec<f64>>,
+    SCP: &Vec<(f64, i64, f64)>,
+    n: usize,
+) -> f64 {
+    let mut ans: f64 = 0.;
+    if memo[res_money as usize][res_problems] != INF_F64 {
+        return memo[res_money as usize][res_problems];
+    }
+    for i in 0..n {
+        let score = SCP[i].0;
+        let cost = SCP[i].1;
+        let prob = SCP[i].2 / 100.;
+        if cost > res_money || (res_problems >> i) & 1 == 0{
+            continue;
+        }
+        let mut exp = 0.;
+        exp += prob * (score + f(res_money - cost, res_problems ^ (1<<i), memo, SCP, n));
+        exp += (1. - prob) * f(res_money - cost, res_problems, memo, SCP, n);
+        ans = ans.max(exp);
+    }
+    memo[res_money as usize][res_problems] = ans;
+    ans
+}
+
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
@@ -41,8 +68,12 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        x: i64,
+        SCP: [(f64, i64, f64); n],
     }
+    let mut memo = vec![vec![INF_F64; 1<<n]; x as usize + 1];
+    wl!(f(x, (1<<n) -1, &mut memo, &SCP, n));
 }
 
 // --- Macros ---
@@ -130,7 +161,7 @@ macro_rules! chmax {
 }
 
 trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
+    fn join_w(self, sep: &str) -> String;
 }
 
 impl<I> JoinExtended for I
@@ -138,7 +169,7 @@ where
     I: Iterator,
     I::Item: Joinable,
 {
-    fn join_with(self, sep: &str) -> String {
+    fn join_w(self, sep: &str) -> String {
         let mut peekable = self.peekable();
         let is_2d = if let Some(first) = peekable.peek() {
             first.is_container()

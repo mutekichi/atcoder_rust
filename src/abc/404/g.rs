@@ -4,13 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -316,8 +316,6 @@ impl UnionFind {
     }
 }
 
-
-
 // END TEMPLATE INJECTIONS
 
 fn main() {
@@ -351,8 +349,7 @@ fn solve<W: Write>(out: &mut W) {
     }
     if let Some(min_dists) = graph.bellman_ford(n) {
         wl!(-min_dists[0]);
-    }
-    else {
+    } else {
         wl!(-1);
     }
 }

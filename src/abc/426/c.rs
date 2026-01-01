@@ -1,5 +1,6 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
+#![allow(non_snake_case)]
 #![allow(dead_code)]
 
 // Common imports
@@ -42,30 +43,26 @@ fn solve<W: Write>(out: &mut W) {
     input! {
         n: usize,
         q: usize,
+        XY: [(usize, usize); q],
     }
 
-    let mut oldest: usize = 0;
-    let mut versions: Vec<usize> = vec![0; n];
-    for i in 0..n {
-        versions[i] = i;
+    let mut pq = BinaryHeap::new();
+    for i in 1..=n {
+        pq.push(Reverse((i, 1usize)));
     }
-
-    for i in 0..q {
-        input! {
-            x: Usize1,
-            y: Usize1,
-        }
-        let mut cnt = 0;
-        if oldest > x {
-            // nothing
-        } else {
-            for j in oldest..x {
-                versions[j] = y;
-                cnt += 1;
-                oldest += 1;
+    for (x, y) in XY {
+        let mut counts = 0;
+        while let Some(Reverse((version, count))) = pq.peek() {
+            if *version <= x {
+                counts += count;
+                pq.pop();
+            }
+            else {
+                break;
             }
         }
-        wl!(cnt);
+        wl!(counts);
+        pq.push(Reverse((y, counts)));
     }
 }
 

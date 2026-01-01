@@ -41,8 +41,25 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: i64,
+        k: usize,
     }
+    if (n as usize) < k {
+        wl!(1);
+        return;
+    }
+    let mut q = VecDeque::new();
+    for _ in 0..k {
+        q.push_back(1i64);
+    }
+    let mut before = k as i64;
+    for _ in 0..(n as usize - k) {
+        let front = q.pop_front().unwrap();
+        q.push_back(before);
+        before = before + before - front + 1000000000i64;
+        before %= 1000000000i64;
+    }
+    wl!(before);
 }
 
 // --- Macros ---

@@ -40,9 +40,10 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {
-        
-    }
+    let a = vec![(5, 4), (3, 2), (1, 0)];
+    wl!(a.iter().join_with(" "));
+    let grid = vec![vec!['#'; 4]; 3];
+    wl!(grid.iter().join_with(" "));
 }
 
 // --- Macros ---
@@ -128,6 +129,7 @@ macro_rules! chmax {
         }
     };
 }
+// --- Macros and Traits for Joining ---
 
 trait JoinExtended {
     fn join_with(self, sep: &str) -> String;
@@ -149,8 +151,8 @@ where
         let res = peekable
             .map(|item| item.join_item(sep))
             .collect::<Vec<_>>();
-        
-        // Use newline for 2D rows, provided sep for 1D elements
+
+        // Use newline for 2D/tuples, provided sep for 1D elements
         res.join(if is_2d { "\n" } else { sep })
     }
 }
@@ -179,22 +181,42 @@ impl_joinable_scalar!(
     i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
 );
 
+// Macro to implement Joinable for tuples
+macro_rules! impl_joinable_tuple {
+    ($($t:ident),+) => {
+        impl<$($t: std::fmt::Display),+> Joinable for &($($t),+) {
+            fn join_item(&self, sep: &str) -> String {
+                #[allow(non_snake_case)]
+                let ($($t),+) = self;
+                vec![$($t.to_string()),+].join(sep)
+            }
+            fn is_container(&self) -> bool { true }
+        }
+        impl<$($t: std::fmt::Display),+> Joinable for ($($t),+) {
+            fn join_item(&self, sep: &str) -> String {
+                #[allow(non_snake_case)]
+                let ($($t),+) = self;
+                vec![$($t.to_string()),+].join(sep)
+            }
+            fn is_container(&self) -> bool { true }
+        }
+    };
+}
+
+impl_joinable_tuple!(A, B);
+impl_joinable_tuple!(A, B, C);
+impl_joinable_tuple!(A, B, C, D);
+
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
+        self.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(sep)
     }
     fn is_container(&self) -> bool { true }
 }
 
 impl<T: std::fmt::Display> Joinable for &[T] {
     fn join_item(&self, sep: &str) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
+        self.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(sep)
     }
     fn is_container(&self) -> bool { true }
 }

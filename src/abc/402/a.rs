@@ -41,8 +41,15 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        S: Chars,
     }
+    let mut ans = vec![];
+    for c in S {
+        if c.is_uppercase() {
+            ans.push(c);
+        }
+    }
+    wl!(ans.iter().collect::<String>());
 }
 
 // --- Macros ---
@@ -130,7 +137,7 @@ macro_rules! chmax {
 }
 
 trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
+    fn join_w(self, sep: &str) -> String;
 }
 
 impl<I> JoinExtended for I
@@ -138,7 +145,7 @@ where
     I: Iterator,
     I::Item: Joinable,
 {
-    fn join_with(self, sep: &str) -> String {
+    fn join_w(self, sep: &str) -> String {
         let mut peekable = self.peekable();
         let is_2d = if let Some(first) = peekable.peek() {
             first.is_container()

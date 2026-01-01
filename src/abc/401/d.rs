@@ -41,8 +41,69 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        k: usize,
+        mut S: Chars,
     }
+    for i in 0..(n - 1) {
+        if S[i] == '?' && S[i + 1] == 'o' {
+            S[i] = '.';
+        }
+    }
+    for i in 1..n {
+        if S[i] == '?' && S[i - 1] == 'o' {
+            S[i] = '.';
+        }
+    }
+    let circle_count = S.iter().filter(|c| **c == 'o').count();
+    let circle_to_add = k - circle_count;
+    if circle_to_add == 0 {
+        for i in 0..n {
+            if S[i] == '?' {
+                S[i] = '.';
+            }
+        }
+        wl!(S.iter().collect::<String>());
+        return;
+    }
+    let mut current_run = 0;
+    let mut is_running = false;
+    let mut runs = vec![];
+    S.push('.');
+    for i in 0..(n+1) {
+        if S[i] == '?' {
+            if is_running {
+                current_run += 1;
+            }
+            else {
+                is_running = true;
+                current_run = 1;
+            }
+        }
+        else {
+            if is_running {
+                runs.push((i - current_run, current_run));
+                current_run = 0;
+                is_running = false;
+            }
+        }
+    }
+    let sum = runs.iter().map(|(_, l)| (*l + 1) / 2).sum::<usize>();
+    if sum == circle_to_add {
+        for (i, l) in runs {
+            if l % 2 == 1 {
+                for j in 0..l {
+                    if j % 2 == 0 {
+                        S[i + j] = 'o';
+                    }
+                    else {
+                        S[i + j] = '.';
+                    }
+                }
+            }
+        }
+    }
+    wl!(S.iter().take(n).collect::<String>());
 }
 
 // --- Macros ---

@@ -1,14 +1,15 @@
 #![allow(unused_imports)]
+#![allow(non_snake_case)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
 
 // Common imports
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -41,35 +42,43 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
         n: usize,
-        mut va: [isize; n],
+        A: [i64; n],
     }
-    
-    let mut vecbool = vec![false; n];
-
-    for &value in &va {
-        if value != -1 {
-            if vecbool[value as usize] {
-                wl!("No");
-                return;
+    let minus_one_count = A.iter().filter(|a| **a == -1).count();
+    let mut unused_numbers = vec![];
+    for i in 1..=n {
+        if !A.contains(&(i as i64)) {
+            unused_numbers.push(i as i64);
+        }
+    }
+    md!(unused_numbers.len());
+    for perm in (0..n).permutations(n) {
+        let mut idx = 0;
+        let mut ans = vec![0; n];
+        let mut ok = true;
+        for i in 0..n {
+            if A[i] == -1 {
+                ans[i] = unused_numbers[idx];
+                idx += 1;
             }
             else {
-                vecbool[value as usize] = true;
+                if A[i] == perm[i] as i64 + 1 {
+                    ans[i] = A[i];
+                }
+                else {
+                    ok = false;
+                    break;
+                }
             }
         }
-    }
-
-    let mut yets = HashSet::new();
-    for i in 0..n {
-        if !vecbool[i] {
-            yets.insert(i);
+        if ok {
+            wl!("Yes");
+            wl!(ans.iter().map(|v| v.to_string()).collect::<Vec<String>>().join(" "));
+            return;
         }
     }
-
-    for i in 0..n {
-
-    }
+    wl!("No");
 }
 
 // --- Macros ---

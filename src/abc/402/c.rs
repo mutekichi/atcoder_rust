@@ -41,7 +41,33 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        m: usize,
+    }
+    let mut restaurant_set = vec![BTreeSet::new(); m];
+    let mut which_restaurant = vec![vec![]; n];
+    for i in 0..m {
+        input! {
+            k: usize,
+            A: [Usize1; k],
+        }
+        for a in A {
+            which_restaurant[a].push(i);
+            restaurant_set[i].insert(a);
+        }
+    }
+    input! {
+        B: [Usize1; n],
+    }
+    let mut ans = 0usize;
+    for b in B {
+        for &r in &which_restaurant[b] {
+            restaurant_set[r].remove(&b);
+            if restaurant_set[r].is_empty() {
+                ans += 1;
+            }
+        }
+        wl!(ans);
     }
 }
 
@@ -130,7 +156,7 @@ macro_rules! chmax {
 }
 
 trait JoinExtended {
-    fn join_with(self, sep: &str) -> String;
+    fn join_w(self, sep: &str) -> String;
 }
 
 impl<I> JoinExtended for I
@@ -138,7 +164,7 @@ where
     I: Iterator,
     I::Item: Joinable,
 {
-    fn join_with(self, sep: &str) -> String {
+    fn join_w(self, sep: &str) -> String {
         let mut peekable = self.peekable();
         let is_2d = if let Some(first) = peekable.peek() {
             first.is_container()
