@@ -3,7 +3,417 @@
 version = 4
 
 [[package]]
-name = "atcoder-rust"
+name = "abc220"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc400"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc401"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc402"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc403"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc404"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc405"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc406"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc407"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc408"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc409"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc410"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc411"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc412"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc413"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc414"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc415"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc416"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc417"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc418"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc419"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc420"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc421"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc424"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc425"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc426"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc427"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc428"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc429"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc430"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc433"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc434"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc435"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc436"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc437"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc438"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc439"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "ahcintroduction"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "arc196"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "arc197"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "arc198"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "arc200"
 version = "0.1.0"
 dependencies = [
  "itertools",

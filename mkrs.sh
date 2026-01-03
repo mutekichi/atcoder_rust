@@ -1,54 +1,47 @@
 #!/bin/bash
-
 # USAGE: ./mkrs.sh [contest_number] (category)
-# Example: ./mkrs.sh 341 (default category is abc)
-
-# 引数チェック
-if [ $# -lt 1 ]; then
-    echo "Usage: ./mkrs.sh [contest_number] (category)"
-    echo "Example: ./mkrs.sh 341 (default category is abc)"
-    exit 1
-fi
 
 NUMBER=$1
-CATEGORY=${2:-abc} # 第2引数がなければ "abc"
+CATEGORY=${2:-abc}
 PREFIX="${CATEGORY}${NUMBER}"
-TARGET_DIR="./src/${CATEGORY}/${NUMBER}"
+TARGET_DIR="./src/${CATEGORY}/${PREFIX}"
 TEMPLATE="./template.rs"
-CARGO_TOML="./Cargo.toml"
 
-# テンプレート確認
-if [ ! -f "$TEMPLATE" ]; then
-    echo "Error: $TEMPLATE not found."
-    exit 1
-fi
-
-# ディレクトリ作成
 mkdir -p "$TARGET_DIR"
 
-# a.rs ～ g.rs を作成し、Cargo.toml に追記
-for PROBLEM in a b c d e f g; do
-    FILE_NAME="${PROBLEM}.rs"
-    FILE_PATH="${TARGET_DIR}/${FILE_NAME}"
-    BIN_NAME="${PREFIX}_${PROBLEM}"
+# Create Cargo.toml
+LOCAL_CARGO="${TARGET_DIR}/Cargo.toml"
+if [ ! -f "$LOCAL_CARGO" ]; then
+    cat > "$LOCAL_CARGO" <<EOL
+[package]
+name = "$PREFIX"
+version = "0.1.0"
+edition = "2024"
 
-    # ファイル作成
+[dependencies]
+proconio = { workspace = true }
+itertools = { workspace = true }
+superslice = { workspace = true }
+num-integer = { workspace = true }
+
+EOL
+    # Add binary targets for problems a to g
+    for PROBLEM in a b c d e f g; do
+        cat >> "$LOCAL_CARGO" <<EOL
+[[bin]]
+name = "$PROBLEM"
+path = "${PROBLEM}.rs"
+
+EOL
+    done
+fi
+
+# Create problem source files from template
+for PROBLEM in a b c d e f g; do
+    FILE_PATH="${TARGET_DIR}/${PROBLEM}.rs"
     if [ ! -f "$FILE_PATH" ]; then
         cp "$TEMPLATE" "$FILE_PATH"
-    else
-        echo "Skipped: $FILE_PATH (already exists)"
-    fi
-
-    # Cargo.toml に未登録なら追記
-    if ! grep -q "name = \"$BIN_NAME\"" "$CARGO_TOML"; then
-        cat >> "$CARGO_TOML" <<EOL
-
-[[bin]]
-name = "$BIN_NAME"
-path = "$FILE_PATH"
-EOL
-
     fi
 done
 
-echo "Setup completed for contest $PREFIX."
+echo "Setup completed for workspace member: $PREFIX"

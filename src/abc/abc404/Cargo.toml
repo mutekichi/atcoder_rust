@@ -1,0 +1,39 @@
+[package]
+name = "abc404"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+proconio = { workspace = true }
+itertools = { workspace = true }
+superslice = { workspace = true }
+num-integer = { workspace = true }
+
+[[bin]]
+name = "a"
+path = "a.rs"
+
+[[bin]]
+name = "b"
+path = "b.rs"
+
+[[bin]]
+name = "c"
+path = "c.rs"
+
+[[bin]]
+name = "d"
+path = "d.rs"
+
+[[bin]]
+name = "e"
+path = "e.rs"
+
+[[bin]]
+name = "f"
+path = "f.rs"
+
+[[bin]]
+name = "g"
+path = "g.rs"
+
