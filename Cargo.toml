@@ -1198,3 +1198,59 @@ path = "./src/abc/401/f.rs"
 [[bin]]
 name = "abc401_g"
 path = "./src/abc/401/g.rs"
+
+[[bin]]
+name = "abc400_a"
+path = "./src/abc/400/a.rs"
+
+[[bin]]
+name = "abc400_b"
+path = "./src/abc/400/b.rs"
+
+[[bin]]
+name = "abc400_c"
+path = "./src/abc/400/c.rs"
+
+[[bin]]
+name = "abc400_d"
+path = "./src/abc/400/d.rs"
+
+[[bin]]
+name = "abc400_e"
+path = "./src/abc/400/e.rs"
+
+[[bin]]
+name = "abc400_f"
+path = "./src/abc/400/f.rs"
+
+[[bin]]
+name = "abc400_g"
+path = "./src/abc/400/g.rs"
+
+[[bin]]
+name = "abc439_a"
+path = "./src/abc/439/a.rs"
+
+[[bin]]
+name = "abc439_b"
+path = "./src/abc/439/b.rs"
+
+[[bin]]
+name = "abc439_c"
+path = "./src/abc/439/c.rs"
+
+[[bin]]
+name = "abc439_d"
+path = "./src/abc/439/d.rs"
+
+[[bin]]
+name = "abc439_e"
+path = "./src/abc/439/e.rs"
+
+[[bin]]
+name = "abc439_f"
+path = "./src/abc/439/f.rs"
+
+[[bin]]
+name = "abc439_g"
+path = "./src/abc/439/g.rs"
