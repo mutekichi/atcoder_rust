@@ -10,7 +10,7 @@ use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{Itertools, Tee, iproduct};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -28,7 +28,7 @@ fn main() {
     let stdout = stdout();
     let mut out = BufWriter::new(stdout.lock());
 
-    upsolve(&mut out);
+    solve(&mut out);
 
     out.flush().unwrap();
 }
@@ -41,120 +41,117 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        q: usize,
-        A: [i64; q],
+        n: usize,
+        _S: Chars,
+        _T: Chars,
     }
 
-    let mut is_primes = vec![true; TEN6];
-    let mut primes = vec![];
+    let S = _S
+        .iter()
+        .map(|c| (*c as u8 - b'a') as usize)
+        .collect::<Vec<_>>();
+    let T = _T
+        .iter()
+        .map(|c| (*c as u8 - b'a') as usize)
+        .collect::<Vec<_>>();
 
-    for i in 2..TEN6 {
-        if is_primes[i] {
-            primes.push(i as i64);
-            let mut idx = i * 2;
-            while idx < TEN6 {
-                is_primes[idx] = false;
-                idx += i;
-            }
-        }
-    }
+    let mut to_list = vec![INF_USIZE; 26];
+    let mut from_list = vec![vec![]; 26];
+    let mut graph = vec![vec![]; 26];
+    let mut used_for_loop = vec![false; 26];
+    let mut self_loop = vec![false; 26];
 
-    let mut twenty_numbers = vec![];
+    for i in 0..n {
+        let s = S[i];
+        let t = T[i];
 
-    let mut first_idx = 0;
-    let mut second_idx = 1;
-
-    let mut first = primes[first_idx];
-    let mut second = primes[second_idx];
-
-    while first * second < TENI {
-        while first * second < TENI {
-            while first * second < TENI {
-                while first * second < TENI {
-                    twenty_numbers.push(first * second);
-                    second = second * primes[second_idx];
-                }
-                second_idx += 1;
-                second = primes[second_idx];
-            }
-            first = first * primes[first_idx];
-            second_idx = first_idx + 1;
-            second = primes[second_idx];
-        }
-        first_idx += 1;
-        first = primes[first_idx];
-        second_idx = first_idx + 1;
-        second = primes[second_idx];
-    }
-    twenty_numbers.push(0);
-    twenty_numbers.push(INF_I64);
-    twenty_numbers.sort_unstable();
-
-    md!(twenty_numbers.iter().take(20).join_with(" "));
-    assert!(twenty_numbers.contains(&20));
-
-    for a in A {
-        let mut ng = twenty_numbers.len() - 1;
-        let mut ok = 0 as usize;
-        while ok.abs_diff(ng) > 1 {
-            let mid = (ok + ng) / 2;
-            let mid_num = twenty_numbers[mid];
-            if mid_num * mid_num <= a {
-                ok = mid;
+        if to_list[s] != INF_USIZE {
+            if to_list[s] == t {
+                continue;
             } else {
-                ng = mid;
+                wl!(-1);
+                return;
             }
         }
-        let num = twenty_numbers[ok];
-        wl!(num * num);
-    }
-}
-
-fn upsolve<W: Write>(out: &mut W) {
-    macro_rules! wl {
-        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
-        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
-    }
-
-    input! {
-        q: usize,
-        A: [i64; q],
+        to_list[s] = t;
+        if s != t {
+            from_list[t].push(s);
+            graph[s].push(t);
+            graph[t].push(s);
+        } else {
+            used_for_loop[s] = true;
+            self_loop[s] = true;
+        }
     }
 
-    let mut is_primes = vec![true; TEN6];
-    let mut primes = vec![];
-    let mut prime_factors = vec![0; TEN6];
-    for i in 2..TEN6 {
-        if is_primes[i] {
-            primes.push(i);
-            let mut idx = i * 2;
-            while idx < TEN6 {
-                is_primes[idx] = false;
-                idx += i;
+    for i in 0..26 {
+        if to_list[i] == i {
+            to_list[i] = INF_USIZE;
+        }
+    }
+
+    let mut ans = 0usize;
+    let mut seen = vec![false; 26];
+
+    for i in 0..26 {
+        if seen[i] {
+            continue;
+        }
+        let mut nodes = vec![];
+        let mut q = VecDeque::new();
+        seen[i] = true;
+        q.push_back(i);
+        while let Some(v) = q.pop_front() {
+            nodes.push(v);
+            for &nv in &graph[v] {
+                if !seen[nv] {
+                    q.push_back(nv);
+                    seen[nv] = true;
+                }
+            }
+        }
+
+        // only self loop
+        if nodes.len() == 1 {
+            continue;
+        }
+        // loop
+        let mut all_one_in_deg = true;
+        // has sink
+        let mut all_one_to = true;
+
+        for &v in &nodes {
+            if from_list[v].len() != 1 {
+                all_one_in_deg = false;
+            }
+            if to_list[v] == INF_USIZE {
+                all_one_to = false;
+            }
+        }
+        if all_one_in_deg {
+            ans += nodes.len() + 1;
+        } else if all_one_to {
+            ans += nodes.len();
+        } else {
+            ans += nodes.len() - 1;
+        }
+        if all_one_in_deg {
+            for v in nodes {
+                used_for_loop[v] = true;
             }
         }
     }
-    for prime in primes {
-        let mut idx = prime;
-        while idx < TEN6 {
-            prime_factors[idx] += 1;
-            idx += prime;
+    if used_for_loop.iter().all(|v| *v) {
+        if self_loop.iter().all(|v| *v) {
+            wl!(0);
+            return;
         }
+        wl!(-1);
+        return;
     }
-
-    let mut ok_numbers = BTreeSet::new();
-    for i in 0..TEN6 {
-        if prime_factors[i] == 2 {
-            ok_numbers.insert((i as i64) * (i as i64));
-        }
-    }
-    for a in A {
-        wl!(ok_numbers.range(0..=a).next_back().unwrap());
-    }
+    wl!(ans);
 }
 
-const TENI: i64 = 1000010i64;
-const TEN6: usize = 1000010;
 // --- Macros ---
 
 #[macro_export]

@@ -10,7 +10,7 @@ use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{Itertools, Tee, iproduct};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -22,13 +22,95 @@ const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 
 // FOR TEMPLATE INJECTIONS
 
+/// Manacher's Algorithm
+///
+/// Enumerates the radius of the longest palindrome centered at each position in O(N).
+/// To handle even-length palindromes, dummy characters are inserted between every character.
+///
+/// # Complexity
+/// - O(N)
+///
+/// # Examples
+///
+/// ```
+/// use atcoder_rust::template::string::manacher::Manacher;
+///
+/// let s: Vec<char> = "abaaab".chars().collect();
+/// // String with dummy: # a # b # a # a # a # b #
+/// let rad = Manacher::build(&s, '#');
+///
+/// // rad[i] is the radius of the palindrome centered at i in the transformed string.
+/// // The length of the palindrome in the original string corresponds to `rad[i] - 1`.
+///
+/// // Center 'b' (index 1 in original, index 3 in transformed: "#a#b#")
+/// // rad[3] = 2 ("#b#") -> length 1 ("b")
+///
+/// // Center 'a' (index 2 in original, index 5 in transformed: "#a#b#a#a#a#")
+/// // rad[5] = 4 ("#a#b#a#") -> length 3 ("aba")
+///
+/// // Center between 'a' and 'a' (index 7 in transformed: "#...#a#a#...#")
+/// // rad[7] = 2 ("#a#a#") -> length 1? No, logic is (rad[i]-1).
+/// // Actually, for "aa", the center is the dummy between them.
+/// // Transformed: ... a # a ...
+/// // The palindrome is "a#a". Radius is 2. Length is 2 - 1 = 1. Wait, length of "aa" is 2.
+/// // Let's check the property:
+/// // The value `rad[i]` means the palindrome in T extends from `i - rad[i] + 1` to `i + rad[i] - 1`.
+/// // The length of the palindrome in the ORIGINAL string is simply `rad[i] - 1`.
+///
+/// assert_eq!(rad.iter().map(|&x| x - 1).max(), Some(3)); // Max palindrome length is 3 ("aba" or "aaa")
+/// ```
+pub struct Manacher;
+
+impl Manacher {
+    /// Constructs the palindrome radius array.
+    ///
+    /// The input slice `s` is transformed by inserting `dummy` between characters and at both ends.
+    /// E.g., `['a', 'b']` with dummy `#` becomes `['#', 'a', '#', 'b', '#']`.
+    ///
+    /// # Returns
+    /// A `Vec<usize>` of length `2 * s.len() + 1`.
+    /// `ret[i]` is the radius of the palindrome centered at `i` in the transformed string.
+    /// The length of the palindrome in the original string corresponding to `ret[i]` is `ret[i] - 1`.
+    pub fn build<T: PartialEq + Clone>(
+        s: &[T],
+        dummy: T,
+    ) -> Vec<usize> {
+        let n = s.len();
+        let mut t = Vec::with_capacity(2 * n + 1);
+        for item in s {
+            t.push(dummy.clone());
+            t.push(item.clone());
+        }
+        t.push(dummy);
+
+        let m = t.len();
+        let mut rad = vec![0; m];
+        let mut i = 0;
+        let mut j = 0;
+        while i < m {
+            while i >= j && i + j < m && t[i - j] == t[i + j] {
+                j += 1;
+            }
+            rad[i] = j;
+            let mut k = 1;
+            while i >= k && k + rad[i - k] < j {
+                rad[i + k] = rad[i - k];
+                k += 1;
+            }
+            i += k;
+            j -= k;
+        }
+        rad
+    }
+}
+
 // END TEMPLATE INJECTIONS
 
 fn main() {
     let stdout = stdout();
     let mut out = BufWriter::new(stdout.lock());
 
-    upsolve(&mut out);
+    solve(&mut out);
 
     out.flush().unwrap();
 }
@@ -41,120 +123,28 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        q: usize,
-        A: [i64; q],
+        S: Chars,
     }
-
-    let mut is_primes = vec![true; TEN6];
-    let mut primes = vec![];
-
-    for i in 2..TEN6 {
-        if is_primes[i] {
-            primes.push(i as i64);
-            let mut idx = i * 2;
-            while idx < TEN6 {
-                is_primes[idx] = false;
-                idx += i;
-            }
+    let rad = Manacher::build(&S, '#');
+    let n = S.len();
+    let mut ans = INF_USIZE;
+    for i in 0..rad.len() {
+        if rad[rad.len() - 1 - i] == i + 1 {
+            ans = i;
         }
     }
-
-    let mut twenty_numbers = vec![];
-
-    let mut first_idx = 0;
-    let mut second_idx = 1;
-
-    let mut first = primes[first_idx];
-    let mut second = primes[second_idx];
-
-    while first * second < TENI {
-        while first * second < TENI {
-            while first * second < TENI {
-                while first * second < TENI {
-                    twenty_numbers.push(first * second);
-                    second = second * primes[second_idx];
-                }
-                second_idx += 1;
-                second = primes[second_idx];
-            }
-            first = first * primes[first_idx];
-            second_idx = first_idx + 1;
-            second = primes[second_idx];
-        }
-        first_idx += 1;
-        first = primes[first_idx];
-        second_idx = first_idx + 1;
-        second = primes[second_idx];
+    let mut ans_chars = vec![];
+    for i in 0..n {
+        ans_chars.push(S[i]);
     }
-    twenty_numbers.push(0);
-    twenty_numbers.push(INF_I64);
-    twenty_numbers.sort_unstable();
-
-    md!(twenty_numbers.iter().take(20).join_with(" "));
-    assert!(twenty_numbers.contains(&20));
-
-    for a in A {
-        let mut ng = twenty_numbers.len() - 1;
-        let mut ok = 0 as usize;
-        while ok.abs_diff(ng) > 1 {
-            let mid = (ok + ng) / 2;
-            let mid_num = twenty_numbers[mid];
-            if mid_num * mid_num <= a {
-                ok = mid;
-            } else {
-                ng = mid;
-            }
-        }
-        let num = twenty_numbers[ok];
-        wl!(num * num);
+    let to_push = n - ans;
+    for i in 0..to_push {
+        ans_chars.push(S[to_push - 1 - i]);
     }
+    let ans_str: String = ans_chars.iter().collect();
+    wl!(ans_str);
 }
 
-fn upsolve<W: Write>(out: &mut W) {
-    macro_rules! wl {
-        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
-        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
-    }
-
-    input! {
-        q: usize,
-        A: [i64; q],
-    }
-
-    let mut is_primes = vec![true; TEN6];
-    let mut primes = vec![];
-    let mut prime_factors = vec![0; TEN6];
-    for i in 2..TEN6 {
-        if is_primes[i] {
-            primes.push(i);
-            let mut idx = i * 2;
-            while idx < TEN6 {
-                is_primes[idx] = false;
-                idx += i;
-            }
-        }
-    }
-    for prime in primes {
-        let mut idx = prime;
-        while idx < TEN6 {
-            prime_factors[idx] += 1;
-            idx += prime;
-        }
-    }
-
-    let mut ok_numbers = BTreeSet::new();
-    for i in 0..TEN6 {
-        if prime_factors[i] == 2 {
-            ok_numbers.insert((i as i64) * (i as i64));
-        }
-    }
-    for a in A {
-        wl!(ok_numbers.range(0..=a).next_back().unwrap());
-    }
-}
-
-const TENI: i64 = 1000010i64;
-const TEN6: usize = 1000010;
 // --- Macros ---
 
 #[macro_export]

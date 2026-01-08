@@ -10,7 +10,7 @@ use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{Itertools, Tee, iproduct};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -28,7 +28,7 @@ fn main() {
     let stdout = stdout();
     let mut out = BufWriter::new(stdout.lock());
 
-    upsolve(&mut out);
+    solve(&mut out);
 
     out.flush().unwrap();
 }
@@ -41,120 +41,47 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        q: usize,
-        A: [i64; q],
+        t: usize,
     }
-
-    let mut is_primes = vec![true; TEN6];
-    let mut primes = vec![];
-
-    for i in 2..TEN6 {
-        if is_primes[i] {
-            primes.push(i as i64);
-            let mut idx = i * 2;
-            while idx < TEN6 {
-                is_primes[idx] = false;
-                idx += i;
-            }
+    for _ in 0..t {
+        input! {
+            n: usize,
+            A: [Usize1; 2 * n],
         }
-    }
-
-    let mut twenty_numbers = vec![];
-
-    let mut first_idx = 0;
-    let mut second_idx = 1;
-
-    let mut first = primes[first_idx];
-    let mut second = primes[second_idx];
-
-    while first * second < TENI {
-        while first * second < TENI {
-            while first * second < TENI {
-                while first * second < TENI {
-                    twenty_numbers.push(first * second);
-                    second = second * primes[second_idx];
-                }
-                second_idx += 1;
-                second = primes[second_idx];
-            }
-            first = first * primes[first_idx];
-            second_idx = first_idx + 1;
-            second = primes[second_idx];
+        let mut count = 0usize;
+        let mut positions = vec![vec![]; n];
+        for i in 0..(2 * n) {
+            positions[A[i]].push(i);
         }
-        first_idx += 1;
-        first = primes[first_idx];
-        second_idx = first_idx + 1;
-        second = primes[second_idx];
-    }
-    twenty_numbers.push(0);
-    twenty_numbers.push(INF_I64);
-    twenty_numbers.sort_unstable();
+        for i in 0..(2 * n - 1) {
+            let a = A[i];
+            let b = A[i + 1];
+            if a == b {
+                continue;
+            }
 
-    md!(twenty_numbers.iter().take(20).join_with(" "));
-    assert!(twenty_numbers.contains(&20));
-
-    for a in A {
-        let mut ng = twenty_numbers.len() - 1;
-        let mut ok = 0 as usize;
-        while ok.abs_diff(ng) > 1 {
-            let mid = (ok + ng) / 2;
-            let mid_num = twenty_numbers[mid];
-            if mid_num * mid_num <= a {
-                ok = mid;
+            let pa = if positions[a][0] == i {
+                positions[a][1]
             } else {
-                ng = mid;
+                positions[a][0]
+            };
+            let pb = if positions[b][0] == i + 1 {
+                positions[b][1]
+            } else {
+                positions[b][0]
+            };
+            if i.abs_diff(pa) == 1 || (i + 1).abs_diff(pb) == 1 {
+                continue;
+            }
+
+            if pa.abs_diff(pb) == 1 {
+                count += 1;
             }
         }
-        let num = twenty_numbers[ok];
-        wl!(num * num);
+        wl!(count / 2);
     }
 }
 
-fn upsolve<W: Write>(out: &mut W) {
-    macro_rules! wl {
-        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
-        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
-    }
-
-    input! {
-        q: usize,
-        A: [i64; q],
-    }
-
-    let mut is_primes = vec![true; TEN6];
-    let mut primes = vec![];
-    let mut prime_factors = vec![0; TEN6];
-    for i in 2..TEN6 {
-        if is_primes[i] {
-            primes.push(i);
-            let mut idx = i * 2;
-            while idx < TEN6 {
-                is_primes[idx] = false;
-                idx += i;
-            }
-        }
-    }
-    for prime in primes {
-        let mut idx = prime;
-        while idx < TEN6 {
-            prime_factors[idx] += 1;
-            idx += prime;
-        }
-    }
-
-    let mut ok_numbers = BTreeSet::new();
-    for i in 0..TEN6 {
-        if prime_factors[i] == 2 {
-            ok_numbers.insert((i as i64) * (i as i64));
-        }
-    }
-    for a in A {
-        wl!(ok_numbers.range(0..=a).next_back().unwrap());
-    }
-}
-
-const TENI: i64 = 1000010i64;
-const TEN6: usize = 1000010;
 // --- Macros ---
 
 #[macro_export]
