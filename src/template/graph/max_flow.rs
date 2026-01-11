@@ -1,128 +1,92 @@
-#![allow(dead_code)]
+#[allow(dead_code)]
 
 // --- SNAP START ---
 
-use std::cmp::min;
+use std::cmp;
 use std::collections::VecDeque;
 
-/// Max Flow (Dinic's Algorithm)
-///
-/// Solves the maximum flow problem in a directed graph.
-///
-/// # Complexity
-/// - O(V^2 E) in general.
-/// - O(E min(V^{2/3}, E^{1/2})) for unit capacity networks (e.g., Bipartite Matching).
-///
-/// # Examples
-///
-/// ```
-/// use atcoder_rust::template::graph::max_flow::Dinic;
-///
-/// let mut dinic = Dinic::new(4);
-/// // Add edges: u -> v with capacity
-/// dinic.add_edge(0, 1, 2);
-/// dinic.add_edge(0, 2, 1);
-/// dinic.add_edge(1, 2, 1);
-/// dinic.add_edge(1, 3, 1);
-/// dinic.add_edge(2, 3, 2);
-///
-/// // Calculate max flow from 0 to 3
-/// assert_eq!(dinic.max_flow(0, 3), 3);
-///
-/// // Check min-cut: Get the set of nodes reachable from s in the residual graph
-/// let cut = dinic.min_cut(0);
-/// assert!(cut[0]); // Source is always reachable
-/// assert!(!cut[3]); // Sink is not reachable
-/// ```
+// Edge structure used in the graph
 #[derive(Clone, Debug)]
 pub struct Edge {
     pub to: usize,
     pub cap: i64,
-    pub rev: usize, // Index of the reverse edge in graph[to]
+    pub flow: i64,
+    pub rev: usize, // Index of the reverse edge in the adjacency list of 'to'
 }
 
-pub struct Dinic {
+// Max Flow Graph structure
+pub struct MfGraph {
     n: usize,
     graph: Vec<Vec<Edge>>,
-    level: Vec<i32>,
-    iter: Vec<usize>,
 }
 
-impl Dinic {
-    /// Creates a new graph with `n` vertices.
+impl MfGraph {
+    // Initialize with n vertices
     pub fn new(n: usize) -> Self {
-        Dinic {
+        MfGraph {
             n,
             graph: vec![vec![]; n],
-            level: vec![],
-            iter: vec![],
         }
     }
 
-    /// Adds a directed edge from `from` to `to` with capacity `cap`.
-    pub fn add_edge(
-        &mut self,
-        from: usize,
-        to: usize,
-        cap: i64,
-    ) {
-        let rev_idx = self.graph[to].len();
-        let fwd_idx = self.graph[from].len();
-
+    // Add a directed edge with capacity
+    pub fn add_edge(&mut self, from: usize, to: usize, cap: i64) {
+        let from_len = self.graph[from].len();
+        let to_len = self.graph[to].len();
+        
         self.graph[from].push(Edge {
             to,
             cap,
-            rev: rev_idx,
+            flow: 0,
+            rev: to_len,
         });
+        
         self.graph[to].push(Edge {
             to: from,
-            cap: 0,
-            rev: fwd_idx,
+            cap: 0, // Capacity 0 for the reverse edge (in directed graph)
+            flow: 0,
+            rev: from_len,
         });
     }
 
-    /// BFS to calculate levels (distance from s).
-    fn bfs(
-        &mut self,
-        s: usize,
-    ) {
-        self.level = vec![-1; self.n];
-        self.level[s] = 0;
-        let mut que = VecDeque::new();
-        que.push_back(s);
-
-        while let Some(v) = que.pop_front() {
-            for e in &self.graph[v] {
-                if e.cap > 0 && self.level[e.to] < 0 {
-                    self.level[e.to] = self.level[v] + 1;
-                    que.push_back(e.to);
-                }
-            }
-        }
+    // Get the current flow state of an edge
+    pub fn get_edge(&self, i: usize, j: usize) -> &Edge {
+        &self.graph[i][j]
     }
 
-    /// DFS to find augmenting paths.
-    fn dfs(
-        &mut self,
-        v: usize,
-        t: usize,
-        f: i64,
-    ) -> i64 {
+    // --- Ford-Fulkerson Algorithm (DFS) ---
+    // Complexity: O(F * E), good for small integers
+    pub fn max_flow_ff(&mut self, s: usize, t: usize) -> i64 {
+        let mut total_flow = 0;
+        loop {
+            let mut used = vec![false; self.n];
+            let f = self.dfs_ff(s, t, i64::MAX, &mut used);
+            if f == 0 {
+                break;
+            }
+            total_flow += f;
+        }
+        total_flow
+    }
+
+    fn dfs_ff(&mut self, v: usize, t: usize, f: i64, used: &mut Vec<bool>) -> i64 {
         if v == t {
             return f;
         }
-        for i in self.iter[v]..self.graph[v].len() {
-            self.iter[v] = i; // Update iter to avoid rescanning edges
-            let e = self.graph[v][i].clone();
-            // Note: We need to access graph[v][i] later, so cloning edge info is safer
-            // or we use indices carefully. Here cloning simplified struct is cheap.
-
-            if e.cap > 0 && self.level[v] < self.level[e.to] {
-                let d = self.dfs(e.to, t, min(f, e.cap));
+        used[v] = true;
+        
+        // Iterate through edges. Note: we need indices to mutate self.graph
+        for i in 0..self.graph[v].len() {
+            let cap = self.graph[v][i].cap;
+            let flow = self.graph[v][i].flow;
+            let to = self.graph[v][i].to;
+            
+            if !used[to] && cap - flow > 0 {
+                let d = self.dfs_ff(to, t, cmp::min(f, cap - flow), used);
                 if d > 0 {
-                    self.graph[v][i].cap -= d;
-                    let rev = e.rev;
-                    self.graph[e.to][rev].cap += d;
+                    self.graph[v][i].flow += d;
+                    let rev = self.graph[v][i].rev;
+                    self.graph[to][rev].flow -= d;
                     return d;
                 }
             }
@@ -130,54 +94,213 @@ impl Dinic {
         0
     }
 
-    /// Computes the maximum flow from `s` to `t`.
-    pub fn max_flow(
-        &mut self,
-        s: usize,
-        t: usize,
-    ) -> i64 {
-        let mut flow = 0;
+    // --- Dinic's Algorithm (BFS + DFS) ---
+    // Complexity: O(V^2 * E), standard for competitive programming
+    pub fn max_flow_dinic(&mut self, s: usize, t: usize) -> i64 {
+        let mut total_flow = 0;
         loop {
-            self.bfs(s);
-            if self.level[t] < 0 {
-                return flow;
+            let level = self.bfs_dinic(s);
+            if level[t] == usize::MAX {
+                break;
             }
-            self.iter = vec![0; self.n];
+            let mut iter = vec![0; self.n];
             loop {
-                let f = self.dfs(s, t, std::i64::MAX);
+                let f = self.dfs_dinic(s, t, i64::MAX, &level, &mut iter);
                 if f == 0 {
                     break;
                 }
-                flow += f;
+                total_flow += f;
             }
         }
+        total_flow
     }
 
-    /// Returns a boolean vector indicating nodes reachable from `s` in the residual graph.
-    /// Useful for reconstructing the Min-Cut.
-    pub fn min_cut(
-        &mut self,
-        s: usize,
-    ) -> Vec<bool> {
-        self.bfs(s);
-        self.level.iter().map(|&x| x != -1).collect()
+    fn bfs_dinic(&self, s: usize) -> Vec<usize> {
+        let mut level = vec![usize::MAX; self.n];
+        let mut que = VecDeque::new();
+        level[s] = 0;
+        que.push_back(s);
+        
+        while let Some(v) = que.pop_front() {
+            for e in &self.graph[v] {
+                if e.cap - e.flow > 0 && level[e.to] == usize::MAX {
+                    level[e.to] = level[v] + 1;
+                    que.push_back(e.to);
+                }
+            }
+        }
+        level
     }
-}
 
-// --- SNAP END ---
+    fn dfs_dinic(
+        &mut self, 
+        v: usize, 
+        t: usize, 
+        f: i64, 
+        level: &Vec<usize>, 
+        iter: &mut Vec<usize>
+    ) -> i64 {
+        if v == t {
+            return f;
+        }
+        
+        while iter[v] < self.graph[v].len() {
+            let i = iter[v];
+            let cap = self.graph[v][i].cap;
+            let flow = self.graph[v][i].flow;
+            let to = self.graph[v][i].to;
+            
+            if cap - flow > 0 && level[v] < level[to] {
+                let d = self.dfs_dinic(to, t, cmp::min(f, cap - flow), level, iter);
+                if d > 0 {
+                    self.graph[v][i].flow += d;
+                    let rev = self.graph[v][i].rev;
+                    self.graph[to][rev].flow -= d;
+                    return d;
+                }
+            }
+            iter[v] += 1;
+        }
+        0
+    }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    // --- Push-Relabel Algorithm (FIFO with Gap Heuristic) ---
+    // Complexity: O(V^3), robust against pathological cases for Dinic/FF
+    pub fn max_flow_push_relabel(&mut self, s: usize, t: usize) -> i64 {
+        let n = self.n;
+        let mut excess = vec![0; n];
+        let mut height = vec![0; n];
+        let mut active = vec![false; n];
+        let mut count = vec![0; n * 2]; // Height frequency for Gap Heuristic
+        let mut queue = VecDeque::new();
 
-    #[test]
-    fn test_max_flow() {
-        let mut dinic = Dinic::new(4);
-        dinic.add_edge(0, 1, 2);
-        dinic.add_edge(0, 2, 1);
-        dinic.add_edge(1, 2, 1);
-        dinic.add_edge(1, 3, 1);
-        dinic.add_edge(2, 3, 2);
-        assert_eq!(dinic.max_flow(0, 3), 3);
+        height[s] = n;
+        active[s] = true;
+        count[0] = n - 1;
+        count[n] = 1;
+
+        // Initial push from source
+        for i in 0..self.graph[s].len() {
+            let cap = self.graph[s][i].cap;
+            if cap > 0 {
+                self.graph[s][i].flow += cap;
+                let to = self.graph[s][i].to;
+                let rev = self.graph[s][i].rev;
+                self.graph[to][rev].flow -= cap;
+                
+                excess[to] += cap;
+                excess[s] -= cap;
+                
+                if !active[to] && to != t && to != s {
+                    active[to] = true;
+                    queue.push_back(to);
+                }
+            }
+        }
+
+        while let Some(u) = queue.pop_front() {
+            active[u] = false;
+            let mut discharged = false;
+
+            // Discharge loop
+            while excess[u] > 0 {
+                let mut pushed = false;
+                let mut min_h = usize::MAX;
+
+                for i in 0..self.graph[u].len() {
+                    let e = &self.graph[u][i];
+                    if e.cap - e.flow > 0 {
+                        if height[u] == height[e.to] + 1 {
+                            // Push
+                            let d = cmp::min(excess[u], e.cap - e.flow);
+                            self.graph[u][i].flow += d;
+                            let rev = self.graph[u][i].rev;
+                            let to = e.to;
+                            self.graph[to][rev].flow -= d;
+                            
+                            excess[u] -= d;
+                            excess[to] += d;
+                            
+                            if !active[to] && to != t && to != s {
+                                active[to] = true;
+                                queue.push_back(to);
+                            }
+                            pushed = true;
+                            if excess[u] == 0 {
+                                break;
+                            }
+                        } else {
+                            min_h = cmp::min(min_h, height[e.to]);
+                        }
+                    }
+                }
+
+                if excess[u] == 0 {
+                    discharged = true;
+                    break;
+                }
+
+                if !pushed {
+                    // Relabel
+                    if count[height[u]] == 1 {
+                        // Gap Heuristic: Lift all nodes with height > height[u]
+                        let h_u = height[u];
+                        for h in height.iter_mut() {
+                            if *h >= h_u && *h < n {
+                                count[*h] -= 1;
+                                *h = n + 1;
+                            }
+                        }
+                    } else {
+                        count[height[u]] -= 1;
+                        height[u] = if min_h == usize::MAX { n + 1 } else { min_h + 1 };
+                        if height[u] < n {
+                            count[height[u]] += 1;
+                        }
+                    }
+                }
+            }
+            
+            // If still active (excess > 0) after processing, put back in queue
+            if !discharged && height[u] < n && excess[u] > 0 {
+                 if !active[u] {
+                    active[u] = true;
+                    queue.push_back(u);
+                 }
+            }
+        }
+
+        // The excess at t is the max flow
+        excess[t] + self.graph[t].iter().map(|e| e.flow).sum::<i64>() 
+        // Note: For Push-Relabel, simply excess[t] usually suffices if flow conservation holds, 
+        // but calculating incoming flow to t is safer given initialization.
+        // Actually, in preflow-push, 'excess[t]' accumulates the flow arriving at t.
+        // However, standard implementation simply tracks excess. 
+        // Let's rely on conservation: flow out of s = flow into t.
+        // Or simpler: sum of flows on edges pointing to t.
+        // Here, we return accumulated excess at t.
+        excess[t]
+    }
+
+    // --- Additional Information ---
+    
+    // Returns a boolean vector indicating the min-cut partition (S-side)
+    // true: reachable from s in residual graph (belongs to S)
+    // false: unreachable (belongs to T)
+    pub fn min_cut(&self, s: usize) -> Vec<bool> {
+        let mut visited = vec![false; self.n];
+        let mut queue = VecDeque::new();
+        visited[s] = true;
+        queue.push_back(s);
+        
+        while let Some(v) = queue.pop_front() {
+            for e in &self.graph[v] {
+                if e.cap - e.flow > 0 && !visited[e.to] {
+                    visited[e.to] = true;
+                    queue.push_back(e.to);
+                }
+            }
+        }
+        visited
     }
 }

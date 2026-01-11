@@ -1,6 +1,26 @@
+#![allow(unused_imports)]
+#![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
-// --- SNAP START ---
+use num_integer::gcd;
+use std::cmp::{Ordering, Reverse, max, min};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::io::{BufWriter, Write, stdout};
+use std::mem;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
+
+use itertools::{Itertools, iproduct};
+use proconio::input;
+use proconio::marker::{Bytes, Chars, Usize1};
+
+const INF_I64: i64 = 1 << 60;
+const INF_USIZE: usize = 1 << 60;
+const INF_F64: f64 = 1e18;
+const INF_I128: i128 = 1 << 120;
+const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+
+// FOR TEMPLATE INJECTIONS
 
 /// Segment Tree (Point Update, Range Query)
 ///
@@ -309,121 +329,250 @@ where
         assert!(p < self.n, "Index out of bounds");
         self.tree[p + self.size].clone()
     }
+}
 
-    /// Returns the largest index `r` in `[l, n]` such that `f(op(a[l], a[l+1], ..., a[r-1]))` is true.
-    ///
-    /// The predicate `f` must be monotonic. That is, if `f` returns true for a range,
-    /// it must also return true for any sub-range starting at `l`.
-    /// Specifically, `f(e)` must be true.
-    ///
-    /// # Arguments
-    /// * `l` - The starting index (inclusive).
-    /// * `f` - A predicate function `Fn(T) -> bool`.
-    ///
-    /// # Returns
-    /// The index `r`. The range satisfying the condition is `[l, r)`.
-    /// If `l == n`, returns `n`.
-    ///
-    /// # Panics
-    /// Panics if `l > n`.
-    ///
-    /// # Complexity
-    /// O(log N)
-    pub fn max_right<P>(
-        &self,
-        mut l: usize,
-        f: P,
-    ) -> usize
-    where
-        P: Fn(T) -> bool,
-    {
-        assert!(l <= self.n);
-        assert!(f(self.e));
-        if l == self.n {
-            return self.n;
-        }
-        l += self.size;
-        let mut sm = self.e;
-        loop {
-            // Remove factors of 2 to move up the tree
-            while l % 2 == 0 {
-                l >>= 1;
-            }
-            if !f((self.op)(sm, self.data[l])) {
-                // If condition fails, dive down to find the exact boundary
-                while l < self.size {
-                    l = 2 * l;
-                    if f((self.op)(sm, self.data[l])) {
-                        sm = (self.op)(sm, self.data[l]);
-                        l += 1;
-                    }
-                }
-                return l - self.size;
-            }
-            sm = (self.op)(sm, self.data[l]);
-            l += 1;
-            // Break if l is a power of 2 (reached the right edge of a subtree)
-            if (l & (l.wrapping_neg())) == l {
-                break;
-            }
-        }
-        self.n
+// END TEMPLATE INJECTIONS
+
+fn main() {
+    let stdout = stdout();
+    let mut out = BufWriter::new(stdout.lock());
+
+    solve(&mut out);
+
+    out.flush().unwrap();
+}
+
+#[allow(unused_variables)]
+fn solve<W: Write>(out: &mut W) {
+    macro_rules! wl {
+        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
+        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    /// Returns the smallest index `l` in `[0, r]` such that `f(op(a[l], a[l+1], ..., a[r-1]))` is true.
-    ///
-    /// The predicate `f` must be monotonic. That is, if `f` returns true for a range `[l, r)`,
-    /// it must also return true for any sub-range ending at `r`.
-    /// Specifically, `f(e)` must be true.
-    ///
-    /// # Arguments
-    /// * `r` - The ending index (exclusive).
-    /// * `f` - A predicate function `Fn(T) -> bool`.
-    ///
-    /// # Returns
-    /// The index `l`. The range satisfying the condition is `[l, r)`.
-    /// If `r == 0`, returns `0`.
-    ///
-    /// # Panics
-    /// Panics if `r > n`.
-    ///
-    /// # Complexity
-    /// O(log N)
-    pub fn min_left<P>(
+    input! {
+        n: usize,
+        A: [Usize1; n],
+    }
+    let mut index_list = vec![vec![]; n];
+    for i in 0..n {
+        index_list[A[i]].push(i);
+    }
+    let mut right_uniques = BTreeSet::new();
+    let mut left_unique_count = 0;
+    let mut left_multiples_count = 0;
+    let mut st = SegmentTree::new(
+        &vec![(0isize, 0isize); n],
+        |l, r| (l.0 + r.0, max(l.1, l.0 + r.1)),
+        (0, 0),
+    );
+    for i in 0..n {
+        let len = index_list[i].len();
+        if len >= 2 {
+            let first = index_list[i][0];
+            let last = index_list[i][len - 1];
+            md!(first, last);
+            st.update(first, (1, 1));
+            st.update(last, (-1, -1));
+            left_multiples_count += 1;
+        } else if len == 1 {
+            left_unique_count += 1;
+        }
+    }
+    let mut ans = 0usize;
+    for i in 0..(n - 2) {
+        let a = A[n - 1 - i];
+        right_uniques.insert(a);
+        if index_list[a].len() > 2 {
+            index_list[a].pop();
+            let last_next = index_list[a].last().unwrap();
+            st.update(*last_next, (-1, -1));
+        } else if index_list[a].len() == 2 {
+            index_list[a].pop();
+            let left = index_list[a][0];
+            st.update(left, (0, 0));
+            left_unique_count += 1;
+            left_multiples_count -= 1;
+        } else {
+            index_list[a].pop();
+            left_unique_count -= 1;
+        }
+        let result = st.query(0, n - 1 - i).1 as usize;
+        md!(i, left_unique_count, right_uniques.len(), result);
+        ans = max(
+            ans,
+            left_unique_count + left_multiples_count + right_uniques.len() + result,
+        );
+    }
+    wl!(ans);
+}
+
+// --- Macros ---
+
+#[macro_export]
+#[cfg(debug_assertions)] // for debug build
+macro_rules! md { // stands for my_dbg
+    ($($arg:expr),* $(,)?) => {{
+        eprint!("[{}:{}] ", file!(), line!());
+
+        let mut _first = true;
+        $(
+            if !_first {
+                eprint!(", ");
+            }
+            eprint!("{}: {}", stringify!($arg), $arg);
+            _first = false;
+        )*
+        eprintln!();
+    }};
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))] // for release build
+macro_rules! md {
+    ($($arg:expr),* $(,)?) => {{
+        // do nothing
+    }};
+}
+
+#[macro_export]
+#[cfg(debug_assertions)]
+// Usage: mep!(val) (-> eprint without newline)
+// mep!("{:<1$}", val, width) (-> left align with width)
+// mep!("{:>1$}", val, width)
+macro_rules! mep {
+    ($x:expr) => { eprint!("{}", $x); };
+    ($($arg:tt)+) => { eprint!($($arg)+); };
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))]
+macro_rules! mep {
+    ($($arg:tt)*) => {};
+}
+
+#[macro_export]
+#[cfg(debug_assertions)]
+// Usage: mep!(val) (-> eprint with space)
+// mep!("{:<1$}", val, width) (-> left align with width)
+// mep!("{:>1$}", val, width)
+macro_rules! mepw { // stands for my_eprint_whitespace
+    ($x:expr) => { eprint!("{} ", $x); };
+    ($($arg:tt)+) => { eprint!($($arg)+); };
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))]
+macro_rules! mepw {
+    ($($arg:tt)*) => {};
+}
+
+#[macro_export]
+macro_rules! chmin {
+    ($a:expr, $b:expr) => {
+        if $a > $b {
+            $a = $b;
+            true
+        } else {
+            false
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! chmax {
+    ($a:expr, $b:expr) => {
+        if $a < $b {
+            $a = $b;
+            true
+        } else {
+            false
+        }
+    };
+}
+
+trait JoinExtended {
+    fn join_with(
+        self,
+        sep: &str,
+    ) -> String;
+}
+
+impl<I> JoinExtended for I
+where
+    I: Iterator,
+    I::Item: Joinable,
+{
+    fn join_with(
+        self,
+        sep: &str,
+    ) -> String {
+        let mut peekable = self.peekable();
+        let is_2d = if let Some(first) = peekable.peek() {
+            first.is_container()
+        } else {
+            false
+        };
+
+        let res = peekable.map(|item| item.join_item(sep)).collect::<Vec<_>>();
+
+        // Use newline for 2D rows, provided sep for 1D elements
+        res.join(if is_2d { "\n" } else { sep })
+    }
+}
+
+trait Joinable {
+    fn join_item(
         &self,
-        mut r: usize,
-        f: P,
-    ) -> usize
-    where
-        P: Fn(T) -> bool,
-    {
-        assert!(r <= self.n);
-        assert!(f(self.e));
-        if r == 0 {
-            return 0;
-        }
-        r += self.size;
-        let mut sm = self.e;
-        loop {
-            r -= 1;
-            while r > 1 && (r % 2 == 1) {
-                r >>= 1;
+        sep: &str,
+    ) -> String;
+    fn is_container(&self) -> bool;
+}
+
+macro_rules! impl_joinable_scalar {
+    ($($t:ty),*) => {
+        $(
+            impl Joinable for &$t {
+                fn join_item(&self, _sep: &str) -> String { self.to_string() }
+                fn is_container(&self) -> bool { false }
             }
-            if !f((self.op)(self.data[r], sm)) {
-                while r < self.size {
-                    r = 2 * r + 1;
-                    if f((self.op)(self.data[r], sm)) {
-                        sm = (self.op)(self.data[r], sm);
-                        r -= 1;
-                    }
-                }
-                return r + 1 - self.size;
+            impl Joinable for $t {
+                fn join_item(&self, _sep: &str) -> String { self.to_string() }
+                fn is_container(&self) -> bool { false }
             }
-            sm = (self.op)(self.data[r], sm);
-            if (r & (r.wrapping_neg())) == r {
-                break;
-            }
-        }
-        0
+        )*
+    };
+}
+
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
+
+impl<T: std::fmt::Display> Joinable for &Vec<T> {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String {
+        self.iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<_>>()
+            .join(sep)
+    }
+    fn is_container(&self) -> bool {
+        true
+    }
+}
+
+impl<T: std::fmt::Display> Joinable for &[T] {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String {
+        self.iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<_>>()
+            .join(sep)
+    }
+    fn is_container(&self) -> bool {
+        true
     }
 }
