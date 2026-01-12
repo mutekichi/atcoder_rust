@@ -4,13 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -19,8 +19,6 @@ const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
-const C998244353: u64 = 998244353;
-const C1000000007: u64 = 1000000007;
 
 // FOR TEMPLATE INJECTIONS
 
@@ -42,7 +40,9 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        
+    }
 }
 
 // --- Macros ---
@@ -130,10 +130,7 @@ macro_rules! chmax {
 }
 
 trait JoinExtended {
-    fn join_with(
-        self,
-        sep: &str,
-    ) -> String;
+    fn join_with(self, sep: &str) -> String;
 }
 
 impl<I> JoinExtended for I
@@ -141,10 +138,7 @@ where
     I: Iterator,
     I::Item: Joinable,
 {
-    fn join_with(
-        self,
-        sep: &str,
-    ) -> String {
+    fn join_with(self, sep: &str) -> String {
         let mut peekable = self.peekable();
         let is_2d = if let Some(first) = peekable.peek() {
             first.is_container()
@@ -152,18 +146,17 @@ where
             false
         };
 
-        let res = peekable.map(|item| item.join_item(sep)).collect::<Vec<_>>();
-
+        let res = peekable
+            .map(|item| item.join_item(sep))
+            .collect::<Vec<_>>();
+        
         // Use newline for 2D rows, provided sep for 1D elements
         res.join(if is_2d { "\n" } else { sep })
     }
 }
 
 trait Joinable {
-    fn join_item(
-        &self,
-        sep: &str,
-    ) -> String;
+    fn join_item(&self, sep: &str) -> String;
     fn is_container(&self) -> bool;
 }
 
@@ -182,34 +175,26 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
-    fn join_item(
-        &self,
-        sep: &str,
-    ) -> String {
+    fn join_item(&self, sep: &str) -> String {
         self.iter()
             .map(|x| x.to_string())
             .collect::<Vec<_>>()
             .join(sep)
     }
-    fn is_container(&self) -> bool {
-        true
-    }
+    fn is_container(&self) -> bool { true }
 }
 
 impl<T: std::fmt::Display> Joinable for &[T] {
-    fn join_item(
-        &self,
-        sep: &str,
-    ) -> String {
+    fn join_item(&self, sep: &str) -> String {
         self.iter()
             .map(|x| x.to_string())
             .collect::<Vec<_>>()
             .join(sep)
     }
-    fn is_container(&self) -> bool {
-        true
-    }
+    fn is_container(&self) -> bool { true }
 }

@@ -4,13 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -19,8 +19,6 @@ const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
-const C998244353: u64 = 998244353;
-const C1000000007: u64 = 1000000007;
 
 // FOR TEMPLATE INJECTIONS
 
@@ -42,7 +40,55 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        n: usize,
+        A: [[isize; n]; n],
+    }
+    let mut scores = vec![0isize; n];
+    let mut state = vec![true; n];
+
+    for i in 0..(n - 1) {
+        for j in (i + 1)..n {
+            let a = A[i][j];
+            scores[i] += a;
+            scores[j] += a;
+        }
+    }
+
+    let score_sums = scores.clone();
+
+    loop {
+        let mut to_change = INF_USIZE;
+        for i in 0..n {
+            if scores[i] < score_sums[i] - scores[i] {
+                to_change = i;
+                break;
+            }
+        }
+        if to_change == INF_USIZE {
+            break;
+        }
+        let before = state[to_change];
+        for i in 0..n {
+            if i != to_change {
+                if state[i] == before {
+                    scores[i] -= A[i][to_change];
+                } else {
+                    scores[i] += A[i][to_change];
+                }
+            } else {
+                scores[to_change] = 0;
+                for i in 0..n {
+                    if i != to_change && state[i] != before {
+                        scores[to_change] += A[i][to_change];
+                    }
+                }
+            }
+        }
+        state[to_change] = !before;
+    }
+    let ans: String = state.iter().map(|v| if *v { 'X' } else { 'Y' }).collect();
+    wl!(ans);
 }
 
 // --- Macros ---
@@ -182,7 +228,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

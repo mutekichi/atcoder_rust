@@ -473,6 +473,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "arc211"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "arc212"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "superslice",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

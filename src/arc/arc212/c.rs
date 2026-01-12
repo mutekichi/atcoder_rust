@@ -1,6 +1,26 @@
+#![allow(unused_imports)]
+#![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
-// --- SNAP START ---
+use num_integer::gcd;
+use std::cmp::{Ordering, Reverse, max, min};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::io::{BufWriter, Write, stdout};
+use std::mem;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
+
+use itertools::{Itertools, iproduct};
+use proconio::input;
+use proconio::marker::{Bytes, Chars, Usize1};
+
+const INF_I64: i64 = 1 << 60;
+const INF_USIZE: usize = 1 << 60;
+const INF_F64: f64 = 1e18;
+const INF_I128: i128 = 1 << 120;
+const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+
+// FOR TEMPLATE INJECTIONS
 
 use std::fmt;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
@@ -251,9 +271,9 @@ impl<const M: u64> proconio::source::Readable for ModInt<M> {
 /// let comb = Combination::<998244353>::new(1000);
 ///
 /// // 5C2 = 10
-/// assert_eq!(comb.ncr(5, 2).val(), 10);
+/// assert_eq!(comb.n_c_r(5, 2).val(), 10);
 /// // 5P2 = 20
-/// assert_eq!(comb.npr(5, 2).val(), 20);
+/// assert_eq!(comb.n_p_r(5, 2).val(), 20);
 /// ```
 pub struct Combination<const M: u64> {
     fact: Vec<ModInt<M>>,
@@ -279,7 +299,7 @@ impl<const M: u64> Combination<M> {
     }
 
     /// Calculates nCr (Combinations). O(1)
-    pub fn ncr(
+    pub fn n_c_r(
         &self,
         n: usize,
         r: usize,
@@ -291,7 +311,7 @@ impl<const M: u64> Combination<M> {
     }
 
     /// Calculates nPr (Permutations). O(1)
-    pub fn npr(
+    pub fn n_p_r(
         &self,
         n: usize,
         r: usize,
@@ -304,7 +324,7 @@ impl<const M: u64> Combination<M> {
 
     /// Calculates nHr (Homogeneous Combinations). O(1)
     /// nHr = (n+r-1)Cr
-    pub fn nhr(
+    pub fn n_h_r(
         &self,
         n: usize,
         r: usize,
@@ -312,7 +332,7 @@ impl<const M: u64> Combination<M> {
         if n == 0 && r == 0 {
             return ModInt::new(1);
         }
-        self.ncr(n + r - 1, r)
+        self.n_c_r(n + r - 1, r)
     }
 
     /// Returns n! (Factorial). O(1)
@@ -324,24 +344,211 @@ impl<const M: u64> Combination<M> {
     }
 }
 
-// --- SNAP END ---
+// END TEMPLATE INJECTIONS
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+fn main() {
+    let stdout = stdout();
+    let mut out = BufWriter::new(stdout.lock());
 
-    #[test]
-    fn test_combination() {
-        let comb = Combination::<998244353>::new(100);
+    solve(&mut out);
 
-        // 5C2 = 10
-        assert_eq!(comb.ncr(5, 2).val(), 10);
-        // 5C5 = 1
-        assert_eq!(comb.ncr(5, 5).val(), 1);
-        // 5C6 = 0
-        assert_eq!(comb.ncr(5, 6).val(), 0);
+    out.flush().unwrap();
+}
 
-        // 5P2 = 20
-        assert_eq!(comb.npr(5, 2).val(), 20);
+#[allow(unused_variables)]
+fn solve<W: Write>(out: &mut W) {
+    macro_rules! wl {
+        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
+        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
+    }
+
+    input! {
+        n: usize,
+        m: usize,
+    }
+
+    let comb: Combination<998244353> = Combination::new(30100000);
+
+    let mut ans = Mint998::new(0);
+
+    for k in 0..=(n / 2) {
+        let mut base = comb.n_h_r(m, k);
+        base *= comb.n_c_r(n - 2 * k + m - 1, 2 * m - 1);
+        ans += base;
+    }
+    for i in 0..m {
+        ans *= Mint998::new(2);
+    }
+    wl!(ans);
+}
+
+// --- Macros ---
+
+#[macro_export]
+#[cfg(debug_assertions)] // for debug build
+macro_rules! md { // stands for my_dbg
+    ($($arg:expr),* $(,)?) => {{
+        eprint!("[{}:{}] ", file!(), line!());
+
+        let mut _first = true;
+        $(
+            if !_first {
+                eprint!(", ");
+            }
+            eprint!("{}: {}", stringify!($arg), $arg);
+            _first = false;
+        )*
+        eprintln!();
+    }};
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))] // for release build
+macro_rules! md {
+    ($($arg:expr),* $(,)?) => {{
+        // do nothing
+    }};
+}
+
+#[macro_export]
+#[cfg(debug_assertions)]
+// Usage: mep!(val) (-> eprint without newline)
+// mep!("{:<1$}", val, width) (-> left align with width)
+// mep!("{:>1$}", val, width)
+macro_rules! mep {
+    ($x:expr) => { eprint!("{}", $x); };
+    ($($arg:tt)+) => { eprint!($($arg)+); };
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))]
+macro_rules! mep {
+    ($($arg:tt)*) => {};
+}
+
+#[macro_export]
+#[cfg(debug_assertions)]
+// Usage: mep!(val) (-> eprint with space)
+// mep!("{:<1$}", val, width) (-> left align with width)
+// mep!("{:>1$}", val, width)
+macro_rules! mepw { // stands for my_eprint_whitespace
+    ($x:expr) => { eprint!("{} ", $x); };
+    ($($arg:tt)+) => { eprint!($($arg)+); };
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))]
+macro_rules! mepw {
+    ($($arg:tt)*) => {};
+}
+
+#[macro_export]
+macro_rules! chmin {
+    ($a:expr, $b:expr) => {
+        if $a > $b {
+            $a = $b;
+            true
+        } else {
+            false
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! chmax {
+    ($a:expr, $b:expr) => {
+        if $a < $b {
+            $a = $b;
+            true
+        } else {
+            false
+        }
+    };
+}
+
+trait JoinExtended {
+    fn join_with(
+        self,
+        sep: &str,
+    ) -> String;
+}
+
+impl<I> JoinExtended for I
+where
+    I: Iterator,
+    I::Item: Joinable,
+{
+    fn join_with(
+        self,
+        sep: &str,
+    ) -> String {
+        let mut peekable = self.peekable();
+        let is_2d = if let Some(first) = peekable.peek() {
+            first.is_container()
+        } else {
+            false
+        };
+
+        let res = peekable.map(|item| item.join_item(sep)).collect::<Vec<_>>();
+
+        // Use newline for 2D rows, provided sep for 1D elements
+        res.join(if is_2d { "\n" } else { sep })
+    }
+}
+
+trait Joinable {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String;
+    fn is_container(&self) -> bool;
+}
+
+macro_rules! impl_joinable_scalar {
+    ($($t:ty),*) => {
+        $(
+            impl Joinable for &$t {
+                fn join_item(&self, _sep: &str) -> String { self.to_string() }
+                fn is_container(&self) -> bool { false }
+            }
+            impl Joinable for $t {
+                fn join_item(&self, _sep: &str) -> String { self.to_string() }
+                fn is_container(&self) -> bool { false }
+            }
+        )*
+    };
+}
+
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
+
+impl<T: std::fmt::Display> Joinable for &Vec<T> {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String {
+        self.iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<_>>()
+            .join(sep)
+    }
+    fn is_container(&self) -> bool {
+        true
+    }
+}
+
+impl<T: std::fmt::Display> Joinable for &[T] {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String {
+        self.iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<_>>()
+            .join(sep)
+    }
+    fn is_container(&self) -> bool {
+        true
     }
 }

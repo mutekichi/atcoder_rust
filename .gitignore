@@ -14,3 +14,5 @@ Thumbs.db
 input.txt
 make_data.py
 to_implement.txt
+scripts/atcoder_history.csv
+scripts/atcoder_manager.py
