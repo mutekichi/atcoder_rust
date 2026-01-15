@@ -4,14 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -43,7 +42,29 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        n: usize,
+        q: usize,
+        A: [i64; n],
+        LR: [(Usize1, Usize1); q],
+    }
+    let mut accum_p0 = vec![0];
+    let mut accum_p1 = vec![0];
+    let mut accum_p2 = vec![0];
+    for i in 0..n {
+        let a = A[i];
+        accum_p0.push(accum_p0[i] + a);
+        accum_p1.push(accum_p1[i] + a * i as i64);
+        accum_p2.push(accum_p2[i] + a * (i * i) as i64);
+    }
+
+    for (l, r) in LR {
+        let term_2 = accum_p2[r + 1] - accum_p2[l];
+        let term_1 = (r + l) as i64 * (accum_p1[r + 1] - accum_p1[l]);
+        let term_0 = (r + 1) as i64 * (1 as i64 - l as i64) * (accum_p0[r + 1] - accum_p0[l]);
+        md!(term_0, term_1, term_2);
+        wl!(term_0 + term_1 - term_2);
+    }
 }
 
 // --- Macros ---
@@ -183,7 +204,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

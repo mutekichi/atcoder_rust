@@ -4,14 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -24,6 +23,32 @@ const C998244353: u64 = 998244353;
 const C1000000007: u64 = 1000000007;
 
 // FOR TEMPLATE INJECTIONS
+
+/// Returns valid neighbor coordinates within the grid (h x w).
+/// Usage:
+/// ```
+/// for (nh, nw) in get_next_positions(h, w, hh, ww, &DIR) {
+///     // process (nh, nw)
+/// }
+/// ```
+fn get_next_positions(
+    h: usize,
+    w: usize,
+    i: usize,
+    j: usize,
+    directions: &[(isize, isize)],
+) -> Vec<(usize, usize)> {
+    let mut next_positions = Vec::with_capacity(directions.len());
+
+    for &(di, dj) in directions {
+        let next_i = i.wrapping_add_signed(di);
+        let next_j = j.wrapping_add_signed(dj);
+        if next_i < h && next_j < w {
+            next_positions.push((next_i, next_j));
+        }
+    }
+    next_positions
+}
 
 // END TEMPLATE INJECTIONS
 
@@ -43,7 +68,28 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        h: usize,
+        w: usize,
+        S: [Chars; h],
+    }
+    for i in 0..h {
+        for j in 0..w {
+            if S[i][j] == '#' {
+                let mut count = 0;
+                for (ni, nj) in get_next_positions(h, w, i, j, &DIR) {
+                    if S[ni][nj] == '#' {
+                        count += 1;
+                    }
+                }
+                if count != 2 && count != 4 {
+                    wl!("No");
+                    return;
+                }
+            }
+        }
+    }
+    wl!("Yes");
 }
 
 // --- Macros ---
@@ -183,7 +229,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

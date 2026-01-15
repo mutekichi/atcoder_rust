@@ -1,24 +1,26 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
-// Common imports
+use num_integer::gcd;
 use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{BufWriter, Write, stdout};
+use std::mem;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-// External crates (Available in AtCoder)
 use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
-// Constants
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
-const MOD: i64 = 998244353;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const C998244353: u64 = 998244353;
+const C1000000007: u64 = 1000000007;
 
 // FOR TEMPLATE INJECTIONS
 
@@ -33,10 +35,7 @@ fn main() {
     out.flush().unwrap();
 }
 
-// Logic goes here
-#[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -44,16 +43,17 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        n: usize,
-        s: [String; n],
-        x: Usize1, y: String,
+        mut S: Chars,
     }
-    if s[x] == y {
-        wl!("Yes");
+    let a = S[0];
+    let b = S[2];
+    if b == '8' {
+        S[0] = char::from_digit(a.to_digit(10).unwrap() + 1, 10).unwrap();
+        S[2] = '1';
+    } else {
+        S[2] = char::from_digit(b.to_digit(10).unwrap() + 1, 10).unwrap();
     }
-    else {
-        wl!("No");
-    }
+    wl!(S.iter().join_with(""));
 }
 
 // --- Macros ---
@@ -140,31 +140,89 @@ macro_rules! chmax {
     };
 }
 
-// Utility functions
+trait JoinExtended {
+    fn join_with(
+        self,
+        sep: &str,
+    ) -> String;
+}
 
-// Utility functions
-/// Returns valid neighbor coordinates within the grid (h x w).
-/// Usage:
-/// ```
-/// for (nh, nw) in get_next_positions(h, w, hh, ww, &DIR) {
-///     // process (nh, nw)
-/// }
-/// ```
-fn get_next_positions(
-    h: usize,
-    w: usize,
-    i: usize,
-    j: usize,
-    directions: &[(isize, isize)],
-) -> Vec<(usize, usize)> {
-    let mut next_positions = Vec::with_capacity(directions.len());
+impl<I> JoinExtended for I
+where
+    I: Iterator,
+    I::Item: Joinable,
+{
+    fn join_with(
+        self,
+        sep: &str,
+    ) -> String {
+        let mut peekable = self.peekable();
+        let is_2d = if let Some(first) = peekable.peek() {
+            first.is_container()
+        } else {
+            false
+        };
 
-    for &(di, dj) in directions {
-        let next_i = i.wrapping_add_signed(di);
-        let next_j = j.wrapping_add_signed(dj);
-        if next_i < h && next_j < w {
-            next_positions.push((next_i, next_j));
-        }
+        let res = peekable.map(|item| item.join_item(sep)).collect::<Vec<_>>();
+
+        // Use newline for 2D rows, provided sep for 1D elements
+        res.join(if is_2d { "\n" } else { sep })
     }
-    next_positions
+}
+
+trait Joinable {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String;
+    fn is_container(&self) -> bool;
+}
+
+macro_rules! impl_joinable_scalar {
+    ($($t:ty),*) => {
+        $(
+            impl Joinable for &$t {
+                fn join_item(&self, _sep: &str) -> String { self.to_string() }
+                fn is_container(&self) -> bool { false }
+            }
+            impl Joinable for $t {
+                fn join_item(&self, _sep: &str) -> String { self.to_string() }
+                fn is_container(&self) -> bool { false }
+            }
+        )*
+    };
+}
+
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
+
+impl<T: std::fmt::Display> Joinable for &Vec<T> {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String {
+        self.iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<_>>()
+            .join(sep)
+    }
+    fn is_container(&self) -> bool {
+        true
+    }
+}
+
+impl<T: std::fmt::Display> Joinable for &[T] {
+    fn join_item(
+        &self,
+        sep: &str,
+    ) -> String {
+        self.iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<_>>()
+            .join(sep)
+    }
+    fn is_container(&self) -> bool {
+        true
+    }
 }

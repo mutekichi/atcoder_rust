@@ -181,6 +181,19 @@ fn snippets<W: Write>(out: &mut W) {
     deque.push_back(2);
 }
 
+struct Point {
+    x: i64,
+    y: i64,
+}
+impl std::fmt::Display for Point {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+    ) -> std::fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
 fn interactive_example() {
     loop {
         // TODO: Implement interaction logic here

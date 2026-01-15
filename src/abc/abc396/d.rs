@@ -4,14 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -43,7 +42,41 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        n: usize,
+        m: usize,
+        UVM: [(Usize1, Usize1, u64); m]
+    }
+    if n == 2 {
+        wl!(UVM[0].2);
+        return;
+    }
+    let inf_u64: u64 = 1 << 63;
+    let mut graph = vec![vec![]; n];
+    for (u, v, m) in UVM {
+        graph[u].push((v, m));
+        graph[v].push((u, m));
+    }
+    let mut ans: u64 = inf_u64;
+    let mut q = VecDeque::new();
+    let mut first_seen = vec![false; n];
+    first_seen[0] = true;
+    q.push_back((0, 0, first_seen));
+    while let Some((v, score, seen)) = q.pop_front() {
+        if v == n - 1 {
+            ans = min(ans, score);
+            continue;
+        }
+        for &(nv, weight) in &graph[v] {
+            if !seen[nv] {
+                let next_score = score ^ weight;
+                let mut next_seen = seen.clone();
+                next_seen[nv] = true;
+                q.push_back((nv, next_score, next_seen));
+            }
+        }
+    }
+    wl!(ans);
 }
 
 // --- Macros ---
@@ -183,7 +216,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

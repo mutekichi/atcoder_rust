@@ -4,14 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -43,7 +42,39 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        n: usize,
+        q: usize,
+    }
+    let mut positions = (0..n).collect::<Vec<usize>>();
+    let mut orig_to_cur = (0..n).collect::<Vec<usize>>();
+    let mut cur_to_orig = (0..n).collect::<Vec<usize>>();
+
+    for _ in 0..q {
+        input! {
+            qtype: usize
+        }
+        if qtype == 3 {
+            input! {
+                a: Usize1,
+            }
+            wl!(orig_to_cur[positions[a]] + 1);
+        } else {
+            input! {
+                a: Usize1, b: Usize1,
+            }
+            if qtype == 1 {
+                positions[a] = cur_to_orig[b];
+            } else {
+                let orig_a = cur_to_orig[a];
+                let orig_b = cur_to_orig[b];
+                orig_to_cur[orig_a] = b;
+                orig_to_cur[orig_b] = a;
+                cur_to_orig[b] = orig_a;
+                cur_to_orig[a] = orig_b;
+            }
+        }
+    }
 }
 
 // --- Macros ---
@@ -183,7 +214,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

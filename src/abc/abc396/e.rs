@@ -4,14 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -43,7 +42,66 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        n: usize,
+        m: usize,
+        XYM: [(Usize1, Usize1, i64); m],
+    }
+    let mut ans = vec![0i64; n];
+    let mut graph = vec![vec![]; n];
+    for (x, y, m) in XYM {
+        graph[x].push((y, m));
+        graph[y].push((x, m));
+    }
+    let mut seen: Vec<Option<i64>> = vec![None; n];
+    for i in 0..n {
+        if seen[i].is_some() {
+            continue;
+        }
+        let mut q = VecDeque::new();
+        q.push_back(i);
+        seen[i] = Some(0);
+        let mut count = 0;
+        let mut parity = vec![0; 32];
+        let mut nodes = vec![];
+        while let Some(v) = q.pop_front() {
+            count += 1;
+            nodes.push(v);
+            let w_v = seen[v].unwrap();
+            for &(nv, w) in &graph[v] {
+                if let Some(value) = seen[nv] {
+                    if value == w_v ^ w {
+                        continue;
+                    } else {
+                        wl!(-1);
+                        return;
+                    }
+                } else {
+                    let next_weight = w_v ^ w;
+                    seen[nv] = Some(next_weight);
+                    ans[nv] = next_weight;
+                    for i in 0..32 {
+                        if (next_weight >> i) & 1 == 1 {
+                            parity[i] += 1;
+                        }
+                    }
+                    q.push_back(nv);
+                }
+            }
+        }
+        md!(parity.iter().join_with(" "));
+        md!(count);
+        for i in 0..32 {
+            let p = parity[i];
+            if p * 2 > count {
+                let bit = 1 << i;
+                for &node in &nodes {
+                    ans[node] ^= bit;
+                }
+            }
+        }
+    }
+    wl!(ans.iter().join_with(" "));
 }
 
 // --- Macros ---
@@ -183,7 +241,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

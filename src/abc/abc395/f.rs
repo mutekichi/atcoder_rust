@@ -4,14 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -43,7 +42,54 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        n: usize,
+        x: i64,
+        UD: [(i64, i64); n],
+    }
+    let mut cost = 0i64;
+    let mut height = UD[0].0 + UD[0].1;
+    let mut range = (UD[0].0, UD[0].1);
+    for i in 1..n {
+        let (mut u, mut d) = UD[i];
+        let (mut range_u, mut range_d) = range;
+        if d + x < range_d {
+            let diff_d = range_d - d - x;
+            height -= diff_d;
+            range_d -= diff_d;
+            cost += diff_d * i as i64;
+        }
+        if u + x < range_u {
+            let diff_u = range_u - u - x;
+            height -= diff_u;
+            range_u -= diff_u;
+            cost += diff_u * i as i64;
+        }
+        if height - range_u + x < d {
+            let diff_d = d - (height - range_u + x);
+            d -= diff_d;
+            cost += diff_d;
+        }
+        if height - range_d + x < u {
+            let diff_u = u - (height - range_d + x);
+            u -= diff_u;
+            cost += diff_u;
+        }
+        if u + d >= height {
+            cost += u + d - height;
+            range_u = height - d;
+            range_d = height - u;
+        }
+        if u + d < height {
+            let diff = height - u - d;
+            cost += diff * i as i64;
+            range_u = u;
+            range_d = d;
+            height = u + d;
+        }
+        range = (range_u, range_d);
+    }
+    wl!(cost);
 }
 
 // --- Macros ---
@@ -183,7 +229,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

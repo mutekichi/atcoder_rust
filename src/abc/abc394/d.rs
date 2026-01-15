@@ -4,14 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -43,7 +42,39 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        S: Chars,
+    }
+    let mut stack = VecDeque::new();
+    for c in S {
+        if c == '<' || c == '(' || c == '[' {
+            stack.push_back(c);
+        } else {
+            let nc = {
+                if c == '>' {
+                    '<'
+                } else if c == ')' {
+                    '('
+                } else {
+                    '['
+                }
+            };
+            if let Some(back) = stack.pop_back() {
+                if back != nc {
+                    wl!("No");
+                    return;
+                }
+            } else {
+                wl!("No");
+                return;
+            }
+        }
+    }
+    if !stack.is_empty() {
+        wl!("No");
+    } else {
+        wl!("Yes");
+    }
 }
 
 // --- Macros ---
@@ -183,7 +214,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

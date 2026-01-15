@@ -4,14 +4,13 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -43,7 +42,37 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        n: usize,
+        m: usize,
+        x: i64,
+        UV: [(Usize1, Usize1); m],
+    }
+    let mut graph = vec![vec![vec![]; 2]; n];
+    for (u, v) in UV {
+        graph[u][0].push(v);
+        graph[v][1].push(u);
+    }
+    let mut dist = vec![vec![INF_I64; 2]; n];
+    let mut pq = BinaryHeap::new();
+    pq.push(Reverse((0, 0, 0)));
+    dist[0][0] = 0;
+    while let Some(Reverse((d, state, v))) = pq.pop() {
+        if d > dist[v][state] {
+            continue;
+        }
+        for &nv in &graph[v][state] {
+            if dist[v][state] + 1 < dist[nv][state] {
+                dist[nv][state] = dist[v][state] + 1;
+                pq.push(Reverse((dist[nv][state], state, nv)));
+            }
+        }
+        if dist[v][state] + x < dist[v][1 - state] {
+            dist[v][1 - state] = dist[v][state] + x;
+            pq.push(Reverse((dist[v][1 - state], 1 - state, v)));
+        }
+    }
+    wl!(min(dist[n - 1][0], dist[n - 1][1]));
 }
 
 // --- Macros ---
@@ -183,7 +212,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

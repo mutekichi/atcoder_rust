@@ -4,14 +4,14 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::fmt::Binary;
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -43,7 +43,75 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        n: usize,
+        AB: [(Usize1, Usize1); n - 1],
+    }
+    if n < 5 {
+        wl!(-1);
+        return;
+    }
+    let mut tree = vec![vec![]; n];
+    let mut degrees = vec![0; n];
+    for (a, b) in AB {
+        tree[a].push(b);
+        tree[b].push(a);
+        degrees[a] += 1;
+        degrees[b] += 1;
+    }
+    let (start, next) = {
+        let mut ans = (INF_USIZE, INF_USIZE);
+        for i in 0..n {
+            if degrees[i] == 1 {
+                ans = (i, tree[i][0]);
+            }
+        }
+        ans
+    };
+
+    let mut ans = 0;
+
+    dfs(next, start, &tree, &mut ans);
+    if ans == 0 {
+        wl!(-1);
+    } else {
+        wl!(ans * 3 + 2);
+    }
+}
+
+fn dfs(
+    v: usize,
+    from: usize,
+    tree: &Vec<Vec<usize>>,
+    ans: &mut usize,
+) -> usize {
+    let mut pq = BinaryHeap::new();
+    for &nv in &tree[v] {
+        if nv == from {
+            continue;
+        }
+        pq.push(dfs(nv, v, tree, ans));
+    }
+    md!(v, pq.len());
+    if pq.len() < 3 {
+        0
+    } else {
+        let v1 = pq.pop().unwrap();
+        let v2 = pq.pop().unwrap();
+        let v3 = pq.pop().unwrap();
+        if pq.len() > 0 {
+            let v4 = pq.pop().unwrap();
+            let res = v1 + v2 + v3 + v4 + 1;
+            if res > *ans {
+                *ans = res;
+            }
+        }
+        let res = v1 + v2 + v3 + 1;
+        if res > *ans {
+            *ans = res;
+        }
+        res
+    }
 }
 
 // --- Macros ---
@@ -183,7 +251,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

@@ -4,16 +4,16 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
+use rand::Rng;
 
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
@@ -36,6 +36,17 @@ fn main() {
     out.flush().unwrap();
 }
 
+fn check_colinear(
+    x1: i64,
+    y1: i64,
+    x2: i64,
+    y2: i64,
+    x3: i64,
+    y3: i64,
+) -> bool {
+    return (y2 - y1) * (x3 - x2) == (y3 - y2) * (x2 - x1);
+}
+
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
@@ -43,7 +54,43 @@ fn solve<W: Write>(out: &mut W) {
         ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
 
-    input! {}
+    input! {
+        n: usize,
+        XY: [(i64, i64); n],
+    }
+    let mut rng = rand::thread_rng();
+
+    for i in 0..500 {
+        let first = rng.gen_range(0..n);
+        let mut second = rng.gen_range(0..n);
+        loop {
+            if first != second {
+                break;
+            }
+            second = rng.gen_range(0..n);
+        }
+
+        let (x1, y1) = (XY[first].0, XY[first].1);
+        let (x2, y2) = (XY[second].0, XY[second].1);
+
+        let mut count = 0;
+        for i in 0..n {
+            if i == first || i == second {
+                count += 1;
+                continue;
+            }
+            let (x3, y3) = (XY[i].0, XY[i].1);
+            if check_colinear(x1, y1, x2, y2, x3, y3) {
+                count += 1;
+            }
+        }
+        if count > n / 2 {
+            wl!("Yes");
+            wl!("{} {} {}", y1 - y2, x2 - x1, x1 * y2 - x2 * y1);
+            return;
+        }
+    }
+    wl!("No");
 }
 
 // --- Macros ---
@@ -183,7 +230,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(
