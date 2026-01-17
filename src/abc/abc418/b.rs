@@ -3,13 +3,13 @@
 #![allow(dead_code)]
 
 // Common imports
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -45,9 +45,29 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        S: Chars,
     }
-    
+    let mut ans = 0f64;
+    let n = S.len();
+    for i in 0..n {
+        for j in (i + 1)..=n {
+            if j - i < 3 {
+                continue;
+            }
+            if S[i] != 't' || S[j - 1] != 't' {
+                continue;
+            }
+            let l = (j - i - 2) as f64;
+            let mut count = 0usize;
+            for k in (i + 1)..(j - 1) {
+                if S[k] == 't' {
+                    count += 1;
+                }
+            }
+            ans = ans.max(count as f64 / l);
+        }
+    }
+    wl!(ans);
 }
 
 // --- Macros ---

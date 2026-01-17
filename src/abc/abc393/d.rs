@@ -5,13 +5,13 @@
 
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -44,8 +44,34 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        S: Chars,
     }
+    let zero_count: usize = S.iter().filter(|c| **c == '0').count();
+    let zero_positions: Vec<usize> = S
+        .iter()
+        .enumerate()
+        .filter(|(i, v)| **v == '0')
+        .map(|(i, v)| i)
+        .collect();
+    let mut ans = INF_USIZE;
+    let mut count = 0usize;
+    let mut diffs = vec![];
+    for i in 0..zero_count {
+        count += zero_positions[i] - i;
+        diffs.push(zero_positions[i] - i);
+    }
+    ans = min(ans, count);
+    md!(ans);
+    for i in (0..zero_count).rev() {
+        let diff = n - 1 - (zero_count - i - 1) - zero_positions[i];
+        md!(diff);
+        count += diff;
+        count -= diffs[i];
+        md!(count);
+        ans = min(ans, count);
+    }
+    wl!(ans);
 }
 
 // --- Macros ---
@@ -185,7 +211,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

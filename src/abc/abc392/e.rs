@@ -5,13 +5,13 @@
 
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -44,7 +44,40 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        m: usize,
+        AB: [(Usize1, Usize1); m],
+    }
+    let mut graph = vec![vec![]; n];
+    for i in 0..m {
+        let (a, b) = AB[i];
+        graph[a].push((b, i));
+        graph[b].push((a, i));
+    }
+    let mut seen_node = vec![false; n];
+    let mut seen_edge = vec![false; m];
+    let mut alone_node_stack = VecDeque::new();
+    for i in 0..n {
+        if !seen_node[i] {
+            continue;
+        }
+        alone_node_stack.push_back(i);
+        let mut queue = VecDeque::new();
+        queue.push_front(i);
+        while let Some(v) = queue.pop_back() {
+            for &(nv, edge) in &graph[v] {
+                if seen_node[nv] {
+                    if !seen_edge[edge] {
+                        if alone_node_stack.is_empty() {
+                            
+                        }
+                    }
+                }
+                else {
+
+                }
+            }
+        }
     }
 }
 
@@ -185,7 +218,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

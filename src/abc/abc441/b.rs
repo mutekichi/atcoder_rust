@@ -5,13 +5,13 @@
 
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -44,7 +44,40 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        m: usize,
+        S: Chars,
+        T: Chars,
+        q: usize,
+        W: [Chars; q],
+    }
+    let mut takahashi = BTreeSet::new();
+    let mut aoki = BTreeSet::new();
+    for i in 0..n {
+        takahashi.insert(S[i]);
+    }
+    for i in 0..m {
+        aoki.insert(T[i]);
+    }
+    for i in 0..q {
+        let w = &W[i];
+        let mut is_takahashi = true;
+        let mut is_aoki = true;
+        for c in w {
+            if !takahashi.contains(c) {
+                is_takahashi = false;
+            }
+            if !aoki.contains(c) {
+                is_aoki = false;
+            }
+        }
+        if is_takahashi && is_aoki {
+            wl!("Unknown");
+        } else if is_takahashi {
+            wl!("Takahashi");
+        } else {
+            wl!("Aoki");
+        }
     }
 }
 
@@ -185,7 +218,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

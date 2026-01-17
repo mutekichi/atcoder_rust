@@ -5,13 +5,13 @@
 
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -44,7 +44,50 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        q: usize,
+        A: [i64; n],
+        RX: [(Usize1, i64); q],
+    }
+    let mut ans = vec![INF_USIZE; q];
+    let mut queries = vec![vec![]; n];
+    for i in 0..q {
+        let (r, x) = RX[i];
+        queries[r].push((i, x));
+    }
+    let mut lis_table = vec![INF_I64; n + 1];
+    lis_table[0] = 0;
+    for i in 0..n {
+        let a = A[i];
+        let mut ok = n + 1;
+        let mut ng = 0;
+        while ok - ng > 1 {
+            let mid = (ok + ng) / 2;
+            if lis_table[mid] > a {
+                ok = mid;
+            } else {
+                ng = mid;
+            }
+        }
+        if lis_table[ok - 1] != a {
+            lis_table[ok] = a;
+        }
+        for &(query_index, x) in &queries[i] {
+            let mut ok = 0;
+            let mut ng = n + 1;
+            while ng - ok > 1 {
+                let mid = (ok + ng) / 2;
+                if lis_table[mid] <= x {
+                    ok = mid;
+                } else {
+                    ng = mid;
+                }
+            }
+            ans[query_index] = ok;
+        }
+    }
+    for a in ans {
+        wl!(a);
     }
 }
 
@@ -185,7 +228,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

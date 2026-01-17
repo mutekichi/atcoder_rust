@@ -3,13 +3,13 @@
 #![allow(dead_code)]
 
 // Common imports
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -45,9 +45,17 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        s: String,
     }
-    
+    if s == "red" {
+        wl!("SSS");
+    } else if s == "blue" {
+        wl!("FFF");
+    } else if s == "green" {
+        wl!("MMM");
+    } else {
+        wl!("Unknown");
+    }
 }
 
 // --- Macros ---

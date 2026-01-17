@@ -5,13 +5,13 @@
 
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -44,8 +44,67 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        m: usize,
+        PV: [(usize, i64); n],
     }
+    let m_max = m + 1;
+    let mut dp = vec![vec![-INF_I64; m_max]; n + 1];
+    dp[0][0] = 0;
+    for i in 0..n {
+        let (p, v) = PV[i];
+        for j in 0..m_max {
+            if j < p {
+                dp[i + 1][j] = dp[i][j];
+            } else {
+                dp[i + 1][j] = max(dp[i][j], dp[i][j - p] + v);
+            }
+        }
+    }
+    let mut max_value = 0;
+    for i in 0..m_max {
+        max_value = max(max_value, dp[n][i]);
+    }
+    let mut max_set = vec![false; m_max];
+    for i in 0..m_max {
+        if dp[n][i] == max_value {
+            max_set[i] = true;
+        }
+    }
+    let mut new_max_set = vec![false; m_max];
+    let mut ans = vec!['A'; n];
+    for i in (0..n).rev() {
+        let mut buy = false;
+        let mut not_buy = false;
+        let (p, v) = PV[i];
+        for max_branch in (0..m_max).rev() {
+            if max_set[max_branch] {
+                if max_branch < p {
+                    not_buy = true;
+                    new_max_set[max_branch] = true;
+                } else {
+                    if dp[i][max_branch] == dp[i + 1][max_branch] {
+                        not_buy = true;
+                        new_max_set[max_branch] = true;
+                    }
+                    if dp[i][max_branch - p] + v == dp[i + 1][max_branch] {
+                        buy = true;
+                        new_max_set[max_branch - p] = true;
+                    }
+                }
+            }
+            max_set[max_branch] = false;
+            if buy && not_buy {
+                ans[i] = 'B';
+            } else if buy && !not_buy {
+                ans[i] = 'A';
+            } else {
+                ans[i] = 'C';
+            }
+        }
+        std::mem::swap(&mut max_set, &mut new_max_set);
+    }
+    wl!(ans.iter().join(""));
 }
 
 // --- Macros ---
@@ -185,7 +244,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

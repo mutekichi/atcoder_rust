@@ -5,13 +5,13 @@
 
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -44,7 +44,37 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        
+        n: usize,
+        k: usize,
+        A: [usize; n],
+    }
+    let size = 1000010usize;
+    let mut counts = vec![0; size];
+    let mut counter = BTreeMap::new();
+    for &a in &A {
+        *counter.entry(a).or_insert(0) += 1;
+    }
+    let mut divisors = vec![vec![1]; size];
+    for i in 2..size {
+        let mut j = i;
+        while j < size {
+            divisors[j].push(i);
+            j += i;
+        }
+    }
+    for (&a, &c) in counter.iter() {
+        for &divisor in &divisors[a] {
+            counts[divisor] += c;
+        }
+    }
+    for i in 0..n {
+        let a = A[i];
+        for &divisor in divisors[a].iter().rev() {
+            if counts[divisor] >= k {
+                wl!(divisor);
+                break;
+            }
+        }
     }
 }
 
@@ -185,7 +215,9 @@ macro_rules! impl_joinable_scalar {
     };
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+impl_joinable_scalar!(
+    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
+);
 
 impl<T: std::fmt::Display> Joinable for &Vec<T> {
     fn join_item(

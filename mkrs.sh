@@ -23,6 +23,7 @@ proconio = { workspace = true }
 itertools = { workspace = true }
 superslice = { workspace = true }
 num-integer = { workspace = true }
+rand = { workspace = true }
 
 EOL
     # Add binary targets for problems a to g
