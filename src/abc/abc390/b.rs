@@ -1,21 +1,27 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
-// Common imports
+use num_integer::gcd;
+use rand::Rng;
 use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{BufWriter, Write, stdout};
+use std::mem;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-// External crates (Available in AtCoder)
 use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
-// Constants
-const INF: i64 = 1 << 60;
-const MOD: i64 = 998244353;
+const INF_I64: i64 = 1 << 60;
+const INF_USIZE: usize = 1 << 60;
+const INF_F64: f64 = 1e18;
+const INF_I128: i128 = 1 << 120;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const C998244353: u64 = 998244353;
+const C1000000007: u64 = 1000000007;
 
 // FOR TEMPLATE INJECTIONS
 
@@ -30,10 +36,7 @@ fn main() {
     out.flush().unwrap();
 }
 
-// Logic goes here
-#[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -42,39 +45,13 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         n: usize,
-        m: usize,
-        s: [Chars; n],
+        A: [i64; n],
     }
-    let mut scores = vec![0usize; n];
-    for j in 0..m {
-        let mut zeros = 0usize;
-        let mut ones = 0usize;
-        for i in 0..n {
-            if s[i][j] == '0' {
-                zeros += 1;
-            } else {
-                ones += 1;
-            }
-        }
-        let winner = if zeros < ones {
-            '0'
-        } else {
-            '1'
-        };
-        for i in 0..n {
-            if s[i][j] == winner {
-                scores[i] += 1;
-            }
-        }
+    if A.windows(3).all(|w| w[0] * w[2] == w[1] * w[1]) {
+        wl!("Yes");
+    } else {
+        wl!("No");
     }
-    let max_score: usize = *scores.iter().max().unwrap();
-    let mut ans = vec![];
-    for i in 0..n {
-        if scores[i] == max_score {
-            ans.push(i + 1);
-        }
-    }
-    wl!(ans.iter().join(" "));
 }
 
 // --- Macros ---
@@ -103,28 +80,4 @@ macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
     }};
-}
-
-#[macro_export]
-macro_rules! chmin {
-    ($a:expr, $b:expr) => {
-        if $a > $b {
-            $a = $b;
-            true
-        } else {
-            false
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! chmax {
-    ($a:expr, $b:expr) => {
-        if $a < $b {
-            $a = $b;
-            true
-        } else {
-            false
-        }
-    };
 }

@@ -3,7 +3,6 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
 use std::cmp::{max, min, Ordering, Reverse};
@@ -23,6 +22,33 @@ const INF_I128: i128 = 1 << 120;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 const C998244353: u64 = 998244353;
 const C1000000007: u64 = 1000000007;
+
+// FOR TEMPLATE INJECTIONS
+
+// END TEMPLATE INJECTIONS
+
+fn main() {
+    let stdout = stdout();
+    let mut out = BufWriter::new(stdout.lock());
+
+    solve(&mut out);
+
+    out.flush().unwrap();
+}
+
+#[allow(unused_variables)]
+fn solve<W: Write>(out: &mut W) {
+    macro_rules! wl {
+        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
+        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
+    }
+
+    input! {
+        
+    }
+}
+
+// --- Macros ---
 
 #[macro_export]
 #[cfg(debug_assertions)] // for debug build
@@ -49,23 +75,3 @@ macro_rules! md {
         // do nothing
     }};
 }
-
-fn main() {
-    let stdout = stdout();
-    let mut out = BufWriter::new(stdout.lock());
-
-    solve(&mut out);
-
-    out.flush().unwrap();
-}
-
-#[allow(unused_variables)]
-fn solve<W: Write>(out: &mut W) {
-    input! {
-
-    }
-}
-
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS

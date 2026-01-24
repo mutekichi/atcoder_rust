@@ -3,7 +3,6 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
 use std::cmp::{Ordering, Reverse, max, min};
@@ -50,6 +49,10 @@ macro_rules! md {
     }};
 }
 
+// FOR TEMPLATE INJECTIONS
+
+// END TEMPLATE INJECTIONS
+
 fn main() {
     let stdout = stdout();
     let mut out = BufWriter::new(stdout.lock());
@@ -61,21 +64,51 @@ fn main() {
 
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
+    macro_rules! wl {
+        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
+        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
+    }
+
     input! {
         n: usize,
-        P: [Usize1; n],
-        Q: [Usize1; n],
+        A: Chars,
     }
-    let mut bib_to_person = vec![INF_USIZE; n];
+    let mut pows = vec![1usize];
     for i in 0..n {
-        bib_to_person[Q[i]] = i;
+        pows.push(pows[i] * 3);
     }
-    let ans = (0..n)
-        .map(|i| Q[P[bib_to_person[i]]] + 1)
-        .collect::<Vec<_>>();
-    println!("{}", ans.iter().join(" "));
+    wl!(f(&A, 0, n, &pows).1);
 }
 
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS
+fn f(
+    A: &Vec<char>,
+    start: usize,
+    level: usize,
+    pows: &Vec<usize>,
+) -> (u32, usize) {
+    if level == 0 {
+        return (A[start].to_digit(10).unwrap(), 1);
+    } else {
+        let mut zero_to_ones = vec![];
+        let mut one_to_zeros = vec![];
+        for i in 0..3 {
+            let (c, steps) = f(A, start + i * pows[level - 1], level - 1, pows);
+            if c == 0 {
+                zero_to_ones.push(steps);
+            } else {
+                one_to_zeros.push(steps);
+            }
+        }
+        zero_to_ones.sort_unstable();
+        one_to_zeros.sort_unstable();
+        if zero_to_ones.len() == 0 {
+            (0, one_to_zeros[0] + one_to_zeros[1])
+        } else if zero_to_ones.len() == 1 {
+            (0, one_to_zeros[0])
+        } else if zero_to_ones.len() == 2 {
+            (1, zero_to_ones[0])
+        } else {
+            (1, zero_to_ones[0] + zero_to_ones[1])
+        }
+    }
+}

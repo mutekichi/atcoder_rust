@@ -3,16 +3,15 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -50,6 +49,10 @@ macro_rules! md {
     }};
 }
 
+// FOR TEMPLATE INJECTIONS
+
+// END TEMPLATE INJECTIONS
+
 fn main() {
     let stdout = stdout();
     let mut out = BufWriter::new(stdout.lock());
@@ -61,11 +64,49 @@ fn main() {
 
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
-    input! {
+    macro_rules! wl {
+        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
+        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
+    }
 
+    input! {
+        n: usize,
+        k: usize,
+        mut A: [i64; n],
+        mut B: [i64; n],
+        mut C: [i64; n],
+    }
+    let mut set = BTreeSet::new();
+    A.sort_unstable();
+    A.reverse();
+    B.sort_unstable();
+    B.reverse();
+    C.sort_unstable();
+    C.reverse();
+    set.insert((Reverse(f(A[0], B[0], C[0])), 0, 0, 0));
+    for i in 0..k {
+        let (Reverse(v), a, b, c) = set.pop_first().unwrap();
+        md!(v, a, b, c);
+        if i == k - 1 {
+            wl!(v);
+            return;
+        }
+        if a != n - 1 {
+            set.insert((Reverse(f(A[a + 1], B[b], C[c])), a + 1, b, c));
+        }
+        if b != n - 1 {
+            set.insert((Reverse(f(A[a], B[b + 1], C[c])), a, b + 1, c));
+        }
+        if c != n - 1 {
+            set.insert((Reverse(f(A[a], B[b], C[c + 1])), a, b, c + 1));
+        }
     }
 }
 
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS
+fn f(
+    a: i64,
+    b: i64,
+    c: i64,
+) -> i64 {
+    a * b + b * c + c * a
+}

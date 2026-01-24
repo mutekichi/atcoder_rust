@@ -1,21 +1,27 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
-// Common imports
+use num_integer::gcd;
+use rand::Rng;
 use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{BufWriter, Write, stdout};
+use std::mem;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-// External crates (Available in AtCoder)
 use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
-// Constants
-const INF: i64 = 1 << 60;
-const MOD: i64 = 998244353;
+const INF_I64: i64 = 1 << 60;
+const INF_USIZE: usize = 1 << 60;
+const INF_F64: f64 = 1e18;
+const INF_I128: i128 = 1 << 120;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const C998244353: u64 = 998244353;
+const C1000000007: u64 = 1000000007;
 
 // FOR TEMPLATE INJECTIONS
 
@@ -30,10 +36,7 @@ fn main() {
     out.flush().unwrap();
 }
 
-// Logic goes here
-#[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -42,39 +45,46 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         n: usize,
-        m: usize,
-        s: [Chars; n],
+        A: [Usize1; n],
     }
-    let mut scores = vec![0usize; n];
-    for j in 0..m {
-        let mut zeros = 0usize;
-        let mut ones = 0usize;
-        for i in 0..n {
-            if s[i][j] == '0' {
-                zeros += 1;
-            } else {
-                ones += 1;
-            }
-        }
-        let winner = if zeros < ones {
-            '0'
-        } else {
-            '1'
-        };
-        for i in 0..n {
-            if s[i][j] == winner {
-                scores[i] += 1;
-            }
-        }
-    }
-    let max_score: usize = *scores.iter().max().unwrap();
-    let mut ans = vec![];
+    let mut last_positions = vec![-INF_I64; n];
+    let mut ans = 0i64;
+    let mut to_add = 0i64;
     for i in 0..n {
-        if scores[i] == max_score {
-            ans.push(i + 1);
+        to_add += (i + 1) as i64;
+        let a = A[i];
+        let pos_minus = if a != 0 {
+            last_positions[a - 1]
+        } else {
+            -INF_I64
+        };
+        let pos_eq = last_positions[a];
+        let pos_plus = if a != n - 1 {
+            last_positions[a + 1]
+        } else {
+            -INF_I64
+        };
+        let pos_max = max(pos_minus, max(pos_eq, pos_plus));
+        if pos_max != -INF_I64 {
+            if pos_max == pos_minus {
+                to_add -= pos_minus + 1;
+                if pos_plus > pos_eq {
+                    to_add -= pos_plus + 1 - max(pos_eq + 1, 0);
+                }
+            } else if pos_max == pos_eq {
+                to_add -= pos_eq + 1;
+            } else {
+                to_add -= pos_plus + 1;
+                if pos_minus > pos_eq {
+                    to_add -= pos_minus + 1 - max(pos_eq + 1, 0);
+                }
+            }
         }
+        last_positions[a] = i as i64;
+        md!(ans);
+        ans += to_add;
     }
-    wl!(ans.iter().join(" "));
+    wl!(ans);
 }
 
 // --- Macros ---
@@ -103,28 +113,4 @@ macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
     }};
-}
-
-#[macro_export]
-macro_rules! chmin {
-    ($a:expr, $b:expr) => {
-        if $a > $b {
-            $a = $b;
-            true
-        } else {
-            false
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! chmax {
-    ($a:expr, $b:expr) => {
-        if $a < $b {
-            $a = $b;
-            true
-        } else {
-            false
-        }
-    };
 }

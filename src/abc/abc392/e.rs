@@ -3,6 +3,7 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
+use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
 use std::cmp::{Ordering, Reverse, max, min};
@@ -22,66 +23,6 @@ const INF_I128: i128 = 1 << 120;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 const C998244353: u64 = 998244353;
 const C1000000007: u64 = 1000000007;
-
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS
-
-fn main() {
-    let stdout = stdout();
-    let mut out = BufWriter::new(stdout.lock());
-
-    solve(&mut out);
-
-    out.flush().unwrap();
-}
-
-#[allow(unused_variables)]
-fn solve<W: Write>(out: &mut W) {
-    macro_rules! wl {
-        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
-        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
-    }
-
-    input! {
-        n: usize,
-        m: usize,
-        AB: [(Usize1, Usize1); m],
-    }
-    let mut graph = vec![vec![]; n];
-    for i in 0..m {
-        let (a, b) = AB[i];
-        graph[a].push((b, i));
-        graph[b].push((a, i));
-    }
-    let mut seen_node = vec![false; n];
-    let mut seen_edge = vec![false; m];
-    let mut alone_node_stack = VecDeque::new();
-    for i in 0..n {
-        if !seen_node[i] {
-            continue;
-        }
-        alone_node_stack.push_back(i);
-        let mut queue = VecDeque::new();
-        queue.push_front(i);
-        while let Some(v) = queue.pop_back() {
-            for &(nv, edge) in &graph[v] {
-                if seen_node[nv] {
-                    if !seen_edge[edge] {
-                        if alone_node_stack.is_empty() {
-                            
-                        }
-                    }
-                }
-                else {
-
-                }
-            }
-        }
-    }
-}
-
-// --- Macros ---
 
 #[macro_export]
 #[cfg(debug_assertions)] // for debug build
@@ -109,145 +50,88 @@ macro_rules! md {
     }};
 }
 
-#[macro_export]
-#[cfg(debug_assertions)]
-// Usage: mep!(val) (-> eprint without newline)
-// mep!("{:<1$}", val, width) (-> left align with width)
-// mep!("{:>1$}", val, width)
-macro_rules! mep {
-    ($x:expr) => { eprint!("{}", $x); };
-    ($($arg:tt)+) => { eprint!($($arg)+); };
+fn main() {
+    let stdout = stdout();
+    let mut out = BufWriter::new(stdout.lock());
+
+    solve(&mut out);
+
+    out.flush().unwrap();
 }
 
-#[macro_export]
-#[cfg(not(debug_assertions))]
-macro_rules! mep {
-    ($($arg:tt)*) => {};
-}
+#[allow(unused_variables)]
+fn solve<W: Write>(out: &mut W) {
+    input! {
+        n: usize,
+        m: usize,
+        AB: [(Usize1, Usize1); m],
+    }
+    let mut graph = vec![vec![]; n];
+    for i in 0..m {
+        let (a, b) = AB[i];
+        graph[a].push((b, i));
+        graph[b].push((a, i));
+    }
 
-#[macro_export]
-#[cfg(debug_assertions)]
-// Usage: mep!(val) (-> eprint with space)
-// mep!("{:<1$}", val, width) (-> left align with width)
-// mep!("{:>1$}", val, width)
-macro_rules! mepw { // stands for my_eprint_whitespace
-    ($x:expr) => { eprint!("{} ", $x); };
-    ($($arg:tt)+) => { eprint!($($arg)+); };
-}
+    let mut ans = vec![];
+    let mut alones = vec![];
+    let mut used = vec![false; m];
 
-#[macro_export]
-#[cfg(not(debug_assertions))]
-macro_rules! mepw {
-    ($($arg:tt)*) => {};
-}
-
-#[macro_export]
-macro_rules! chmin {
-    ($a:expr, $b:expr) => {
-        if $a > $b {
-            $a = $b;
-            true
-        } else {
-            false
+    let mut seen = vec![false; n];
+    for i in 0..n {
+        if seen[i] {
+            continue;
         }
-    };
-}
-
-#[macro_export]
-macro_rules! chmax {
-    ($a:expr, $b:expr) => {
-        if $a < $b {
-            $a = $b;
-            true
-        } else {
-            false
+        let mut queue = vec![];
+        seen[i] = true;
+        queue.push(i);
+        let mut temp_rem_cables = vec![];
+        while let Some(v) = queue.pop() {
+            for &(nv, idx) in &graph[v] {
+                md!(nv, idx);
+                if seen[nv] {
+                    if !used[idx] {
+                        temp_rem_cables.push(idx);
+                    }
+                } else {
+                    seen[nv] = true;
+                    queue.push(nv);
+                }
+                used[idx] = true;
+            }
         }
-    };
-}
-
-trait JoinExtended {
-    fn join_with(
-        self,
-        sep: &str,
-    ) -> String;
-}
-
-impl<I> JoinExtended for I
-where
-    I: Iterator,
-    I::Item: Joinable,
-{
-    fn join_with(
-        self,
-        sep: &str,
-    ) -> String {
-        let mut peekable = self.peekable();
-        let is_2d = if let Some(first) = peekable.peek() {
-            first.is_container()
-        } else {
-            false
-        };
-
-        let res = peekable.map(|item| item.join_item(sep)).collect::<Vec<_>>();
-
-        // Use newline for 2D rows, provided sep for 1D elements
-        res.join(if is_2d { "\n" } else { sep })
+        alones.push((i, temp_rem_cables));
     }
-}
+    alones.sort_unstable_by(|a, b| b.1.len().cmp(&a.1.len()));
 
-trait Joinable {
-    fn join_item(
-        &self,
-        sep: &str,
-    ) -> String;
-    fn is_container(&self) -> bool;
-}
+    let mut deque = VecDeque::new();
+    for alone in alones {
+        deque.push_back(alone);
+    }
 
-macro_rules! impl_joinable_scalar {
-    ($($t:ty),*) => {
-        $(
-            impl Joinable for &$t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
+    while deque.len() > 1 {
+        let (i, cables) = deque.pop_front().unwrap();
+        for cable in cables {
+            if let Some((j, _)) = deque.pop_back() {
+                ans.push((cable, j));
             }
-            impl Joinable for $t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-        )*
-    };
+        }
+        deque.push_back((i, vec![]));
+    }
+
+    println!(
+        "{}\n{}",
+        ans.len(),
+        ans.iter()
+            .map(|(cable, alone)| {
+                vec![cable + 1, AB[*cable].0 + 1, alone + 1]
+                    .iter()
+                    .join(" ")
+            })
+            .join("\n")
+    );
 }
 
-impl_joinable_scalar!(
-    i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str
-);
+// FOR TEMPLATE INJECTIONS
 
-impl<T: std::fmt::Display> Joinable for &Vec<T> {
-    fn join_item(
-        &self,
-        sep: &str,
-    ) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool {
-        true
-    }
-}
-
-impl<T: std::fmt::Display> Joinable for &[T] {
-    fn join_item(
-        &self,
-        sep: &str,
-    ) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool {
-        true
-    }
-}
+// END TEMPLATE INJECTIONS

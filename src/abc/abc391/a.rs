@@ -3,16 +3,15 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -50,6 +49,10 @@ macro_rules! md {
     }};
 }
 
+// FOR TEMPLATE INJECTIONS
+
+// END TEMPLATE INJECTIONS
+
 fn main() {
     let stdout = stdout();
     let mut out = BufWriter::new(stdout.lock());
@@ -61,11 +64,24 @@ fn main() {
 
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
-    input! {
-
+    macro_rules! wl {
+        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
+        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
     }
+
+    input! {
+        D: Chars,
+    }
+    let convert = |c: char| {
+        if c == 'E' {
+            'W'
+        } else if c == 'W' {
+            'E'
+        } else if c == 'N' {
+            'S'
+        } else {
+            'N'
+        }
+    };
+    println!("{}", D.iter().map(|c| convert(*c)).collect::<String>());
 }
-
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS

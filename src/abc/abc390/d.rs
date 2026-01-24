@@ -3,16 +3,15 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -50,6 +49,10 @@ macro_rules! md {
     }};
 }
 
+// FOR TEMPLATE INJECTIONS
+
+// END TEMPLATE INJECTIONS
+
 fn main() {
     let stdout = stdout();
     let mut out = BufWriter::new(stdout.lock());
@@ -61,11 +64,38 @@ fn main() {
 
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
-    input! {
+    macro_rules! wl {
+        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
+        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
+    }
 
+    input! {
+        n: usize,
+        A: [i64; n],
+    }
+    let mut set = BTreeSet::new();
+    f(0, &A, &mut set);
+    wl!(set.len());
+}
+fn f(
+    accum: i64,
+    state: &Vec<i64>,
+    set: &mut BTreeSet<i64>,
+) {
+    if state.is_empty() {
+        set.insert(accum);
+        return;
+    }
+    for i in 0..(1usize << (state.len() - 1)) {
+        let mut new_state = vec![];
+        let mut sum = state[0];
+        for j in 0..(state.len() - 1) {
+            if (i >> j) & 1 == 1 {
+                new_state.push(state[j + 1]);
+            } else {
+                sum += state[j + 1];
+            }
+        }
+        f(accum ^ sum, &new_state, set);
     }
 }
-
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS

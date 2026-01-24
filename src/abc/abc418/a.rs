@@ -46,13 +46,13 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         n: usize,
-        S: Chars,
+        s: Chars,
     }
     if n < 3 {
         wl!("No");
         return;
     }
-    if S.iter().skip(n - 3).collect::<String>() == "tea" {
+    if s.iter().skip(n - 3).collect::<String>() == "tea" {
         wl!("Yes");
     }
     else {

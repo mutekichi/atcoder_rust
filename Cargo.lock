@@ -13,10 +13,45 @@ dependencies = [
 ]
 
 [[package]]
+name = "abc389"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc390"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc391"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "abc392"
 version = "0.1.0"
 dependencies = [
  "itertools",
+ "memoise",
  "num-integer",
  "proconio",
  "rand",
@@ -621,6 +656,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bcc35a38544a891a5f7c865aca548a982ccb3b8650a5b06d0fd33a10283c56fc"
 
 [[package]]
+name = "memoise"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "04d4bedd9ad829dc571ce57e21d6b270a62646889bc045f265eb92183d6599db"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "num-integer"
 version = "0.1.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -709,6 +755,17 @@ checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
 name = "syn"
+version = "1.0.109"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
+]
+
+[[package]]
+name = "syn"
 version = "2.0.114"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4d107df263a3013ef9b1879b0df87d706ff80f65a86ea879bd9c31f9b307c2a"
@@ -747,5 +804,5 @@ checksum = "2c7962b26b0a8685668b671ee4b54d007a67d4eaf05fda79ac0ecf41e32270f1"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn",
+ "syn 2.0.114",
 ]

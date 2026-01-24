@@ -1,5 +1,5 @@
 [package]
-name = "abc392"
+name = "abc389"
 version = "0.1.0"
 edition = "2024"
 
@@ -9,7 +9,6 @@ itertools = { workspace = true }
 superslice = { workspace = true }
 num-integer = { workspace = true }
 rand = { workspace = true }
-memoise = { workspace = true }
 
 [[bin]]
 name = "a"

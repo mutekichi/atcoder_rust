@@ -3,15 +3,16 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
+use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -22,33 +23,6 @@ const INF_I128: i128 = 1 << 120;
 const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
 const C998244353: u64 = 998244353;
 const C1000000007: u64 = 1000000007;
-
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS
-
-fn main() {
-    let stdout = stdout();
-    let mut out = BufWriter::new(stdout.lock());
-
-    solve(&mut out);
-
-    out.flush().unwrap();
-}
-
-#[allow(unused_variables)]
-fn solve<W: Write>(out: &mut W) {
-    macro_rules! wl {
-        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
-        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
-    }
-
-    input! {
-        
-    }
-}
-
-// --- Macros ---
 
 #[macro_export]
 #[cfg(debug_assertions)] // for debug build
@@ -76,143 +50,50 @@ macro_rules! md {
     }};
 }
 
-#[macro_export]
-#[cfg(debug_assertions)]
-// Usage: mep!(val) (-> eprint without newline)
-// mep!("{:<1$}", val, width) (-> left align with width)
-// mep!("{:>1$}", val, width)
-macro_rules! mep {
-    ($x:expr) => { eprint!("{}", $x); };
-    ($($arg:tt)+) => { eprint!($($arg)+); };
+fn main() {
+    let stdout = stdout();
+    let mut out = BufWriter::new(stdout.lock());
+
+    solve(&mut out);
+
+    out.flush().unwrap();
 }
 
-#[macro_export]
-#[cfg(not(debug_assertions))]
-macro_rules! mep {
-    ($($arg:tt)*) => {};
-}
-
-#[macro_export]
-#[cfg(debug_assertions)]
-// Usage: mep!(val) (-> eprint with space)
-// mep!("{:<1$}", val, width) (-> left align with width)
-// mep!("{:>1$}", val, width)
-macro_rules! mepw { // stands for my_eprint_whitespace
-    ($x:expr) => { eprint!("{} ", $x); };
-    ($($arg:tt)+) => { eprint!($($arg)+); };
-}
-
-#[macro_export]
-#[cfg(not(debug_assertions))]
-macro_rules! mepw {
-    ($($arg:tt)*) => {};
-}
-
-#[macro_export]
-macro_rules! chmin {
-    ($a:expr, $b:expr) => {
-        if $a > $b {
-            $a = $b;
-            true
-        } else {
-            false
+#[allow(unused_variables)]
+fn solve<W: Write>(out: &mut W) {
+    input! {
+        n: usize,
+    }
+    let mut K = vec![];
+    let mut data = vec![];
+    let mut counts = vec![vec![0usize; 100010usize]; n];
+    for i in 0..n {
+        input! {
+            k: usize,
+            A: [usize; k],
         }
-    };
-}
-
-#[macro_export]
-macro_rules! chmax {
-    ($a:expr, $b:expr) => {
-        if $a < $b {
-            $a = $b;
-            true
-        } else {
-            false
+        K.push(k);
+        data.push(BTreeMap::new());
+        for a in A {
+            counts[i][a] += 1;
+            *(data[i]).entry(a).or_insert(0) += 1;
         }
-    };
-}
-
-trait JoinExtended {
-    fn join_with(
-        self,
-        sep: &str,
-    ) -> String;
-}
-
-impl<I> JoinExtended for I
-where
-    I: Iterator,
-    I::Item: Joinable,
-{
-    fn join_with(
-        self,
-        sep: &str,
-    ) -> String {
-        let mut peekable = self.peekable();
-        let is_2d = if let Some(first) = peekable.peek() {
-            first.is_container()
-        } else {
-            false
-        };
-
-        let res = peekable.map(|item| item.join_item(sep)).collect::<Vec<_>>();
-
-        // Use newline for 2D rows, provided sep for 1D elements
-        res.join(if is_2d { "\n" } else { sep })
     }
-}
-
-trait Joinable {
-    fn join_item(
-        &self,
-        sep: &str,
-    ) -> String;
-    fn is_container(&self) -> bool;
-}
-
-macro_rules! impl_joinable_scalar {
-    ($($t:ty),*) => {
-        $(
-            impl Joinable for &$t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
+    let mut ans = 0f64;
+    for i in 0..(n - 1) {
+        for j in (i + 1)..n {
+            let mut numerator = 0usize;
+            for (&v, &count) in data[i].iter() {
+                md!(i, v, count);
+                numerator += count * counts[j][v];
             }
-            impl Joinable for $t {
-                fn join_item(&self, _sep: &str) -> String { self.to_string() }
-                fn is_container(&self) -> bool { false }
-            }
-        )*
-    };
+            md!(i, j, numerator, K[i] * K[j]);
+            ans = ans.max(numerator as f64 / (K[i] * K[j]) as f64);
+        }
+    }
+    println!("{}", ans);
 }
 
-impl_joinable_scalar!(i32, i64, i128, u32, u64, u128, usize, isize, f32, f64, char, String, &str);
+// FOR TEMPLATE INJECTIONS
 
-impl<T: std::fmt::Display> Joinable for &Vec<T> {
-    fn join_item(
-        &self,
-        sep: &str,
-    ) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool {
-        true
-    }
-}
-
-impl<T: std::fmt::Display> Joinable for &[T] {
-    fn join_item(
-        &self,
-        sep: &str,
-    ) -> String {
-        self.iter()
-            .map(|x| x.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
-    }
-    fn is_container(&self) -> bool {
-        true
-    }
-}
+// END TEMPLATE INJECTIONS

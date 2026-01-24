@@ -3,16 +3,15 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -50,6 +49,10 @@ macro_rules! md {
     }};
 }
 
+// FOR TEMPLATE INJECTIONS
+
+// END TEMPLATE INJECTIONS
+
 fn main() {
     let stdout = stdout();
     let mut out = BufWriter::new(stdout.lock());
@@ -61,11 +64,55 @@ fn main() {
 
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
-    input! {
+    macro_rules! wl {
+        ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
+        ($($arg:tt)*) => { writeln!(out, $($arg)*).unwrap(); };
+    }
 
+    input! {
+        n: usize,
+        w: usize,
+        XY: [(Usize1, i64); n],
+        q: usize,
+        TA: [(i64, Usize1); q],
+    }
+    let mut ans = vec![INF_I64; n];
+    let mut y_list = vec![vec![]; w];
+    for i in 0..n {
+        let (x, y) = XY[i];
+        y_list[x].push((y, i));
+    }
+    for i in 0..w {
+        y_list[i].sort_unstable();
+    }
+    let mut h = 0;
+    loop {
+        let mut max_y = 0;
+        let mut ok = true;
+        for i in 0..w {
+            if y_list[i].len() <= h {
+                ok = false;
+                break;
+            } else {
+                max_y = max_y.max(y_list[i][h].0);
+            }
+        }
+        if !ok {
+            break;
+        } else {
+            for i in 0..w {
+                md!(i, h, y_list[i].len());
+                ans[y_list[i][h].1] = max_y;
+            }
+        }
+        h += 1;
+    }
+    for (t, a) in TA {
+        md!(t, a);
+        if ans[a] <= t {
+            wl!("No");
+        } else {
+            wl!("Yes");
+        }
     }
 }
-
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS
