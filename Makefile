@@ -9,12 +9,23 @@ help:
 	@echo "  make use src/tmpl.rs abc 341 a  : Inject template"
 
 INPUT_FILE = input.txt
-
-# Keywords to be excluded from positional arguments
 KEYWORDS = new run use data release p
-
-# Extract arguments that are not make targets or functional keywords
 ARGS = $(filter-out $(KEYWORDS) $@,$(MAKECMDGOALS))
+
+# OS detection
+ifeq ($(OS),Windows_NT)
+    PLATFORM := Windows
+else
+    PLATFORM := $(shell uname -s)
+endif
+
+# Define paste command based on OS
+ifeq ($(PLATFORM),Windows)
+    PASTE_CMD := powershell.exe -command "Get-Clipboard" | tr -d '\r'
+else
+    # Default for macOS (Darwin)
+    PASTE_CMD := pbpaste
+endif
 
 # Mode detection
 CARGO_FLAGS =
@@ -24,7 +35,6 @@ ifneq (,$(filter release,$(MAKECMDGOALS)))
 	MODE := release
 endif
 
-# Check if "p" is provided as an argument
 DO_PASTE = $(filter p,$(MAKECMDGOALS))
 
 .PHONY: release p
@@ -45,14 +55,13 @@ run:
 	$(eval P := $(word 3, $(ARGS)))
 	@if [ -z "$(T)" ] || [ -z "$(C)" ] || [ -z "$(P)" ]; then echo "Error: Type, ID, and Prob required."; exit 1; fi
 	$(eval PKG_NAME := $(T)$(C))
-	@# Paste if "p" keyword exists
+	@# Paste from clipboard based on OS
 	@if [ -n "$(DO_PASTE)" ]; then \
-		powershell.exe -command "Get-Clipboard" | tr -d '\r' > $(INPUT_FILE); \
+		$(PASTE_CMD) > $(INPUT_FILE); \
 		echo "Copied clipboard content to $(INPUT_FILE)"; \
 	fi
-	@# Compile using workspace package and bin name
 	@cargo build $(CARGO_FLAGS) --quiet -p $(PKG_NAME) --bin $(P)
-	@# Execute
+	@# Resolve binary path (handles .exe for Windows and no ext for Mac)
 	@BIN_PATH="./target/$(MODE)/$(P)"; \
 	if [ -f "$${BIN_PATH}.exe" ]; then BIN_PATH="$${BIN_PATH}.exe"; fi; \
 	if [ "$(MODE)" = "release" ]; then \
@@ -88,7 +97,7 @@ use:
 
 .PHONY: paste
 paste:
-	@powershell.exe -command "Get-Clipboard" | tr -d '\r' > $(INPUT_FILE)
+	@$(PASTE_CMD) > $(INPUT_FILE)
 	@echo "Copied clipboard content to $(INPUT_FILE)"
 
 %:
