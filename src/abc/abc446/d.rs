@@ -62,8 +62,22 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        n: usize,
+        A: [usize; n],
     }
+    let mut data = BTreeMap::new();
+    let mut ans = 1usize;
+    for a in A {
+        if data.contains_key(&(a - 1)) {
+            let val = data.get(&(a - 1)).unwrap() + 1;
+            ans = ans.max(val);
+            data.insert(a, val);
+        }
+        else {
+            data.insert(a, 1);
+        }
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

@@ -62,8 +62,54 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        t: usize,
     }
+    for _ in 0..t {
+        input! {
+            n: usize,
+            mut k: i64,
+            l: i64,
+            mut A: [i64; n],
+        }
+        A.sort_unstable();
+        A.dedup();
+        let mut intervals = A.windows(2).map(|w| w[1] - w[0]).collect::<Vec<_>>();
+        intervals.sort_unstable();
+        let mut ans = 0;
+        let mut mergin_sum = A[0] + l - A[A.len() - 1];
+        let mut mergin_large = max(A[0], l - A[A.len() - 1]);
+        let mut sum = 0;
+
+        for i in 0..=min(k as usize, intervals.len()) {
+            let rem = k - i as i64;
+            if rem > 0 {
+                ans = max(ans, sum + mergin_sum * (rem - 1) + mergin_large);
+            }
+            else {
+                ans = max(ans, sum);
+            }
+
+            if i < min(k as usize, intervals.len()) {
+                let interval = intervals[intervals.len() - 1 - i];
+                sum += interval / 2;
+                mergin_sum += interval;
+                mergin_large += interval / 2;
+            }
+        }
+        println!("{}", ans);
+    }
+}
+
+fn calc_kougo(
+    k: i64,
+    left: i64,
+    right: i64,
+) -> i64 {
+    let mut kougo = (left + right) * (k / 2);
+    if k % 2 == 1 {
+        kougo += max(left, right);
+    };
+    kougo
 }
 
 // FOR TEMPLATE INJECTIONS

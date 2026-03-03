@@ -9,7 +9,7 @@ use rand::Rng;
 use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{BufWriter, Write, stdout};
-use std::mem::swap;
+use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
 use itertools::{Itertools, iproduct};
@@ -62,8 +62,21 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+      n: usize,
+      A: [Usize1; n],
     }
+    let mut ans = vec![0; n];
+    for i in (0..n).rev() {
+        if A[i] == i {
+            ans[i] = i;
+        } else {
+            ans[i] = ans[A[i]];
+        }
+    }
+    for i in 0..n {
+        ans[i] += 1;
+    }
+    println!("{}", ans.iter().join(" "));
 }
 
 // FOR TEMPLATE INJECTIONS

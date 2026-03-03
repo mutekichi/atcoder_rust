@@ -62,7 +62,27 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        n: usize,
+        m: usize,
+    }
+    let mut remains = vec![true; m];
+    for _ in 0..n {
+        input! {
+            l: usize,
+            A: [usize; l],
+        }
+        let mut ok = true;
+        for a in A {
+            if remains[a - 1] {
+                remains[a - 1] = false;
+                println!("{}", a);
+                ok = false;
+                break;
+            }
+        }
+        if ok {
+            println!("{}", 0);
+        }
     }
 }
 

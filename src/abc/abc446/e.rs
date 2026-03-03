@@ -62,8 +62,51 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        m: usize,
+        a: usize,
+        b: usize,
     }
+    let mut status = vec![vec![3; m]; m];
+    for i in 0..m {
+        for j in 0..m {
+            let mut s = i;
+            let mut t = j;
+            let mut history = vec![];
+            let mut ok = true;
+            loop {
+                history.push((s, t));
+                if s * t == 0 {
+                    ok = false;
+                    break;
+                }
+                if status[s][t] != 3 {
+                    if status[s][t] == 0 {
+                        ok = false;
+                    }
+                    break;
+                }
+                status[s][t] = 2;
+                (s, t) = (t, (s * b + t * a) % m);
+            }
+            for (s, t) in history {
+                if ok {
+                    status[s][t] = 1;
+                }
+                else {
+                    status[s][t] = 0;
+                }
+            }
+        }
+    }
+    let mut ans = 0usize;
+    for i in 0..m {
+        for j in 0..m {
+            if status[i][j] == 1 {
+                ans += 1;
+            }
+        }
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

@@ -62,7 +62,30 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        t: usize,
+    }
+    for _ in 0..t {
+        input! {
+            n: usize,
+            d: usize,
+            A: [usize; n],
+            B: [usize; n],
+        }
+        let mut total_stock = 0usize;
+        let mut total_usage = 0usize;
+        let mut total_to_trash = 0usize;
+        for i in 0..n {
+            total_stock += A[i];
+            total_usage += B[i];
+            if i >= d {
+                total_to_trash += A[i - d];
+            }
+            if total_to_trash > total_usage {
+                let count_to_trash = total_to_trash - total_usage;
+                total_usage += count_to_trash;
+            }
+        }
+        println!("{}", total_stock - total_usage);
     }
 }
 

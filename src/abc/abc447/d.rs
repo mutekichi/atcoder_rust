@@ -62,8 +62,29 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        S: Chars,
     }
+    let mut ans = 0usize;
+    let mut c_rem = 0usize;
+    let mut bc_rem = 0usize;
+    for &c in S.iter().rev() {
+        if c == 'A' {
+            if bc_rem > 0 {
+                ans += 1;
+                bc_rem -= 1;
+            }
+        }
+        else if c == 'B' {
+            if c_rem > 0 {
+                bc_rem += 1;
+                c_rem -= 1;
+            }
+        }
+        else {
+            c_rem += 1;
+        }
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

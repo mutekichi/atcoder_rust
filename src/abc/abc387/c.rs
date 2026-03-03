@@ -62,8 +62,33 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        l: i64, r: i64,
     }
+    println!("{}", count_snakes(r, 10) - count_snakes(l - 1, 10));
+}
+
+fn count_snakes(n: i64, lim: i64) -> i64 {
+    md!(n, lim);
+    if n == 0 {
+        return 0;
+    }
+    let (factor, pow) = {
+        let mut m = n;
+        let mut pow = 1; 
+        while m >= 10 {
+            m /= 10;
+            pow += 1;
+        }
+        (m, pow)
+    };
+    md!(factor, pow);
+    let lim = min(lim, factor);
+    let mut sum = 0;
+    for i in 1..=lim {
+        sum += i.pow(pow - 1);
+    }
+    md!(sum, n - factor * 10_i64.pow(pow - 1));
+    sum + count_snakes(n - factor * 10_i64.pow(pow - 1), lim)
 }
 
 // FOR TEMPLATE INJECTIONS

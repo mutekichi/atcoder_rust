@@ -62,8 +62,9 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        S: Chars,
     }
+    println!("{}UPC", S[0]);
 }
 
 // FOR TEMPLATE INJECTIONS

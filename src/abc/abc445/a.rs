@@ -62,7 +62,12 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        S: Chars,
+    }
+    if S[0] == *S.last().unwrap() {
+        println!("Yes");
+    } else {
+        println!("No");
     }
 }
 

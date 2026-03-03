@@ -62,8 +62,9 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        S: String,
     }
+    println!("Of{}", S.to_ascii_lowercase());
 }
 
 // FOR TEMPLATE INJECTIONS

@@ -13,6 +13,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "abc387"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc388"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "abc389"
 version = "0.1.0"
 dependencies = [
@@ -568,6 +592,54 @@ dependencies = [
 ]
 
 [[package]]
+name = "abc445"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc446"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc447"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "ahc060"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "ahcintroduction"
 version = "0.1.0"
 dependencies = [
@@ -644,6 +716,18 @@ dependencies = [
  "itertools",
  "num-integer",
  "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "arc215"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
  "superslice",
 ]
 

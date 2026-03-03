@@ -62,7 +62,13 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        n: usize, m: usize,
+    }
+    if m <= (n + 1) / 2 {
+        println!("Yes");
+    }
+    else {
+        println!("No");
     }
 }
 

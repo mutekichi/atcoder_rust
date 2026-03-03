@@ -6,13 +6,13 @@
 use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{Ordering, Reverse, max, min};
+use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{BufWriter, Write, stdout};
+use std::io::{stdout, BufWriter, Write};
 use std::mem::swap;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{Itertools, iproduct};
+use itertools::{iproduct, Itertools};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -62,7 +62,20 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        n: usize,
+        S: [String; n],
+    }
+    let l = S.iter().map(|s| s.len()).max().unwrap();
+    for s in S {
+        let pad = (l - s.len()) / 2;
+        for i in 0..pad {
+            print!(".");
+        }
+        print!("{}", s);
+        for i in 0..pad {
+            print!(".");
+        }
+        println!();
     }
 }
 

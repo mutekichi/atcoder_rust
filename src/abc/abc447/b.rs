@@ -62,8 +62,21 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        s: Chars,
     }
+    let mut counter = vec![0; 26];
+    for &c in &s {
+        counter[(c as u8 - b'a') as usize] += 1;
+    }
+    let &largest_count = counter.iter().max().unwrap();
+    
+    let mut ans = vec![];
+    for &c in &s {
+        if counter[(c as u8 - b'a') as usize] != largest_count {
+            ans.push(c);
+        }
+    }
+    println!("{}", ans.iter().join(""));
 }
 
 // FOR TEMPLATE INJECTIONS

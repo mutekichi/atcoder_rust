@@ -62,8 +62,69 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        q: usize,
     }
+    for _ in 0..q {
+        input! {
+            n: usize,
+            AB: [(Usize1, Usize1); n - 1],
+        }
+        let mut graph = vec![vec![]; n];
+        for (a, b) in AB {
+            graph[a].push(b);
+            graph[b].push(a);
+        }
+        let mut ans = 1usize;
+        dfs(INF_USIZE, 0, &graph, &mut ans);
+        println!("{}", ans);
+    }
+}
+
+fn dfs(
+    from: usize,
+    v: usize,
+    graph: &Vec<Vec<usize>>,
+    ans: &mut usize,
+) -> usize {
+    let mut val = 1;
+    let mut vec = BinaryHeap::new();
+
+    for &nv in &graph[v] {
+        if nv == from {
+            continue;
+        }
+        let val = dfs(v, nv, graph, ans);
+        vec.push(val);
+    }
+    md!(v, vec.len());
+    if vec.len() < 2 {
+        val = 0;
+    } else {
+        let first = vec.pop().unwrap();
+        let second = vec.pop().unwrap();
+        let has_third = vec.pop().is_some();
+        if from != INF_USIZE {
+            if has_third {
+            *ans = max(*ans, first + second + 1);
+            }
+            else {
+                *ans = max(*ans, first + 1);
+            }
+            if has_third {
+                val = first + 1;
+            }
+        } else {
+            let has_fourth = vec.pop().is_some();
+            if has_third && has_fourth {
+                *ans = max(*ans, first + second + 1);
+            }
+            else if has_third {
+                *ans = max(*ans, first + 1);
+            }
+        }
+    }
+    md!(v, val, ans);
+    val
 }
 
 // FOR TEMPLATE INJECTIONS

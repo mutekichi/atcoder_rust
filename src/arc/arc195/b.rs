@@ -47,21 +47,17 @@ fn solve<W: Write>(out: &mut W) {
     }
     let mut A = vec![];
     let mut B = vec![];
-    let mut a_almighty = 0;
-    let mut b_almighty = 0;
 
     for a in AA {
         if a != -1 {
             A.push(a);
         } else {
-            a_almighty += 1;
         }
     }
     for b in BB {
         if b != -1 {
             B.push(b);
         } else {
-            b_almighty += 1;
         }
     }
     let mut unused = BTreeSet::new();

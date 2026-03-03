@@ -62,8 +62,9 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        a: usize, b: usize,
     }
+    println!("{}", (a + b).pow(2));
 }
 
 // FOR TEMPLATE INJECTIONS

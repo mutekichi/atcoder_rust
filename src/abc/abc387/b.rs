@@ -62,8 +62,20 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        x: usize,
     }
+    let ans = {
+        let mut sum = 0;
+        for i in 1..=9 {
+            for j in 1..=9 {
+                if i * j != x {
+                    sum += i * j;
+                }
+            }
+        }
+        sum
+    };
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

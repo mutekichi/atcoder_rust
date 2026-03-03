@@ -62,8 +62,47 @@ fn main() {
 #[allow(unused_variables)]
 fn solve<W: Write>(out: &mut W) {
     input! {
-
+        s: Chars,
+        t: Chars,
     }
+    let mut s_runs = vec![];
+    let mut t_runs = vec![];
+    let mut s_others = vec![];
+    let mut t_others = vec![];
+    let mut run_length = 0;
+    for c in s {
+        if c == 'A' {
+            run_length += 1usize;
+        } else {
+            s_runs.push(run_length);
+            run_length = 0;
+            s_others.push(c);
+        }
+    }
+    s_runs.push(run_length);
+    run_length = 0;
+    for c in t {
+        if c == 'A' {
+            run_length += 1;
+        } else {
+            t_runs.push(run_length);
+            run_length = 0;
+            t_others.push(c);
+        }
+    }
+    t_runs.push(run_length);
+
+    if s_others.len() != t_others.len() || !s_others.iter().zip(t_others).all(|(s, t)| *s == t) {
+        println!("-1");
+        return;
+    }
+
+    assert!(s_runs.len() == t_runs.len());
+    let mut ans = 0usize;
+    for i in 0..s_runs.len() {
+        ans += s_runs[i].abs_diff(t_runs[i]);
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS
