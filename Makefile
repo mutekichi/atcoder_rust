@@ -3,6 +3,7 @@ help:
 	@echo "Usage:"
 	@echo "  make new abc 341                : Create environment for ABC341"
 	@echo "  make run abc 341 a              : Run solution for ABC341 problem A"
+	@echo "  make run ahc 060                : Run solution for AHC060 (implicitly runs a)"
 	@echo "  make run abc 341 a p            : Paste from clipboard and run"
 	@echo "  make run abc 341 a release      : Run solution in release mode"
 	@echo "  make data                       : Generate test data"
@@ -46,14 +47,18 @@ new:
 	$(eval T := $(word 1, $(ARGS)))
 	$(eval C := $(word 2, $(ARGS)))
 	@if [ -z "$(T)" ] || [ -z "$(C)" ]; then echo "Error: Type and ID required."; exit 1; fi
+	@if [ "$(T)" != "abc" ] && [ "$(T)" != "arc" ] && [ "$(T)" != "ahc" ]; then echo "Error: Category must be abc, arc, or ahc."; exit 1; fi
 	@./mkrs.sh $(C) $(T)
 
 .PHONY: run
 run:
 	$(eval T := $(word 1, $(ARGS)))
 	$(eval C := $(word 2, $(ARGS)))
-	$(eval P := $(word 3, $(ARGS)))
-	@if [ -z "$(T)" ] || [ -z "$(C)" ] || [ -z "$(P)" ]; then echo "Error: Type, ID, and Prob required."; exit 1; fi
+	$(eval P_ARG := $(word 3, $(ARGS)))
+	@if [ -z "$(T)" ] || [ -z "$(C)" ]; then echo "Error: Type and ID required."; exit 1; fi
+	@if [ "$(T)" != "abc" ] && [ "$(T)" != "arc" ] && [ "$(T)" != "ahc" ]; then echo "Error: Category must be abc, arc, or ahc."; exit 1; fi
+	$(eval P := $(if $(filter ahc,$(T)),a,$(P_ARG)))
+	@if [ -z "$(P)" ]; then echo "Error: Prob required for $(T)."; exit 1; fi
 	$(eval PKG_NAME := $(T)$(C))
 	@# Paste from clipboard based on OS
 	@if [ -n "$(DO_PASTE)" ]; then \
@@ -61,7 +66,7 @@ run:
 		echo "Copied clipboard content to $(INPUT_FILE)"; \
 	fi
 	@cargo build $(CARGO_FLAGS) --quiet -p $(PKG_NAME) --bin $(P)
-	@# Resolve binary path (handles .exe for Windows and no ext for Mac)
+	@# Resolve binary path
 	@BIN_PATH="./target/$(MODE)/$(P)"; \
 	if [ -f "$${BIN_PATH}.exe" ]; then BIN_PATH="$${BIN_PATH}.exe"; fi; \
 	if [ "$(MODE)" = "release" ]; then \

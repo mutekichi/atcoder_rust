@@ -4,6 +4,7 @@
 #![allow(non_snake_case)]
 
 use num_integer::gcd;
+use rand::Rng;
 use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{BufWriter, Write, stdout};
@@ -13,7 +14,8 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
-use rand::Rng;
+use rand::rngs::SmallRng;
+use std::cell::RefCell;
 
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
@@ -58,16 +60,16 @@ fn solve<W: Write>(out: &mut W) {
         n: usize,
         XY: [(i64, i64); n],
     }
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     for i in 0..500 {
-        let first = rng.gen_range(0..n);
-        let mut second = rng.gen_range(0..n);
+        let first = rng.random_range(0..n);
+        let mut second = rng.random_range(0..n);
         loop {
             if first != second {
                 break;
             }
-            second = rng.gen_range(0..n);
+            second = rng.random_range(0..n);
         }
 
         let (x1, y1) = (XY[first].0, XY[first].1);
