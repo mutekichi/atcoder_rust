@@ -132,8 +132,8 @@ fn solve<W: Write>(out: &mut W) {
 }
 
 fn generate_plan(state: &mut State) {
-    let sim_count = 50;
-    let max_depth = 30;
+    let sim_count = 100;
+    let max_depth = 80;
     
     let mut best_plan = Vec::new();
     let mut best_score = -1.0;
