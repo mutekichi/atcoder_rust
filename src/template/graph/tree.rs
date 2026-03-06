@@ -62,13 +62,23 @@ impl Tree {
 
     /// Adds an undirected edge between `u` and `v` with weight `w`.
     /// For unweighted trees, use `w = 1`.
-    pub fn add_edge(&mut self, u: usize, v: usize, w: i64) {
+    pub fn add_edge(
+        &mut self,
+        u: usize,
+        v: usize,
+        w: i64,
+    ) {
         self.edges[u].push((v, w));
         self.edges[v].push((u, w));
     }
 
     /// Adds a directed edge from `u` to `v` with weight `w`.
-    pub fn add_directed_edge(&mut self, u: usize, v: usize, w: i64) {
+    pub fn add_directed_edge(
+        &mut self,
+        u: usize,
+        v: usize,
+        w: i64,
+    ) {
         self.edges[u].push((v, w));
     }
 
@@ -94,7 +104,10 @@ impl Tree {
         (dist[v], r, v)
     }
 
-    fn bfs_farthest(&self, start: usize) -> usize {
+    fn bfs_farthest(
+        &self,
+        start: usize,
+    ) -> usize {
         let (dist, _) = self.bfs_dist(start);
         dist.iter()
             .enumerate()
@@ -103,12 +116,15 @@ impl Tree {
             .unwrap()
     }
 
-    fn bfs_dist(&self, start: usize) -> (Vec<i64>, usize) {
+    fn bfs_dist(
+        &self,
+        start: usize,
+    ) -> (Vec<i64>, usize) {
         let mut dist = vec![-1; self.n];
         let mut queue = std::collections::VecDeque::new();
         dist[start] = 0;
         queue.push_back(start);
-        
+
         let mut farthest_node = start;
         let mut max_dist = 0;
 
@@ -186,23 +202,26 @@ impl Tree {
     ///
     /// # Complexity
     /// - O(N log N)
-    pub fn build_lca(&mut self, root: usize) {
+    pub fn build_lca(
+        &mut self,
+        root: usize,
+    ) {
         self.root = root;
         let log_n = (self.n as f64).log2().ceil() as usize;
         let log_n = if log_n == 0 { 1 } else { log_n };
-        
+
         self.parent = vec![vec![None; self.n]; log_n + 1];
         self.depth = vec![0; self.n];
         self.dist_from_root = vec![0; self.n];
-        
+
         let mut stack = vec![(root, None::<usize>, 0, 0)]; // u, p, d, dist
-        
+
         // Iterative DFS
         while let Some((u, p, d, dist)) = stack.pop() {
             self.parent[0][u] = p;
             self.depth[u] = d;
             self.dist_from_root[u] = dist;
-            
+
             for &(v, w) in &self.edges[u] {
                 if Some(v) != p {
                     stack.push((v, Some(u), d + 1, dist + w));
@@ -228,7 +247,11 @@ impl Tree {
     ///
     /// # Complexity
     /// - O(log N)
-    pub fn lca(&self, mut u: usize, mut v: usize) -> usize {
+    pub fn lca(
+        &self,
+        mut u: usize,
+        mut v: usize,
+    ) -> usize {
         assert!(self.lca_ready, "LCA not built. Call build_lca(root) first.");
 
         if self.depth[u] > self.depth[v] {
@@ -263,17 +286,80 @@ impl Tree {
     ///
     /// # Complexity
     /// - O(log N)
-    pub fn dist(&self, u: usize, v: usize) -> i64 {
+    pub fn dist(
+        &self,
+        u: usize,
+        v: usize,
+    ) -> i64 {
         let lca = self.lca(u, v);
         self.dist_from_root[u] + self.dist_from_root[v] - 2 * self.dist_from_root[lca]
     }
-    
+
     /// Returns the distance (number of edges) between nodes `u` and `v`.
     ///
     /// # Complexity
     /// - O(log N)
-    pub fn depth_dist(&self, u: usize, v: usize) -> usize {
+    pub fn depth_dist(
+        &self,
+        u: usize,
+        v: usize,
+    ) -> usize {
         let lca = self.lca(u, v);
         self.depth[u] + self.depth[v] - 2 * self.depth[lca]
+    }
+
+    /// Euler Tour of the tree.
+    ///
+    /// # Returns
+    /// - `in_time[u]`: The time index when node `u` is first visited.
+    /// - `out_time[u]`: The time index after all nodes in `u`'s subtree have been visited.
+    /// - `euler`: The sequence of nodes in the order they are visited (size N).
+    /// - `depth`: The depth of each node in the tree.
+    /// - `dist`: The weighted distance from the root to each node.
+    ///
+    /// # Complexity
+    /// - O(N)
+    pub fn euler_tour(&self) -> (Vec<usize>, Vec<usize>, Vec<usize>, Vec<usize>, Vec<i64>) {
+        let n = self.n;
+        let mut in_time = vec![0; n];
+        let mut out_time = vec![0; n];
+        let mut euler = vec![0; n];
+        let mut depth = vec![0; n];
+        let mut dist = vec![0; n];
+        let mut parent = vec![n; n];
+        let mut order = Vec::with_capacity(n);
+
+        let mut timer = 0;
+        let mut stack = vec![(self.root, n, 0, 0i64)];
+
+        // DFS to compute in_time, depth, dist, and a topological order
+        while let Some((u, p, d, w)) = stack.pop() {
+            in_time[u] = timer;
+            euler[timer] = u;
+            depth[u] = d;
+            dist[u] = w;
+            parent[u] = p;
+            timer += 1;
+            order.push(u);
+
+            // Add children in reverse to maintain edge order
+            for &(v, weight) in self.edges[u].iter().rev() {
+                if v != p {
+                    stack.push((v, u, d + 1, w + weight));
+                }
+            }
+        }
+
+        // Post-order traversal using 'order' to calculate subtree sizes
+        let mut subtree_size = vec![1; n];
+        for &u in order.iter().rev() {
+            out_time[u] = in_time[u] + subtree_size[u];
+            let p = parent[u];
+            if p != n {
+                subtree_size[p] += subtree_size[u];
+            }
+        }
+
+        (in_time, out_time, euler, depth, dist)
     }
 }

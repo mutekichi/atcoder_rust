@@ -6,13 +6,13 @@
 use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem::swap;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -50,11 +50,50 @@ macro_rules! md {
     }};
 }
 
-#[allow(unused_variables)]
 fn main() {
+    let stdout = stdout();
+    let mut out = BufWriter::new(stdout.lock());
+
+    solve(&mut out);
+
+    out.flush().unwrap();
+}
+
+#[allow(unused_variables)]
+fn solve<W: Write>(out: &mut W) {
     input! {
-        
+        mut l: u64,
+        mut r: u64,
     }
+    let mut ans = vec![];
+    for i in 0usize..64 {
+        if ((l >> i) & 1 == 1) && (l + (1 << i)) <= r {
+            ans.push((l, l + (1 << i)));
+            md!(l, l + (1 << i));
+            l += 1 << i;
+        }
+    }
+    for i in (0usize..64).rev() {
+        if (l >> i) & 1 != (r >> i) & 1 {
+            ans.push((l, l + (1 << i)));
+            md!(l, l + (1 << i));
+            l += 1 << i;
+        }
+    }
+    assert_eq!(l, r);
+    println!("{}", ans.len());
+    for (i, j) in ans {
+        println!("{} {}", i, j);
+    }
+}
+
+fn msb(n: u64) -> usize {
+    for i in (0..64).rev() {
+        if (n >> i) & 1 == 1 {
+            return i;
+        }
+    }
+    return INF_USIZE;
 }
 
 // FOR TEMPLATE INJECTIONS

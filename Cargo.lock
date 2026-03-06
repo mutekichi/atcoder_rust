@@ -13,6 +13,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "abc348"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc349"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "abc387"
 version = "0.1.0"
 dependencies = [

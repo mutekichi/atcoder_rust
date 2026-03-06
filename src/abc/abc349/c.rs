@@ -6,13 +6,13 @@
 use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem::swap;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -50,11 +50,32 @@ macro_rules! md {
     }};
 }
 
-#[allow(unused_variables)]
 fn main() {
+    let stdout = stdout();
+    let mut out = BufWriter::new(stdout.lock());
+
+    solve(&mut out);
+
+    out.flush().unwrap();
+}
+
+#[allow(unused_variables)]
+fn solve<W: Write>(out: &mut W) {
     input! {
-        
+        S: Chars,
+        T: Chars,
     }
+    let mut idx = 0usize;
+    for c in S {
+        if T[idx] == c.to_ascii_uppercase()  {
+            idx += 1;
+        }
+        if idx >= 3 || (idx == 2 && T[idx] == 'X') {
+            println!("Yes");
+            return;
+        }
+    }
+    println!("No");
 }
 
 // FOR TEMPLATE INJECTIONS

@@ -6,13 +6,13 @@
 use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem::swap;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -50,11 +50,31 @@ macro_rules! md {
     }};
 }
 
-#[allow(unused_variables)]
 fn main() {
+    let stdout = stdout();
+    let mut out = BufWriter::new(stdout.lock());
+
+    solve(&mut out);
+
+    out.flush().unwrap();
+}
+
+#[allow(unused_variables)]
+fn solve<W: Write>(out: &mut W) {
     input! {
-        
+        S: Chars,
     }
+    let mut counter = vec![0; 26];
+    for c in S {
+        counter[(c as u8 - b'a') as usize] += 1;
+    }
+    let mut appear_times = vec![0; 200];
+    for count in counter {
+        if count == 0 { continue; }
+        appear_times[count] += 1;
+    }
+    md!(appear_times.iter().take(10).join(" "));
+    println!("{}", if appear_times.iter().all(|&t| t == 0 || t == 2) {"Yes"} else {"No"});
 }
 
 // FOR TEMPLATE INJECTIONS
