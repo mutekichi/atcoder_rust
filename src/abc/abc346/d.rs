@@ -50,56 +50,37 @@ macro_rules! md {
     }};
 }
 
-fn main() {
-    let stdout = stdout();
-    let mut out = BufWriter::new(stdout.lock());
-
-    solve(&mut out);
-
-    out.flush().unwrap();
-}
-
 #[allow(unused_variables)]
-fn solve<W: Write>(out: &mut W) {
+fn main() {
     input! {
-        n: String,
+        n: usize,
+        mut S: Chars,
+        C: [i64; n],
     }
-    if n.len() < 7 {
-        let n: i64 = n.parse().unwrap();
-        for i in n..2 * n {
-            if check(i) && check(i + 1) {
-                println!("{}", i);
-                return;
-            }
+    for i in 0..n {
+        if i % 2 == 0 {
+            S[i] = if S[i] == '0' { '1' } else { '0' };
         }
-        println!("{}", -1);
-    } else {
-        let top = n.chars().collect::<Vec<_>>()[0].to_digit(10).unwrap();
-        let second = n.chars().collect::<Vec<_>>()[1].to_digit(10).unwrap();
-        if top == 1 {
-            if second < 7 {
-                println!("17{}", "0".repeat(n.len() - 2));
-            } else {
-                println!("26{}", "0".repeat(n.len() - 2));
-            }
-        } else if top < 7 {
-            println!("{}{}{}", top + 1, 7 - top, "0".repeat(n.len() - 2));
+    }
+    let cost_all_zeros: i64 = (0..n).filter(|&j| S[j] == '1').map(|j| C[j]).sum();
+    let mut ans = INF_I64;
+    let mut cost_ones_zeros = cost_all_zeros;
+    for i in 0..n-1 {
+        if S[i] == '1' {
+            cost_ones_zeros -= C[i];
         } else {
-            println!("1{}10", "0".repeat(n.len() - 2));
+            cost_ones_zeros += C[i];
         }
+        ans = min(ans, cost_ones_zeros);
     }
-}
-
-fn check(n: i64) -> bool {
-    let mut digits = vec![];
-    let mut m = n;
-    while m > 0 {
-        digits.push(m % 10);
-        m /= 10;
+    let mut cost_zeros_ones = cost_all_zeros;
+    for i in (1..n).rev() {
+        if S[i] == '1' {
+            cost_zeros_ones -= C[i];
+        } else {
+            cost_zeros_ones += C[i];
+        }
+        ans = min(ans, cost_zeros_ones);
     }
-    n % (digits.iter().sum::<i64>()) == 0
+    println!("{}", ans);
 }
-
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS

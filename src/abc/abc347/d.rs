@@ -6,6 +6,7 @@
 use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
+use std::arch::x86_64::_popcnt64;
 use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::io::{BufWriter, Write, stdout};
@@ -50,84 +51,54 @@ macro_rules! md {
     }};
 }
 
-fn main() {
-    let stdout = stdout();
-    let mut out = BufWriter::new(stdout.lock());
-
-    solve(&mut out);
-
-    out.flush().unwrap();
-}
-
 #[allow(unused_variables)]
-fn solve<W: Write>(out: &mut W) {
+fn main() {
     input! {
-        l: i64, r: i64,
+        a: usize,
+        b: usize,
+        c: i64,
     }
-    println!("{}", snakes(r) - snakes(l - 1));
-}
-
-fn snakes(n: i64) -> i64 {
-    if n == 9 {
-        return 9;
+    let popcount_c = c.count_ones() as usize;
+    let max_popcount = if a + b <= 60 {
+        a + b
+    } else {
+        120 - a - b
+    };
+    if popcount_c > max_popcount  || a.abs_diff(b) > popcount_c || (a + b - popcount_c) % 2 == 1 {
+        println!("-1");
+        return;
     }
-    let mut digits = vec![];
-    let mut m = n;
-    while m > 0 {
-        digits.push(m % 10);
-        m /= 10;
-    }
-    let mut sum = 0i64;
+    let mut cnt_common = (a + b - popcount_c) / 2;
+    let mut cnt_a = a - cnt_common;
+    let mut cnt_b = b - cnt_common;
 
-    // count 1 -> 999
-    let mut counts = vec![];
-    counts.push(9i64);
-    for i in 1..20 {
-        let mut sum = counts[i - 1];
-        for j in 1i64..=9 {
-            sum += (j).pow(i as u32);
-        }
-        counts.push(sum);
-    }
-    sum += counts[digits.len() - 2];
+    let mut ans_a = 0i64;
+    let mut ans_b = 0i64;
 
-    // count 1000 -> (top-1)999
-    let top = digits[digits.len() - 1];
-    for i in 1..top {
-        sum += i.pow(digits.len() as u32 - 1);
-        md!(sum);
-    }
-
-    // count (top)000 -> (top)XYZ
-    for i in (0..digits.len() - 1).rev() {
-        let digit = digits[i];
-
-        sum += min(digit, top) * top.pow(i as u32);
-        md!(i, sum);
-        if digit >= top {
-            break;
+    for i in 0..62 {
+        if (c >> i) & 1 == 1 {
+            if cnt_a > 0 {
+                ans_a += 1 << i;
+                cnt_a -= 1;
+            } else if cnt_b > 0 {
+                ans_b += 1 << i;
+                cnt_b -= 1;
+            }
+        } else {
+            if cnt_common > 0 {
+                ans_a += 1 << i;
+                ans_b += 1 << i;
+                cnt_common -= 1;
+            }
         }
     }
+    assert_eq!(ans_a.count_ones() as usize, a);
+    assert_eq!(ans_b.count_ones() as usize, b);
+    assert_eq!(ans_a ^ ans_b, c);
 
-    if check(n) {
-        sum += 1;
-    }
-
-    sum
+    println!("{} {}", ans_a, ans_b);
 }
 
-fn check(n: i64) -> bool {
-    let mut digits = vec![];
-    let mut n = n;
-    while n > 0 {
-        digits.push(n % 10);
-        n /= 10;
-    }
-    digits
-        .iter()
-        .take(digits.len() - 1)
-        .all(|e| *e < digits[digits.len() - 1])
-}
 // FOR TEMPLATE INJECTIONS
 
 // END TEMPLATE INJECTIONS

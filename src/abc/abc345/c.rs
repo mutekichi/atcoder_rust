@@ -50,84 +50,26 @@ macro_rules! md {
     }};
 }
 
-fn main() {
-    let stdout = stdout();
-    let mut out = BufWriter::new(stdout.lock());
-
-    solve(&mut out);
-
-    out.flush().unwrap();
-}
-
 #[allow(unused_variables)]
-fn solve<W: Write>(out: &mut W) {
+fn main() {
     input! {
-        l: i64, r: i64,
+        S: Chars,
     }
-    println!("{}", snakes(r) - snakes(l - 1));
+    let n = S.len() as i64;
+    let mut ans: i64 = n * (n - 1) / 2;
+    let mut counter = vec![0; 26];
+    for c in S {
+        counter[(c as u8 - b'a') as usize] += 1i64;
+    }
+    if counter.iter().any(|e| *e > 1) {
+        ans += 1;
+    }
+    for count in counter {
+        ans -= count * (count - 1) / 2;
+    }
+    println!("{}", ans);
 }
 
-fn snakes(n: i64) -> i64 {
-    if n == 9 {
-        return 9;
-    }
-    let mut digits = vec![];
-    let mut m = n;
-    while m > 0 {
-        digits.push(m % 10);
-        m /= 10;
-    }
-    let mut sum = 0i64;
-
-    // count 1 -> 999
-    let mut counts = vec![];
-    counts.push(9i64);
-    for i in 1..20 {
-        let mut sum = counts[i - 1];
-        for j in 1i64..=9 {
-            sum += (j).pow(i as u32);
-        }
-        counts.push(sum);
-    }
-    sum += counts[digits.len() - 2];
-
-    // count 1000 -> (top-1)999
-    let top = digits[digits.len() - 1];
-    for i in 1..top {
-        sum += i.pow(digits.len() as u32 - 1);
-        md!(sum);
-    }
-
-    // count (top)000 -> (top)XYZ
-    for i in (0..digits.len() - 1).rev() {
-        let digit = digits[i];
-
-        sum += min(digit, top) * top.pow(i as u32);
-        md!(i, sum);
-        if digit >= top {
-            break;
-        }
-    }
-
-    if check(n) {
-        sum += 1;
-    }
-
-    sum
-}
-
-fn check(n: i64) -> bool {
-    let mut digits = vec![];
-    let mut n = n;
-    while n > 0 {
-        digits.push(n % 10);
-        n /= 10;
-    }
-    digits
-        .iter()
-        .take(digits.len() - 1)
-        .all(|e| *e < digits[digits.len() - 1])
-}
 // FOR TEMPLATE INJECTIONS
 
 // END TEMPLATE INJECTIONS

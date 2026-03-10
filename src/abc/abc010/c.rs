@@ -4,15 +4,16 @@
 #![allow(non_snake_case)]
 
 use memoise::memoise;
-use num_integer::gcd;
+use num_integer::{Roots, gcd};
 use rand::Rng;
-use std::cmp::{Ordering, Reverse, max, min};
+use std::cmp::{max, min, Ordering, Reverse};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{BufWriter, Write, stdout};
+use std::f64::EPSILON;
+use std::io::{stdout, BufWriter, Write};
 use std::mem::swap;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{Itertools, iproduct};
+use itertools::{iproduct, Itertools};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -50,54 +51,24 @@ macro_rules! md {
     }};
 }
 
-fn main() {
-    let stdout = stdout();
-    let mut out = BufWriter::new(stdout.lock());
-
-    solve(&mut out);
-
-    out.flush().unwrap();
-}
-
 #[allow(unused_variables)]
-fn solve<W: Write>(out: &mut W) {
+fn main() {
     input! {
-        n: String,
+        s: (usize ,usize), t: (usize, usize),
+        u: usize, v: usize,
+        n: usize,
+        XY: [(usize , usize); n],
     }
-    if n.len() < 7 {
-        let n: i64 = n.parse().unwrap();
-        for i in n..2 * n {
-            if check(i) && check(i + 1) {
-                println!("{}", i);
-                return;
-            }
-        }
-        println!("{}", -1);
-    } else {
-        let top = n.chars().collect::<Vec<_>>()[0].to_digit(10).unwrap();
-        let second = n.chars().collect::<Vec<_>>()[1].to_digit(10).unwrap();
-        if top == 1 {
-            if second < 7 {
-                println!("17{}", "0".repeat(n.len() - 2));
-            } else {
-                println!("26{}", "0".repeat(n.len() - 2));
-            }
-        } else if top < 7 {
-            println!("{}{}{}", top + 1, 7 - top, "0".repeat(n.len() - 2));
-        } else {
-            println!("1{}10", "0".repeat(n.len() - 2));
+    for house in XY {
+        if dist(s, house) + dist(house, t) <= (u * v) as f64 + EPSILON {
+            println!("YES");
+            return;
         }
     }
+    println!("NO");
 }
-
-fn check(n: i64) -> bool {
-    let mut digits = vec![];
-    let mut m = n;
-    while m > 0 {
-        digits.push(m % 10);
-        m /= 10;
-    }
-    n % (digits.iter().sum::<i64>()) == 0
+fn dist(s: (usize ,usize), t: (usize , usize)) -> f64 {
+    (((s.0.abs_diff(t.0)).pow(2) + (s.1.abs_diff(t.1)).pow(2)) as f64).sqrt()
 }
 
 // FOR TEMPLATE INJECTIONS

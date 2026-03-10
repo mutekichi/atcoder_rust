@@ -3,12 +3,60 @@
 version = 4
 
 [[package]]
+name = "abc010"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "abc220"
 version = "0.1.0"
 dependencies = [
  "itertools",
  "num-integer",
  "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "abc345"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc346"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc347"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
  "superslice",
 ]
 
@@ -641,6 +689,18 @@ dependencies = [
 
 [[package]]
 name = "abc447"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc448"
 version = "0.1.0"
 dependencies = [
  "itertools",
