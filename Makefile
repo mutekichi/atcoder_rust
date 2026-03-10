@@ -60,23 +60,21 @@ run:
 	$(eval P := $(if $(filter ahc,$(T)),a,$(P_ARG)))
 	@if [ -z "$(P)" ]; then echo "Error: Prob required for $(T)."; exit 1; fi
 	$(eval PKG_NAME := $(T)$(C))
-	@# Paste from clipboard based on OS
 	@if [ -n "$(DO_PASTE)" ]; then \
 		$(PASTE_CMD) > $(INPUT_FILE); \
 		echo "Copied clipboard content to $(INPUT_FILE)"; \
 	fi
 	@cargo build $(CARGO_FLAGS) --quiet -p $(PKG_NAME) --bin $(P)
-	@# Resolve binary path
 	@BIN_PATH="./target/$(MODE)/$(P)"; \
 	if [ -f "$${BIN_PATH}.exe" ]; then BIN_PATH="$${BIN_PATH}.exe"; fi; \
 	if [ "$(MODE)" = "release" ]; then \
-		echo "Start: $$(date +'%H:%M:%S.%3N')"; \
+		echo "Start: $$(date +'%H:%M:%S.%3N')" >&2; \
 		START_TIME=$$(python -c 'import time; print(time.time())'); \
 		if [ -f $(INPUT_FILE) ]; then cat $(INPUT_FILE) | "$$BIN_PATH"; else "$$BIN_PATH"; fi; \
 		RET=$$?; \
 		END_TIME=$$(python -c 'import time; print(time.time())'); \
-		echo "End:   $$(date +'%H:%M:%S.%3N')"; \
-		python -c "print(f'Execution time: {$$END_TIME - $$START_TIME:.4f}s')"; \
+		echo "End:   $$(date +'%H:%M:%S.%3N')" >&2; \
+		python -c "print(f'Execution time: {$$END_TIME - $$START_TIME:.4f}s')" >&2; \
 	else \
 		if [ -f $(INPUT_FILE) ]; then cat $(INPUT_FILE) | "$$BIN_PATH"; else "$$BIN_PATH"; fi; \
 		RET=$$?; \

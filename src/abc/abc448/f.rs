@@ -6,13 +6,13 @@
 use memoise::memoise;
 use num_integer::gcd;
 use rand::Rng;
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem::swap;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -65,21 +65,19 @@ fn main() {
         points_w.insert((x - y, i));
     }
     let mut ans = vec![1];
-    let mut point = (INF_I64, INF_I64);
+    let point = (INF_I64, INF_I64);
     while ans.len() < n {
         let nearest_x = {
             let can1 = points_h.range(..(point.0 + point.1, INF_USIZE)).next_back();
             let can2 = points_h.range((point.0 + point.1, 0)..).next();
             if can1.is_none() {
                 can2.unwrap()
-            }
-            else if can2.is_none() {
+            } else if can2.is_none() {
                 can1.unwrap()
             } else {
                 if can1.unwrap().0 < can2.unwrap().0 {
                     can1.unwrap()
-                }
-                else {
+                } else {
                     can2.unwrap()
                 }
             }
@@ -89,14 +87,12 @@ fn main() {
             let can2 = points_h.range((point.0 - point.1, 0)..).next();
             if can1.is_none() {
                 can2.unwrap()
-            }
-            else if can2.is_none() {
+            } else if can2.is_none() {
                 can1.unwrap()
             } else {
                 if can1.unwrap().0 < can2.unwrap().0 {
                     can1.unwrap()
-                }
-                else {
+                } else {
                     can2.unwrap()
                 }
             }
@@ -106,8 +102,7 @@ fn main() {
             ans.push(i + 1);
             points_h.remove(&(XY[i].0 + XY[i].1, i));
             points_w.remove(&(XY[i].0 - XY[i].1, i));
-        }
-        else {
+        } else {
             let i = nearest_y.1;
             ans.push(i + 1);
             points_h.remove(&(XY[i].0 + XY[i].1, i));
@@ -407,6 +402,5 @@ impl<const M: u64> Default for ModInt<M> {
         ModInt::new(0)
     }
 }
-
 
 // END TEMPLATE INJECTIONS
