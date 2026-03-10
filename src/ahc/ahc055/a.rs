@@ -157,18 +157,18 @@ impl State {
         let mut max_priority = -1.0;
 
         let threshold_multiplier = match self.active_durability_sum {
-            0 | 1 => 1.6,
-            2 => 1.45,
-            3 => 1.3,
-            4 => 1.2,
-            5 => 1.1,
-            6 => 1.0,
-            7 => 0.9,
-            8 => 0.8,
-            9 => 0.7,
-            10 => 0.6,
-            11 => 0.55,
-            _ => 0.5,
+            0 | 1 => 1.8,
+            2 => 1.65,
+            3 => 1.5,
+            4 => 1.4,
+            5 => 1.3,
+            6 => 1.2,
+            7 => 1.1,
+            8 => 1.0,
+            9 => 0.9,
+            10 => 0.8,
+            11 => 0.75,
+            _ => 0.7,
         };
 
         for i in 0..input.n {
@@ -177,10 +177,10 @@ impl State {
             }
 
             let threshold_base = match input.c[i] {
-                6 => 70.0,
-                5 => 50.0,
-                4 => 35.0,
-                3 => 25.0,
+                6 => 90.0,
+                5 => 80.0,
+                4 => 60.0,
+                3 => 40.0,
                 2 => 20.0,
                 1 => 15.0,
                 _ => 0.0,
@@ -189,7 +189,7 @@ impl State {
             let threshold = threshold_base * threshold_multiplier;
 
             if (self.h[i] as f64) <= threshold {
-                let noise = 0.8 + 0.4 * rng.next_f64();
+                let noise = 0.7 + 0.6 * rng.next_f64();
                 let priority = (input.weapon_scores[i] / (self.h[i] as f64).max(1.0)) * noise;
                 if priority > max_priority {
                     max_priority = priority;
@@ -350,6 +350,13 @@ fn main() {
         }
         final_state.open_best_chest_from_scratch(&input, &mut final_rng);
     }
+
+    let bare_hands_count = final_state
+        .actions
+        .iter()
+        .filter(|&&(w, _)| w == -1)
+        .count();
+    eprintln!("Bare hands count: {}", bare_hands_count);
 
     for (w, b) in final_state.actions {
         println!("{} {}", w, b);
