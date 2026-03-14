@@ -530,8 +530,6 @@ fn butterfly_inv<T: NttField>(a: &mut [T]) {
 
 #[test]
 fn test_convolution() {
-    use crate::template::math::modint::Mint998;
-
     let a = vec![Mint998::new(1), Mint998::new(2), Mint998::new(3)];
     let b = vec![Mint998::new(4), Mint998::new(5)];
 

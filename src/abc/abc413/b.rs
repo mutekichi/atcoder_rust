@@ -3,14 +3,14 @@
 #![allow(dead_code)]
 
 // Common imports
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, concat, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -38,7 +38,6 @@ fn main() {
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -47,8 +46,20 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        n: usize,
+        s: [String; n],
     }
-    
+    let mut set = BTreeSet::new();
+    for i in 0..n {
+        for j in 0..n {
+            if i == j {
+                continue;
+            }
+            let s = format!("{}{}", s[i], s[j]);
+            set.insert(s);
+        }
+    }
+    println!("{}", set.len());
 }
 
 // --- Macros ---

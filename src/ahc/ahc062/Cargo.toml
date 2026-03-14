@@ -1,5 +1,5 @@
 [package]
-name = "atcoder_rust"
+name = "ahc062"
 version = "0.1.0"
 edition = "2024"
 
@@ -11,14 +11,7 @@ num-integer = { workspace = true }
 rand = { workspace = true }
 memoise = { workspace = true }
 
-[workspace]
-members = ["src/abc/*", "src/arc/*", "src/ahc/*"]
-resolver = "2"
+[[bin]]
+name = "a"
+path = "a.rs"
 
-[workspace.dependencies]
-proconio = "0.4.5"
-itertools = "0.13.0"
-superslice = "1.0.0"
-num-integer = "0.1.44"
-rand = "0.9.2"
-memoise = "0.3.2"

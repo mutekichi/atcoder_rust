@@ -47,8 +47,11 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        n: usize,
+        m: usize,
+        vec_a: [usize; n],
     }
-    
+    println!("{}", if vec_a.iter().sum::<usize>() <= m { "Yes" } else { "No" });
 }
 
 // --- Macros ---

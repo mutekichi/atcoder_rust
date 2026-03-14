@@ -1,56 +1,43 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
-#![allow(non_snake_case)]
 
-use itertools::{Itertools, iproduct};
 use proconio::input;
-use proconio::marker::{Bytes, Chars, Usize1};
-use std::cmp::{Ordering, Reverse, max, min};
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{BufWriter, Write, stdout};
-use std::mem::swap;
-use std::ops::Bound::{Excluded, Included, Unbounded};
 use std::time::Instant;
 
-#[macro_export]
-#[cfg(debug_assertions)]
-macro_rules! md {
-    ($($arg:expr),* $(,)?) => {{
-        eprint!("[{}:{}] ", file!(), line!());
-        let mut _first = true;
-        $(
-            if !_first { eprint!(", "); }
-            eprint!("{}: {}", stringify!($arg), $arg);
-            _first = false;
-        )*
-        eprintln!();
-    }};
-}
-
-#[macro_export]
-#[cfg(not(debug_assertions))]
-macro_rules! md {
-    ($($arg:expr),* $(,)?) => {{}};
-}
+const TIME_LIMIT_SEC: f64 = 1.95;
 
 struct Xorshift {
-    seed: u64,
+    seed: u32,
 }
 
 impl Xorshift {
-    fn new(seed: u64) -> Self {
+    fn new(seed: u32) -> Self {
         Self {
-            seed: if seed == 0 { 88172645463325252 } else { seed },
+            seed: if seed == 0 { 123456789 } else { seed },
         }
     }
 
     #[inline]
-    fn next_f64(&mut self) -> f64 {
+    fn next(&mut self) -> u32 {
         self.seed ^= self.seed << 13;
-        self.seed ^= self.seed >> 7;
-        self.seed ^= self.seed << 17;
-        (self.seed as f64) / (u64::MAX as f64)
+        self.seed ^= self.seed >> 17;
+        self.seed ^= self.seed << 5;
+        self.seed
+    }
+
+    #[inline]
+    fn next_f64(&mut self) -> f64 {
+        self.next() as f64 / u32::MAX as f64
+    }
+
+    #[inline]
+    fn gen_range(
+        &mut self,
+        min: usize,
+        max: usize,
+    ) -> usize {
+        min + (self.next() as usize % (max - min))
     }
 }
 
@@ -58,9 +45,7 @@ struct Input {
     n: usize,
     h: Vec<i32>,
     c: Vec<i32>,
-    a: Vec<Vec<i32>>,
-    c_scores: Vec<f64>,
-    chest_weights: Vec<f64>,
+    a: Vec<i32>,
 }
 
 impl Input {
@@ -69,342 +54,165 @@ impl Input {
             n: usize,
             h: [i32; n],
             c: [i32; n],
-            a: [[i32; n]; n],
+            a_raw: [[i32; n]; n],
         }
 
-        let mut c_scores = vec![0.0; n];
-        for i in 0..n {
-            let s = match c[i] {
-                6 => 3.0,
-                5 => 2.0,
-                4 => 1.5,
-                3 => 1.0,
-                2 => 0.5,
-                1 => 0.0,
-                _ => 0.0,
-            };
-            c_scores[i] = if s > 0.0 { s } else { 0.001 };
+        let mut a: Vec<i32> = Vec::with_capacity(n * n);
+        for row in a_raw.iter() {
+            a.extend(row);
         }
 
-        let mut chest_weights = vec![0.0; n];
-        for b in 0..n {
-            let mut incoming_damages = Vec::with_capacity(n);
-            for w in 0..n {
-                incoming_damages.push(a[w][b]);
-            }
-            incoming_damages.sort_unstable_by(|x, y| y.cmp(x));
-
-            let top6_sum: i32 = incoming_damages.iter().take(6).sum();
-            let avg_top6 = top6_sum as f64 / 6.0;
-
-            chest_weights[b] = 100.0 / avg_top6.max(1.0);
-        }
-
-        Self {
-            n,
-            h,
-            c,
-            a,
-            c_scores,
-            chest_weights,
-        }
-    }
-}
-
-struct State {
-    h: Vec<i32>,
-    durabilities: Vec<i32>,
-    opened: Vec<bool>,
-    unopened_chests: Vec<usize>,
-    unopened_pos: Vec<usize>,
-    active_weapons: Vec<usize>,
-    open_count: usize,
-    actions_count: usize,
-    actions: Vec<(i32, usize)>,
-    record_actions: bool,
-    active_durability_sum: i32,
-    temp_scores: Vec<f64>,
-}
-
-impl State {
-    fn new(
-        input: &Input,
-        record_actions: bool,
-    ) -> Self {
-        Self {
-            h: input.h.clone(),
-            durabilities: input.c.clone(),
-            opened: vec![false; input.n],
-            unopened_chests: (0..input.n).collect(),
-            unopened_pos: (0..input.n).collect(),
-            active_weapons: Vec::with_capacity(input.n),
-            open_count: 0,
-            actions_count: 0,
-            actions: if record_actions {
-                Vec::with_capacity(10000)
-            } else {
-                Vec::new()
-            },
-            record_actions,
-            active_durability_sum: 0,
-            temp_scores: vec![0.0; input.n],
-        }
+        Self { n, h, c, a }
     }
 
     #[inline]
-    fn mark_opened(
-        &mut self,
-        b: usize,
-        input: &Input,
-    ) {
-        self.opened[b] = true;
-        self.open_count += 1;
-        self.active_durability_sum += input.c[b];
-
-        if input.c[b] > 0 {
-            self.active_weapons.push(b);
-        }
-
-        let pos = self.unopened_pos[b];
-        let last_b = *self.unopened_chests.last().unwrap();
-
-        self.unopened_chests.swap_remove(pos);
-        self.unopened_pos[last_b] = pos;
-    }
-
-    #[inline]
-    fn calc_dynamic_weapon_score(
+    fn get_a(
         &self,
         w: usize,
-        input: &Input,
-    ) -> f64 {
-        let mut top1 = 0;
-        let mut top2 = 0;
-        let mut top3 = 0;
-
-        for &b in &self.unopened_chests {
-            if b == w {
-                continue;
-            }
-            let dmg = input.a[w][b];
-            if dmg > top1 {
-                top3 = top2;
-                top2 = top1;
-                top1 = dmg;
-            } else if dmg > top2 {
-                top3 = top2;
-                top2 = dmg;
-            } else if dmg > top3 {
-                top3 = dmg;
-            }
-        }
-
-        (top1 + top2 + top3) as f64 * input.c_scores[w]
+        b: usize,
+    ) -> i32 {
+        self.a[w * self.n + b]
     }
+}
 
-    fn try_finish_with_bare_hands(
-        &mut self,
-        input: &Input,
-        rng: &mut Xorshift,
-    ) -> bool {
-        let mut best_chest = usize::MAX;
-        let mut max_priority = -1.0;
+// Simulates the game based on the given order of chests to open.
+fn evaluate_order(
+    order: &[usize],
+    input: &Input,
+    get_actions: bool,
+) -> (i32, Vec<(i32, usize)>) {
+    let mut h = input.h.clone();
+    let mut dur = input.c.clone();
+    let mut active_weapons: Vec<usize> = Vec::with_capacity(input.n);
+    let mut actions = Vec::new();
+    let mut bare_hands_count = 0;
 
-        let threshold_multiplier = match self.active_durability_sum {
-            0 | 1 => 1.8,
-            2 => 1.7,
-            3 => 1.6,
-            4 => 1.4,
-            5 => 1.3,
-            6 => 1.2,
-            7 => 1.1,
-            8 => 1.0,
-            9 => 0.9,
-            10 => 0.8,
-            11 => 0.7,
-            _ => 0.6,
-        };
+    for &b in order {
+        // Attack chest `b` until it opens
+        while h[b] > 0 {
+            let mut best_w_idx = usize::MAX;
+            let mut best_dmg = 0;
 
-        for &i in &self.unopened_chests {
-            let threshold_base = match input.c[i] {
-                6 => 70.0,
-                5 => 50.0,
-                4 => 35.0,
-                3 => 25.0,
-                2 => 20.0,
-                1 => 15.0,
-                _ => 0.0,
-            };
+            // Find the most effective weapon currently available
+            for (idx, &w) in active_weapons.iter().enumerate() {
+                let dmg = input.get_a(w, b);
 
-            let threshold = threshold_base * threshold_multiplier;
-
-            if (self.h[i] as f64) <= threshold {
-                let dynamic_score = self.calc_dynamic_weapon_score(i, input);
-                let noise = 0.8 + 0.4 * rng.next_f64();
-                let priority = (dynamic_score / (self.h[i] as f64).max(1.0)) * noise;
-                if priority > max_priority {
-                    max_priority = priority;
-                    best_chest = i;
+                // Simple heuristic: use weapon if it deals reasonable damage
+                // In a real competition, you would tune this threshold or add more logic
+                if dmg > best_dmg && dmg >= 15 {
+                    best_dmg = dmg;
+                    best_w_idx = idx;
                 }
             }
-        }
 
-        if max_priority >= 0.0 {
-            let b = best_chest;
-            if self.record_actions {
-                while self.h[b] > 0 {
-                    self.actions.push((-1, b));
-                    self.h[b] -= 1;
+            if best_w_idx != usize::MAX {
+                // Attack with the chosen weapon
+                let w = active_weapons[best_w_idx];
+                let actual_dmg = h[b].min(best_dmg);
+                h[b] -= actual_dmg;
+                dur[w] -= 1;
+
+                if get_actions {
+                    actions.push((w as i32, b));
+                }
+
+                if dur[w] == 0 {
+                    active_weapons.swap_remove(best_w_idx);
                 }
             } else {
-                self.actions_count += self.h[b] as usize;
-                self.h[b] = 0;
-            }
-            self.mark_opened(b, input);
-            return true;
-        }
-
-        false
-    }
-
-    fn process_best_weapon_attack(
-        &mut self,
-        input: &Input,
-        rng: &mut Xorshift,
-    ) -> bool {
-        let mut best_w_idx = usize::MAX;
-        let mut best_w = usize::MAX;
-        let mut best_b = usize::MAX;
-        let mut max_score = -1.0;
-
-        // Pre-calculate dynamic scores for this turn to avoid redundant calculations in the double loop
-        for &b in &self.unopened_chests {
-            self.temp_scores[b] = self.calc_dynamic_weapon_score(b, input);
-        }
-
-        for (idx, &w) in self.active_weapons.iter().enumerate() {
-            for &b in &self.unopened_chests {
-                let actual_damage = min(input.a[w][b], self.h[b]);
-                let mut base_score = actual_damage as f64 * input.chest_weights[b];
-
-                // Add bonus if this attack finishes the chest
-                if input.a[w][b] >= self.h[b] {
-                    base_score += self.temp_scores[b] * 0.1;
+                // No effective weapon found, finish with bare hands
+                bare_hands_count += h[b];
+                if get_actions {
+                    for _ in 0..h[b] {
+                        actions.push((-1, b));
+                    }
                 }
-
-                let noise = 0.8 + 0.4 * rng.next_f64();
-                let score = base_score * noise;
-
-                if score > max_score {
-                    max_score = score;
-                    best_w_idx = idx;
-                    best_w = w;
-                    best_b = b;
-                }
+                h[b] = 0;
             }
         }
 
-        if max_score >= 0.0 {
-            if self.record_actions {
-                self.actions.push((best_w as i32, best_b));
-            }
-            self.actions_count += 1;
-            self.h[best_b] -= input.a[best_w][best_b];
-            self.durabilities[best_w] -= 1;
-            self.active_durability_sum -= 1;
-
-            if self.durabilities[best_w] == 0 {
-                self.active_weapons.swap_remove(best_w_idx);
-            }
-
-            if self.h[best_b] <= 0 {
-                self.mark_opened(best_b, input);
-            }
-            return true;
+        // Add the new weapon from the opened chest if it has durability
+        if input.c[b] > 0 {
+            active_weapons.push(b);
         }
-
-        false
     }
 
-    fn open_best_chest_from_scratch(
-        &mut self,
-        input: &Input,
-        rng: &mut Xorshift,
-    ) {
-        let mut best_chest = self.unopened_chests[0];
-        let mut best_score = -1.0;
-
-        for &i in &self.unopened_chests {
-            let h_penalty = self.h[i] as f64 + 140.0;
-            let dynamic_score = self.calc_dynamic_weapon_score(i, input);
-            let noise = 0.5 + 1.0 * rng.next_f64();
-            let score = (dynamic_score / h_penalty) * noise;
-
-            if score > best_score {
-                best_score = score;
-                best_chest = i;
-            }
-        }
-
-        if self.record_actions {
-            while self.h[best_chest] > 0 {
-                self.actions.push((-1, best_chest));
-                self.h[best_chest] -= 1;
-            }
-        } else {
-            self.actions_count += self.h[best_chest] as usize;
-            self.h[best_chest] = 0;
-        }
-        self.mark_opened(best_chest, input);
-    }
+    (bare_hands_count, actions)
 }
 
 fn main() {
     let start_time = Instant::now();
     let input = Input::new();
+    let mut rng = Xorshift::new(42);
 
-    let mut best_score = usize::MAX;
-    let mut best_seed = 0;
+    // Initial state: 0, 1, ..., N-1
+    let mut current_order: Vec<usize> = (0..input.n).collect();
+    // Shuffle initial order to avoid getting stuck in a bad local minimum
+    for i in (1..input.n).rev() {
+        let j = rng.gen_range(0, i + 1);
+        current_order.swap(i, j);
+    }
 
-    let mut main_rng = Xorshift::new(193);
+    let (mut current_score, _) = evaluate_order(&current_order, &input, false);
+    let mut best_order = current_order.clone();
+    let mut best_score = current_score;
 
-    while start_time.elapsed().as_millis() < 1960 {
-        let current_seed = main_rng.seed;
-        let mut rng = Xorshift::new(current_seed);
-        main_rng.next_f64();
+    let t0 = 100.0;
+    let t1 = 0.1;
+    let mut iter_count = 0;
 
-        let mut state = State::new(&input, false);
-
-        while state.open_count < input.n {
-            if state.try_finish_with_bare_hands(&input, &mut rng) {
-                continue;
+    loop {
+        if (iter_count & 255) == 0 {
+            let elapsed = start_time.elapsed().as_secs_f64();
+            if elapsed >= TIME_LIMIT_SEC {
+                break;
             }
-            if state.process_best_weapon_attack(&input, &mut rng) {
-                continue;
-            }
-            state.open_best_chest_from_scratch(&input, &mut rng);
+        }
+        iter_count += 1;
+
+        let elapsed = start_time.elapsed().as_secs_f64();
+        let progress = elapsed / TIME_LIMIT_SEC;
+        let temp = t0 * (1.0 - progress) + t1 * progress; // Linear cooling
+
+        // Neighborhood operations
+        let op = rng.gen_range(0, 2);
+        let mut next_order = current_order.clone();
+
+        if op == 0 {
+            // Swap two elements
+            let idx1 = rng.gen_range(0, input.n);
+            let idx2 = rng.gen_range(0, input.n);
+            next_order.swap(idx1, idx2);
+        } else {
+            // Insert an element into a new position
+            let idx_from = rng.gen_range(0, input.n);
+            let idx_to = rng.gen_range(0, input.n);
+            let val = next_order.remove(idx_from);
+            next_order.insert(idx_to, val);
         }
 
-        if state.actions_count < best_score {
-            best_score = state.actions_count;
-            best_seed = current_seed;
+        let (next_score, _) = evaluate_order(&next_order, &input, false);
+        let diff = next_score - current_score;
+
+        // Simulated Annealing acceptance criterion
+        if diff <= 0 || rng.next_f64() < (-diff as f64 / temp).exp() {
+            current_order = next_order;
+            current_score = next_score;
+
+            if current_score < best_score {
+                best_score = current_score;
+                best_order = current_order.clone();
+            }
         }
     }
 
-    let mut final_rng = Xorshift::new(best_seed);
-    let mut final_state = State::new(&input, true);
+    // Generate final actions from the best order
+    let (final_score, final_actions) = evaluate_order(&best_order, &input, true);
 
-    while final_state.open_count < input.n {
-        if final_state.try_finish_with_bare_hands(&input, &mut final_rng) {
-            continue;
-        }
-        if final_state.process_best_weapon_attack(&input, &mut final_rng) {
-            continue;
-        }
-        final_state.open_best_chest_from_scratch(&input, &mut final_rng);
-    }
+    eprintln!("Iterations: {}", iter_count);
+    eprintln!("Best Score (Bare hands): {}", final_score);
 
-    for (w, b) in final_state.actions {
+    for (w, b) in final_actions {
         println!("{} {}", w, b);
     }
 }
