@@ -1,17 +1,61 @@
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
+use memoise::memoise;
+use num_integer::gcd;
+use rand::Rng;
+use std::cmp::{Ordering, Reverse, max, min};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::io::{BufWriter, Write, stdout};
+use std::mem::swap;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
+use std::time::{Instant, Duration};
+
+use itertools::{Itertools, iproduct};
 use proconio::input;
-use std::time::Instant;
+use proconio::marker::{Bytes, Chars, Usize1};
 
-const TIME_LIMIT_SEC: f64 = 1.95;
+const INF_I64: i64 = 1 << 60;
+const INF_USIZE: usize = 1 << 60;
+const INF_F64: f64 = 1e18;
+const INF_I128: i128 = 1 << 120;
+const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const C998244353: u64 = 998244353;
+const C1000000007: u64 = 1000000007;
 
-struct Xorshift {
+#[macro_export]
+#[cfg(debug_assertions)]
+macro_rules! md {
+    ($($arg:expr),* $(,)?) => {{
+        eprint!("[{}:{}] ", file!(), line!());
+
+        let mut _first = true;
+        $(
+            if !_first {
+                eprint!(", ");
+            }
+            eprint!("{}: {}", stringify!($arg), $arg);
+            _first = false;
+        )*
+        eprintln!();
+    }};
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))]
+macro_rules! md {
+    ($($arg:expr),* $(,)?) => {{
+    }};
+}
+
+// Fast PRNG
+struct XorShift {
     seed: u32,
 }
 
-impl Xorshift {
+impl XorShift {
     fn new(seed: u32) -> Self {
         Self {
             seed: if seed == 0 { 123456789 } else { seed },
@@ -32,187 +76,334 @@ impl Xorshift {
     }
 
     #[inline]
-    fn gen_range(
-        &mut self,
-        min: usize,
-        max: usize,
-    ) -> usize {
+    fn gen_range(&mut self, min: usize, max: usize) -> usize {
+        if max <= min {
+            return min;
+        }
         min + (self.next() as usize % (max - min))
     }
 }
 
-struct Input {
+// Hamiltonian path builder
+struct PathGenerator {
     n: usize,
-    h: Vec<i32>,
-    c: Vec<i32>,
-    a: Vec<i32>,
+    v: usize,
+    edge_count: usize,
+    degree: Vec<usize>,
+    other_end: Vec<usize>,
+    avail: Vec<Vec<usize>>,
+    adj: Vec<Vec<usize>>,
+    
+    bucket: Vec<Vec<usize>>,
+    b_idx: Vec<isize>,
+    b_pos: Vec<usize>,
+    queue: Vec<usize>,
+
+    initial_avail: Vec<Vec<usize>>,
+    initial_bucket: Vec<Vec<usize>>,
+    initial_b_idx: Vec<isize>,
+    initial_b_pos: Vec<usize>,
 }
 
-impl Input {
-    fn new() -> Self {
-        input! {
-            n: usize,
-            h: [i32; n],
-            c: [i32; n],
-            a_raw: [[i32; n]; n],
-        }
+impl PathGenerator {
+    fn new(n: usize) -> Self {
+        let v = n * n;
+        let mut generator = Self {
+            n, v, edge_count: 0,
+            degree: vec![0; v],
+            other_end: vec![0; v],
+            avail: vec![vec![]; v],
+            adj: vec![vec![]; v],
+            bucket: vec![vec![]; 9],
+            b_idx: vec![-1; v],
+            b_pos: vec![0; v],
+            queue: Vec::with_capacity(v),
+            initial_avail: vec![vec![]; v],
+            initial_bucket: vec![vec![]; 9],
+            initial_b_idx: vec![-1; v],
+            initial_b_pos: vec![0; v],
+        };
 
-        let mut a: Vec<i32> = Vec::with_capacity(n * n);
-        for row in a_raw.iter() {
-            a.extend(row);
-        }
-
-        Self { n, h, c, a }
-    }
-
-    #[inline]
-    fn get_a(
-        &self,
-        w: usize,
-        b: usize,
-    ) -> i32 {
-        self.a[w * self.n + b]
-    }
-}
-
-// Simulates the game based on the given order of chests to open.
-fn evaluate_order(
-    order: &[usize],
-    input: &Input,
-    get_actions: bool,
-) -> (i32, Vec<(i32, usize)>) {
-    let mut h = input.h.clone();
-    let mut dur = input.c.clone();
-    let mut active_weapons: Vec<usize> = Vec::with_capacity(input.n);
-    let mut actions = Vec::new();
-    let mut bare_hands_count = 0;
-
-    for &b in order {
-        // Attack chest `b` until it opens
-        while h[b] > 0 {
-            let mut best_w_idx = usize::MAX;
-            let mut best_dmg = 0;
-
-            // Find the most effective weapon currently available
-            for (idx, &w) in active_weapons.iter().enumerate() {
-                let dmg = input.get_a(w, b);
-
-                // Simple heuristic: use weapon if it deals reasonable damage
-                // In a real competition, you would tune this threshold or add more logic
-                if dmg > best_dmg && dmg >= 15 {
-                    best_dmg = dmg;
-                    best_w_idx = idx;
-                }
-            }
-
-            if best_w_idx != usize::MAX {
-                // Attack with the chosen weapon
-                let w = active_weapons[best_w_idx];
-                let actual_dmg = h[b].min(best_dmg);
-                h[b] -= actual_dmg;
-                dur[w] -= 1;
-
-                if get_actions {
-                    actions.push((w as i32, b));
-                }
-
-                if dur[w] == 0 {
-                    active_weapons.swap_remove(best_w_idx);
-                }
-            } else {
-                // No effective weapon found, finish with bare hands
-                bare_hands_count += h[b];
-                if get_actions {
-                    for _ in 0..h[b] {
-                        actions.push((-1, b));
+        for r in 0..n {
+            for c in 0..n {
+                let u = r * n + c;
+                for dr in -1..=1 {
+                    for dc in -1..=1 {
+                        if dr == 0 && dc == 0 { continue; }
+                        let nr = r as isize + dr;
+                        let nc = c as isize + dc;
+                        if nr >= 0 && nr < n as isize && nc >= 0 && nc < n as isize {
+                            generator.initial_avail[u].push((nr as usize) * n + (nc as usize));
+                        }
                     }
                 }
-                h[b] = 0;
+                let count = generator.initial_avail[u].len();
+                generator.initial_b_idx[u] = count as isize;
+                generator.initial_b_pos[u] = generator.initial_bucket[count].len();
+                generator.initial_bucket[count].push(u);
             }
         }
+        generator
+    }
 
-        // Add the new weapon from the opened chest if it has durability
-        if input.c[b] > 0 {
-            active_weapons.push(b);
+    fn init(&mut self) {
+        self.degree.fill(0);
+        for a in &mut self.adj { a.clear(); }
+        self.avail.clone_from(&self.initial_avail);
+        for i in 0..self.v { self.other_end[i] = i; }
+        self.edge_count = 0;
+
+        self.bucket.clone_from(&self.initial_bucket);
+        self.b_idx.clone_from(&self.initial_b_idx);
+        self.b_pos.clone_from(&self.initial_b_pos);
+        self.queue.clear();
+    }
+
+    fn update_bucket(&mut self, u: usize, new_count: isize) {
+        if self.degree[u] >= 2 { return; }
+        let old_count = self.b_idx[u];
+        if old_count == new_count { return; }
+
+        if old_count != -1 {
+            let oc = old_count as usize;
+            let pos = self.b_pos[u];
+            let last_u = *self.bucket[oc].last().unwrap();
+            self.bucket[oc][pos] = last_u;
+            self.b_pos[last_u] = pos;
+            self.bucket[oc].pop();
+        }
+
+        if new_count != -1 {
+            let nc = new_count as usize;
+            self.b_idx[u] = new_count;
+            self.b_pos[u] = self.bucket[nc].len();
+            self.bucket[nc].push(u);
+        } else {
+            self.b_idx[u] = -1;
         }
     }
 
-    (bare_hands_count, actions)
-}
-
-fn main() {
-    let start_time = Instant::now();
-    let input = Input::new();
-    let mut rng = Xorshift::new(42);
-
-    // Initial state: 0, 1, ..., N-1
-    let mut current_order: Vec<usize> = (0..input.n).collect();
-    // Shuffle initial order to avoid getting stuck in a bad local minimum
-    for i in (1..input.n).rev() {
-        let j = rng.gen_range(0, i + 1);
-        current_order.swap(i, j);
+    fn remove_avail(&mut self, u: usize, v: usize) -> bool {
+        if let Some(pos) = self.avail[u].iter().position(|&x| x == v) {
+            self.avail[u].swap_remove(pos);
+            if self.degree[u] < 2 {
+                self.update_bucket(u, self.avail[u].len() as isize);
+            }
+            let req = 2 - self.degree[u] as isize;
+            if req > 0 {
+                if (self.avail[u].len() as isize) == req {
+                    self.queue.push(u);
+                } else if (self.avail[u].len() as isize) < req {
+                    return false;
+                }
+            }
+        }
+        true
     }
 
-    let (mut current_score, _) = evaluate_order(&current_order, &input, false);
-    let mut best_order = current_order.clone();
-    let mut best_score = current_score;
+    fn add_edge(&mut self, u: usize, v: usize) -> bool {
+        self.adj[u].push(v);
+        self.adj[v].push(u);
+        self.degree[u] += 1;
+        self.degree[v] += 1;
+        self.edge_count += 1;
 
-    let t0 = 100.0;
-    let t1 = 0.1;
-    let mut iter_count = 0;
+        let end_u = self.other_end[u];
+        let end_v = self.other_end[v];
+        self.other_end[end_u] = end_v;
+        self.other_end[end_v] = end_u;
 
-    loop {
-        if (iter_count & 255) == 0 {
-            let elapsed = start_time.elapsed().as_secs_f64();
-            if elapsed >= TIME_LIMIT_SEC {
+        if self.edge_count < self.v - 1 {
+            if !self.remove_avail(end_u, end_v) { return false; }
+            if !self.remove_avail(end_v, end_u) { return false; }
+        }
+
+        if self.degree[u] == 2 {
+            self.update_bucket(u, -1);
+            let avail_u = self.avail[u].clone();
+            for &w in &avail_u {
+                if !self.remove_avail(w, u) { return false; }
+            }
+            self.avail[u].clear();
+        } else {
+            if !self.remove_avail(u, v) { return false; }
+        }
+
+        if self.degree[v] == 2 {
+            self.update_bucket(v, -1);
+            let avail_v = self.avail[v].clone();
+            for &w in &avail_v {
+                if !self.remove_avail(w, v) { return false; }
+            }
+            self.avail[v].clear();
+        } else {
+            if !self.remove_avail(v, u) { return false; }
+        }
+
+        true
+    }
+
+    fn process_queue(&mut self) -> bool {
+        let mut head = 0;
+        while head < self.queue.len() {
+            let u = self.queue[head];
+            head += 1;
+            let mut req = 2 - self.degree[u] as isize;
+            if req <= 0 { continue; }
+
+            let targets = self.avail[u].clone();
+            for &v in &targets {
+                if req == 0 { break; }
+                if self.avail[u].contains(&v) {
+                    if !self.add_edge(u, v) { return false; }
+                    req -= 1;
+                }
+            }
+            if req > 0 { return false; }
+        }
+        self.queue.clear();
+        true
+    }
+
+    fn random_connect(&mut self, rng: &mut XorShift) -> bool {
+        let mut min_count = -1;
+        for c in 1..=8 {
+            if !self.bucket[c].is_empty() {
+                min_count = c as isize;
                 break;
             }
         }
-        iter_count += 1;
+        if min_count == -1 { return false; }
 
-        let elapsed = start_time.elapsed().as_secs_f64();
-        let progress = elapsed / TIME_LIMIT_SEC;
-        let temp = t0 * (1.0 - progress) + t1 * progress; // Linear cooling
+        let b_idx = min_count as usize;
+        let u_idx = rng.gen_range(0, self.bucket[b_idx].len());
+        let u = self.bucket[b_idx][u_idx];
 
-        // Neighborhood operations
-        let op = rng.gen_range(0, 2);
-        let mut next_order = current_order.clone();
+        let v_idx = rng.gen_range(0, self.avail[u].len());
+        let v = self.avail[u][v_idx];
 
-        if op == 0 {
-            // Swap two elements
-            let idx1 = rng.gen_range(0, input.n);
-            let idx2 = rng.gen_range(0, input.n);
-            next_order.swap(idx1, idx2);
-        } else {
-            // Insert an element into a new position
-            let idx_from = rng.gen_range(0, input.n);
-            let idx_to = rng.gen_range(0, input.n);
-            let val = next_order.remove(idx_from);
-            next_order.insert(idx_to, val);
+        self.add_edge(u, v)
+    }
+
+    fn generate(&mut self, rng: &mut XorShift) -> Option<Vec<usize>> {
+        self.init();
+        let mut ok = true;
+
+        while self.edge_count < self.v - 1 {
+            if !self.queue.is_empty() {
+                if !self.process_queue() {
+                    ok = false;
+                    break;
+                }
+            } else {
+                if !self.random_connect(rng) {
+                    ok = false;
+                    break;
+                }
+            }
         }
 
-        let (next_score, _) = evaluate_order(&next_order, &input, false);
-        let diff = next_score - current_score;
+        if ok {
+            Some(self.extract_path())
+        } else {
+            None
+        }
+    }
 
-        // Simulated Annealing acceptance criterion
-        if diff <= 0 || rng.next_f64() < (-diff as f64 / temp).exp() {
-            current_order = next_order;
-            current_score = next_score;
+    fn extract_path(&self) -> Vec<usize> {
+        let mut path = Vec::with_capacity(self.v);
+        let mut start_node = 0;
+        for i in 0..self.v {
+            if self.degree[i] == 1 {
+                start_node = i;
+                break;
+            }
+        }
 
-            if current_score < best_score {
-                best_score = current_score;
-                best_order = current_order.clone();
+        let mut curr = start_node;
+        let mut prev = !0;
+        path.push(curr);
+
+        while path.len() < self.v {
+            for &nxt in &self.adj[curr] {
+                if nxt != prev {
+                    prev = curr;
+                    curr = nxt;
+                    path.push(curr);
+                    break;
+                }
+            }
+        }
+        path
+    }
+}
+
+#[allow(unused_variables)]
+fn main() {
+    input! {
+        N: usize,
+        A: [[i64; N]; N],
+    }
+
+    let start_time = Instant::now();
+    let time_limit = Duration::from_millis(2950);
+
+    let mut best_score = -1;
+    let mut best_path = Vec::new();
+    let mut iterations = 0;
+    let mut valid_count = 0;
+
+    let mut generator = PathGenerator::new(N);
+    let mut rng = XorShift::new(42);
+
+    while start_time.elapsed() < time_limit {
+        iterations += 1;
+        
+        if let Some(path) = generator.generate(&mut rng) {
+            valid_count += 1;
+            
+            let mut score1 = 0;
+            for (k, &u) in path.iter().enumerate() {
+                let r = u / N;
+                let c = u % N;
+                score1 += (k as i64) * A[r][c];
+            }
+            if score1 > best_score {
+                best_score = score1;
+                best_path = path.clone();
+            }
+
+            let mut score2 = 0;
+            for (k, &u) in path.iter().rev().enumerate() {
+                let r = u / N;
+                let c = u % N;
+                score2 += (k as i64) * A[r][c];
+            }
+            if score2 > best_score {
+                best_score = score2;
+                let mut rev_path = path.clone();
+                rev_path.reverse();
+                best_path = rev_path;
             }
         }
     }
 
-    // Generate final actions from the best order
-    let (final_score, final_actions) = evaluate_order(&best_order, &input, true);
+    eprintln!("Total iterations: {}", iterations);
+    eprintln!("Valid paths generated: {}", valid_count);
+    eprintln!("Best Score: {}", best_score);
 
-    eprintln!("Iterations: {}", iter_count);
-    eprintln!("Best Score (Bare hands): {}", final_score);
-
-    for (w, b) in final_actions {
-        println!("{} {}", w, b);
+    let mut out = BufWriter::new(stdout());
+    if !best_path.is_empty() {
+        for &u in &best_path {
+            writeln!(out, "{} {}", u / N, u % N).unwrap();
+        }
+    } else {
+        for r in 0..N {
+            for c in 0..N {
+                let col = if r % 2 == 0 { c } else { N - 1 - c };
+                writeln!(out, "{} {}", r, col).unwrap();
+            }
+        }
     }
+    out.flush().unwrap();
 }
