@@ -4,8 +4,9 @@
 #![allow(non_snake_case)]
 
 use proconio::input;
+use std::cmp::{max, min};
 use std::io::{BufWriter, Write, stdout};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 const TIME_LIMIT_SEC: f64 = 2.85;
 
@@ -50,7 +51,6 @@ struct Input {
     n: usize,
     v: usize,
     a: Vec<i64>,
-    smooth_a: Vec<f64>,
     neighbors: Vec<Vec<usize>>,
 }
 
@@ -84,23 +84,7 @@ impl Input {
                 }
             }
         }
-
-        let mut smooth_a = vec![0.0; v];
-        for u in 0..v {
-            let mut sum_nbr = 0;
-            for &nb in &neighbors[u] {
-                sum_nbr += a[nb];
-            }
-            smooth_a[u] = 3.0 * a[u] as f64 + (sum_nbr as f64 / neighbors[u].len() as f64);
-        }
-
-        Self {
-            n,
-            v,
-            a,
-            smooth_a,
-            neighbors,
-        }
+        Self { n, v, a, neighbors }
     }
 
     #[inline]
@@ -117,31 +101,20 @@ impl Input {
     }
 }
 
-fn generate_refined_path(
+fn generate_initial_path(
     input: &Input,
     rng: &mut XorShift,
 ) -> Vec<usize> {
     loop {
         let mut visited = vec![false; input.v];
         let mut path = Vec::with_capacity(input.v);
-
-        // Find best goal node based on smooth score
-        let mut start_node = 0;
-        let mut max_s = -1.0;
-        for u in 0..input.v {
-            if input.smooth_a[u] > max_s {
-                max_s = input.smooth_a[u];
-                start_node = u;
-            }
-        }
-
-        let mut curr = start_node;
+        let mut curr = rng.gen_range(0, input.v);
         visited[curr] = true;
         path.push(curr);
 
         while path.len() < input.v {
+            let mut min_deg = usize::MAX;
             let mut candidates = Vec::new();
-            let mut min_deg_val = 9;
 
             for &v in &input.neighbors[curr] {
                 if !visited[v] {
@@ -151,9 +124,12 @@ fn generate_refined_path(
                             deg += 1;
                         }
                     }
-                    candidates.push((v, deg));
-                    if deg < min_deg_val {
-                        min_deg_val = deg;
+                    if deg < min_deg {
+                        min_deg = deg;
+                        candidates.clear();
+                        candidates.push(v);
+                    } else if deg == min_deg {
+                        candidates.push(v);
                     }
                 }
             }
@@ -162,21 +138,20 @@ fn generate_refined_path(
                 break;
             }
 
-            // Pure Warnsdorff's heuristic for stability
-            let mins: Vec<usize> = candidates
-                .iter()
-                .filter(|&&(_, d)| d == min_deg_val)
-                .map(|&(v, _)| v)
-                .collect();
-            let next_node = mins[rng.gen_range(0, mins.len())];
+            // Heuristic: Prefer smaller population for early path indices
+            let next_node = if candidates.len() == 1 {
+                candidates[0]
+            } else {
+                candidates.sort_by_key(|&v| input.a[v]);
+                let idx = (rng.next_f64() * rng.next_f64() * candidates.len() as f64) as usize;
+                candidates[idx]
+            };
 
             visited[next_node] = true;
             path.push(next_node);
             curr = next_node;
         }
-
         if path.len() == input.v {
-            path.reverse();
             return path;
         }
     }
@@ -186,8 +161,8 @@ struct State {
     order: Vec<usize>,
     pos: Vec<usize>,
     score: i64,
-    sum_a: Vec<i64>,
-    sum_ka: Vec<i64>,
+    sum_a: Vec<i64>,  // Prefix sum of A
+    sum_ka: Vec<i64>, // Prefix sum of k*A
 }
 
 impl State {
@@ -195,10 +170,9 @@ impl State {
         input: &Input,
         order: Vec<usize>,
     ) -> Self {
-        let v = input.v;
-        let mut pos = vec![0; v];
-        let mut sum_a = vec![0; v + 1];
-        let mut sum_ka = vec![0; v + 1];
+        let mut pos = vec![0; input.v];
+        let mut sum_a = vec![0; input.v + 1];
+        let mut sum_ka = vec![0; input.v + 1];
         let mut score = 0;
         for (k, &u) in order.iter().enumerate() {
             pos[u] = k;
@@ -215,18 +189,6 @@ impl State {
         }
     }
 
-    fn update_prefix_sums(
-        &mut self,
-        from: usize,
-        input: &Input,
-    ) {
-        for k in from + 1..=input.v {
-            let u = self.order[k - 1];
-            self.sum_a[k] = self.sum_a[k - 1] + input.a[u];
-            self.sum_ka[k] = self.sum_ka[k - 1] + (k as i64 - 1) * input.a[u];
-        }
-    }
-
     #[inline]
     fn get_diff_2opt(
         &self,
@@ -237,14 +199,21 @@ impl State {
         if r <= l + 1 || r + 1 >= input.v {
             return None;
         }
-        if !input.is_adj(self.order[l + 1], self.order[r + 1]) {
+
+        let u1 = self.order[l + 1];
+        let v1 = self.order[r + 1];
+        if !input.is_adj(u1, v1) {
             return None;
         }
 
         let s = (l + r + 1) as i64;
         let range_sum_a = self.sum_a[r + 1] - self.sum_a[l + 1];
         let range_sum_ka = self.sum_ka[r + 1] - self.sum_ka[l + 1];
-        Some(s * range_sum_a - 2 * range_sum_ka)
+
+        // New index k' = (l + 1) + (r - k) = l + r + 1 - k = s - k
+        // Diff = sum_{k=l+1}^r (k' - k) * A[k] = sum (s - 2k) * A[k] = s * sum A - 2 * sum kA
+        let diff = s * range_sum_a - 2 * range_sum_ka;
+        Some(diff)
     }
 
     fn apply_2opt(
@@ -256,73 +225,16 @@ impl State {
     ) {
         self.order[l + 1..=r].reverse();
         for k in l + 1..=r {
-            self.pos[self.order[k]] = k;
+            let u = self.order[k];
+            self.pos[u] = k;
         }
         self.score += diff;
-        self.update_prefix_sums(l, input);
-    }
-
-    #[inline]
-    fn get_diff_or_opt(
-        &self,
-        idx_b: usize,
-        target_idx: usize,
-        input: &Input,
-    ) -> Option<i64> {
-        if idx_b == 0 || idx_b == input.v - 1 || idx_b == target_idx || idx_b == target_idx + 1 {
-            return None;
+        // Update prefix sums for the changed range
+        for k in l + 1..=input.v {
+            let u = self.order[k - 1];
+            self.sum_a[k] = self.sum_a[k - 1] + input.a[u];
+            self.sum_ka[k] = self.sum_ka[k - 1] + (k as i64 - 1) * input.a[u];
         }
-
-        if !input.is_adj(self.order[idx_b - 1], self.order[idx_b + 1]) {
-            return None;
-        }
-        if !input.is_adj(self.order[target_idx], self.order[idx_b]) {
-            return None;
-        }
-        if target_idx + 1 < input.v && !input.is_adj(self.order[idx_b], self.order[target_idx + 1])
-        {
-            return None;
-        }
-
-        let b_val = input.a[self.order[idx_b]];
-        let k_b = idx_b as i64;
-        let k_target = if idx_b < target_idx {
-            target_idx as i64
-        } else {
-            (target_idx + 1) as i64
-        };
-
-        let diff = if idx_b < target_idx {
-            let range_sum_a = self.sum_a[target_idx + 1] - self.sum_a[idx_b + 1];
-            (k_target - k_b) * b_val - range_sum_a
-        } else {
-            let range_sum_a = self.sum_a[idx_b] - self.sum_a[target_idx + 1];
-            (k_target - k_b) * b_val + range_sum_a
-        };
-        Some(diff)
-    }
-
-    fn apply_or_opt(
-        &mut self,
-        idx_b: usize,
-        target_idx: usize,
-        diff: i64,
-        input: &Input,
-    ) {
-        let b = self.order.remove(idx_b);
-        let new_idx = if idx_b < target_idx {
-            target_idx
-        } else {
-            target_idx + 1
-        };
-        self.order.insert(new_idx, b);
-
-        let start_upd = if idx_b < new_idx { idx_b } else { new_idx };
-        for k in start_upd..self.order.len() {
-            self.pos[self.order[k]] = k;
-        }
-        self.score += diff;
-        self.update_prefix_sums(start_upd, input);
     }
 }
 
@@ -331,53 +243,55 @@ fn main() {
     let input = Input::new();
     let mut rng = XorShift::new(42);
 
-    let mut best_state = {
-        let initial_order = generate_refined_path(&input, &mut rng);
-        State::new(&input, initial_order)
-    };
-    let mut current_state = State::new(&input, best_state.order.clone());
+    let mut best_overall_score = -1;
+    let mut best_overall_order = Vec::new();
 
-    let t0 = 1e5;
-    let t1 = 1e0;
-
+    // Multistart loop
     while start_time.elapsed().as_secs_f64() < TIME_LIMIT_SEC {
-        let elapsed = start_time.elapsed().as_secs_f64();
-        let progress = elapsed / TIME_LIMIT_SEC;
-        let temp = t0 * (t1 as f64 / t0 as f64).powf(progress as f64);
+        let initial_order = generate_initial_path(&input, &mut rng);
+        let mut current_state = State::new(&input, initial_order);
 
-        if progress < 0.5 {
-            // Phase 1: 2-opt
+        // Initial check for reversal
+        let mut rev_order = current_state.order.clone();
+        rev_order.reverse();
+        let rev_state = State::new(&input, rev_order);
+        if rev_state.score > current_state.score {
+            current_state = rev_state;
+        }
+
+        let t0 = 1e6;
+        let t1 = 1e2;
+        let mut iter_count = 0;
+
+        while iter_count < 200000 {
+            if (iter_count & 255) == 0 && start_time.elapsed().as_secs_f64() >= TIME_LIMIT_SEC {
+                break;
+            }
+            iter_count += 1;
+
+            let progress = start_time.elapsed().as_secs_f64() / TIME_LIMIT_SEC;
+            let temp = t0 * (t1 / t0).powf(progress);
+
             let l = rng.gen_range(0, input.v - 2);
             let u = current_state.order[l];
             let target_v = input.neighbors[u][rng.gen_range(0, input.neighbors[u].len())];
             let r = current_state.pos[target_v];
+
             if let Some(diff) = current_state.get_diff_2opt(l, r, &input) {
                 if diff >= 0 || rng.next_f64() < (diff as f64 / temp).exp() {
                     current_state.apply_2opt(l, r, diff, &input);
                 }
             }
-        } else {
-            // Phase 2: Or-opt (Node Reinsertion)
-            let idx_b = rng.gen_range(1, input.v - 1);
-            let b = current_state.order[idx_b];
-            let target_node = input.neighbors[b][rng.gen_range(0, input.neighbors[b].len())];
-            let target_idx = current_state.pos[target_node];
-            if let Some(diff) = current_state.get_diff_or_opt(idx_b, target_idx, &input) {
-                if diff >= 0 || rng.next_f64() < (diff as f64 / temp).exp() {
-                    current_state.apply_or_opt(idx_b, target_idx, diff, &input);
-                }
-            }
         }
 
-        if current_state.score > best_state.score {
-            best_state = State::new(&input, current_state.order.clone());
+        if current_state.score > best_overall_score {
+            best_overall_score = current_state.score;
+            best_overall_order = current_state.order;
         }
     }
 
-    eprintln!("Best score: {}", best_state.score);
-
     let mut out = BufWriter::new(stdout());
-    for &u in &best_state.order {
+    for &u in &best_overall_order {
         writeln!(out, "{} {}", u / input.n, u % input.n).unwrap();
     }
 }
