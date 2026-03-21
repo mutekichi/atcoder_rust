@@ -4,13 +4,14 @@ help:
 	@echo "  make new abc 341                : Create environment for ABC341"
 	@echo "  make run abc 341 a              : Run solution for ABC341 problem A"
 	@echo "  make run ahc 060                : Run solution for AHC060 (implicitly runs a)"
+	@echo "  make run ahc 062 in             : Run all inputs in src/ahc/ahc062/in/"
 	@echo "  make run abc 341 a p            : Paste from clipboard and run"
 	@echo "  make run abc 341 a release      : Run solution in release mode"
 	@echo "  make data                       : Generate test data"
 	@echo "  make use src/tmpl.rs abc 341 a  : Inject template"
 
 INPUT_FILE = input.txt
-KEYWORDS = new run use data release p
+KEYWORDS = new run use data release p in
 ARGS = $(filter-out $(KEYWORDS) $@,$(MAKECMDGOALS))
 
 # OS detection
@@ -24,7 +25,6 @@ endif
 ifeq ($(PLATFORM),Windows)
     PASTE_CMD := powershell.exe -command "Get-Clipboard" | tr -d '\r'
 else
-    # Default for macOS (Darwin)
     PASTE_CMD := pbpaste
 endif
 
@@ -37,9 +37,11 @@ ifneq (,$(filter release,$(MAKECMDGOALS)))
 endif
 
 DO_PASTE = $(filter p,$(MAKECMDGOALS))
+# Detection for batch execution
+DO_BATCH = $(filter in,$(MAKECMDGOALS))
 
-.PHONY: release p
-release p:
+.PHONY: release p in
+release p in:
 	@:
 
 .PHONY: new
@@ -58,7 +60,7 @@ run:
 	@if [ -z "$(T)" ] || [ -z "$(C)" ]; then echo "Error: Type and ID required."; exit 1; fi
 	@if [ "$(T)" != "abc" ] && [ "$(T)" != "arc" ] && [ "$(T)" != "ahc" ]; then echo "Error: Category must be abc, arc, or ahc."; exit 1; fi
 	$(eval P := $(if $(filter ahc,$(T)),a,$(P_ARG)))
-	@if [ -z "$(P)" ]; then echo "Error: Prob required for $(T)."; exit 1; fi
+	@if [ -z "$(P)" ] && [ -z "$(DO_BATCH)" ]; then echo "Error: Prob required for $(T)."; exit 1; fi
 	$(eval PKG_NAME := $(T)$(C))
 	@if [ -n "$(DO_PASTE)" ]; then \
 		$(PASTE_CMD) > $(INPUT_FILE); \
@@ -67,19 +69,37 @@ run:
 	@cargo build $(CARGO_FLAGS) --quiet -p $(PKG_NAME) --bin $(P)
 	@BIN_PATH="./target/$(MODE)/$(P)"; \
 	if [ -f "$${BIN_PATH}.exe" ]; then BIN_PATH="$${BIN_PATH}.exe"; fi; \
-	if [ "$(MODE)" = "release" ]; then \
-		echo "Start: $$(date +'%H:%M:%S.%3N')" >&2; \
-		START_TIME=$$(python -c 'import time; print(time.time())'); \
-		if [ -f $(INPUT_FILE) ]; then cat $(INPUT_FILE) | "$$BIN_PATH"; else "$$BIN_PATH"; fi; \
-		RET=$$?; \
-		END_TIME=$$(python -c 'import time; print(time.time())'); \
-		echo "End:   $$(date +'%H:%M:%S.%3N')" >&2; \
-		python -c "print(f'Execution time: {$$END_TIME - $$START_TIME:.4f}s')" >&2; \
+	if [ -n "$(DO_BATCH)" ]; then \
+		IN_DIR="src/$(T)/$(T)$(C)/in"; \
+		OUT_DIR="src/$(T)/$(T)$(C)/out"; \
+		mkdir -p "$$OUT_DIR"; \
+		for f in "$$IN_DIR"/*; do \
+			fname=$$(basename "$$f"); \
+			echo "Running $$fname..."; \
+			if [ "$(MODE)" = "release" ]; then \
+				START_TIME=$$(python -c 'import time; print(time.time())'); \
+				"$$BIN_PATH" < "$$f" > "$$OUT_DIR/$$fname"; \
+				END_TIME=$$(python -c 'import time; print(time.time())'); \
+				python -c "print(f'  Done. Time: {$$END_TIME - $$START_TIME:.4f}s')" >&2; \
+			else \
+				"$$BIN_PATH" < "$$f" > "$$OUT_DIR/$$fname"; \
+			fi; \
+		done; \
 	else \
-		if [ -f $(INPUT_FILE) ]; then cat $(INPUT_FILE) | "$$BIN_PATH"; else "$$BIN_PATH"; fi; \
-		RET=$$?; \
-	fi; \
-	exit $$RET
+		if [ "$(MODE)" = "release" ]; then \
+			echo "Start: $$(date +'%H:%M:%S.%3N')" >&2; \
+			START_TIME=$$(python -c 'import time; print(time.time())'); \
+			if [ -f $(INPUT_FILE) ]; then cat $(INPUT_FILE) | "$$BIN_PATH"; else "$$BIN_PATH"; fi; \
+			RET=$$?; \
+			END_TIME=$$(python -c 'import time; print(time.time())'); \
+			echo "End:   $$(date +'%H:%M:%S.%3N')" >&2; \
+			python -c "print(f'Execution time: {$$END_TIME - $$START_TIME:.4f}s')" >&2; \
+		else \
+			if [ -f $(INPUT_FILE) ]; then cat $(INPUT_FILE) | "$$BIN_PATH"; else "$$BIN_PATH"; fi; \
+			RET=$$?; \
+		fi; \
+		exit $$RET; \
+	fi
 
 .PHONY: data
 data:

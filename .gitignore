@@ -20,3 +20,4 @@ scripts/atcoder_manager.py
 .venv/
 
 **/in/*
+**/out/*
