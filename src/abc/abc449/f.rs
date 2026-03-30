@@ -60,25 +60,181 @@ fn main() {
         n: usize,
         RC: [(i64, i64); n],
     }
+
+    let RC = RC
+        .iter()
+        .map(|&(r, c)| {
+            (
+                // (max(1, r - h + 1), min(H, r + h - 1)),
+                (max(1, r - h + 1), r),
+                // (max(1, c - w + 1), min(W, c + w - 1)),
+                (max(1, c - w + 1), c),
+            )
+        })
+        .collect::<Vec<_>>();
+
+    let mut h_set = BTreeSet::new();
+    let mut w_set = BTreeSet::new();
+    h_set.insert(1);
+    h_set.insert(H);
+    w_set.insert(1);
+    w_set.insert(W);
+
+    for &(r, c) in &RC {
+        h_set.insert(r.0);
+        h_set.insert(r.1);
+        if r.1 < H {
+            h_set.insert(r.1 + 1);
+        }
+        w_set.insert(c.0);
+        w_set.insert(c.1);
+        if c.1 < W {
+            w_set.insert(c.1 + 1);
+        }
+    }
+    if w > 1 {
+        w_set.insert(W - w + 2);
+    }
+    if h > 1 {
+        h_set.insert(H - h + 2);
+    }
+
+    let mut h_vec = h_set.into_iter().collect::<Vec<_>>();
+    let mut w_vec = w_set.into_iter().collect::<Vec<_>>();
+    h_vec.push(H + 1);
+    w_vec.push(W + 1);
+
+    let lh = h_vec.len();
+    let lw = w_vec.len();
+
+    let data_w = w_vec
+        .windows(2)
+        .map(|w| (w[1] - w[0], 0, w[1] - w[0]))
+        .collect::<Vec<_>>();
+
+    let comp_h = CoordinateCompression::new(h_vec.clone());
+    let comp_w = CoordinateCompression::new(w_vec);
+
     let mut lst = LazySegmentTree::new(
-        &vec![(0i64, w); w as usize],
-        |a: (i64, i64), b: (i64, i64)| {
-            if a.0 > b.0 {
-                b
-            } else if a.0 < b.0 {
-                a
+        &data_w,
+        |a: (i64, isize, i64), b: (i64, isize, i64)| {
+            if a.1 == b.1 {
+                (a.0 + b.0, a.1, a.2 + b.2)
             } else {
-                (a.0, a.1 + b.1)
+                if a.1 < b.1 {
+                    (a.0 + b.0, a.1, a.2)
+                } else {
+                    (a.0 + b.0, b.1, b.2)
+                }
             }
         },
-        (INF_I64, 064),
-        |x, op| (x.0 + op, x.1),
-        |new_op, old_op| new_op + old_op,
+        (0, INF_USIZE as isize, 0),
+        |a, b: isize| (a.0, a.1 + b, a.2),
+        |a, b| a + b,
         0,
     );
+
+    let mut to_insert = vec![vec![]; lh];
+    let mut to_remove = vec![vec![]; lh];
+
+    for (r, c) in RC {
+        let w = (comp_w.compress(&c.0), comp_w.compress(&c.1));
+        to_insert[comp_h.compress(&r.0)].push(w);
+        to_remove[comp_h.compress(&r.1)].push(w);
+    }
+
+    if w > 1 {
+        to_insert[0].push((comp_w.compress(&(W - w + 2)), comp_w.compress(&W)));
+    }
+    if h > 1 {
+        to_insert[comp_h.compress(&(H - h + 2))].push((0, comp_w.compress(&W)));
+    }
+
+    let mut ans = 0;
+
+    for hw in h_vec.windows(2) {
+        md!(hw[0], hw[1]);
+        let height = hw[1] - hw[0];
+        for &to_insert in &to_insert[comp_h.compress(&hw[0])] {
+            let (l, r) = to_insert;
+            md!(l, r, "insert");
+            lst.apply_range(l, r + 1, 1);
+        }
+        let (_, min, count) = lst.all_prod();
+        md!(min, count);
+        if min == 0 {
+            ans += height * count;
+        }
+        for &to_remove in &to_remove[comp_h.compress(&hw[0])] {
+            let (l, r) = to_remove;
+            md!(l, r, "remove");
+            lst.apply_range(l, r + 1, -1);
+        }
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS
+
+/// Coordinate Compression (Zaatsu)
+///
+/// Compresses a set of values into indices [0, N-1] preserving order.
+///
+/// # Examples
+///
+/// ```
+/// use atcoder_rust::template::utils::coordinate_compression::CoordinateCompression;
+///
+/// let data = vec![100, 2, 100, 50, 2];
+/// let cc = CoordinateCompression::new(data);
+///
+/// assert_eq!(cc.size(), 3); // {2, 50, 100}
+/// assert_eq!(cc.compress(&2), 0);
+/// assert_eq!(cc.compress(&50), 1);
+/// assert_eq!(cc.compress(&100), 2);
+/// assert_eq!(cc.decompress(1), 50);
+/// ```
+#[derive(Debug, Clone)]
+pub struct CoordinateCompression<T> {
+    pub xs: Vec<T>,
+}
+
+impl<T: Ord + Clone + Copy> CoordinateCompression<T> {
+    /// Constructs a new `CoordinateCompression` from a vector of values.
+    ///
+    /// Duplicates are removed and the values are sorted.
+    pub fn new(mut data: Vec<T>) -> Self {
+        data.sort();
+        data.dedup();
+        CoordinateCompression { xs: data }
+    }
+
+    /// Returns the compressed index for the given value.
+    ///
+    /// # Panics
+    /// Panics if the value is not found (use `binary_search` directly if handling missing values).
+    pub fn compress(
+        &self,
+        val: &T,
+    ) -> usize {
+        self.xs
+            .binary_search(val)
+            .expect("Value not found in compressed coordinates")
+    }
+
+    /// Returns the original value for the given compressed index.
+    pub fn decompress(
+        &self,
+        i: usize,
+    ) -> T {
+        self.xs[i]
+    }
+
+    /// Returns the number of unique values.
+    pub fn size(&self) -> usize {
+        self.xs.len()
+    }
+}
 
 /// Lazy Segment Tree (Range Update, Range Query)
 ///

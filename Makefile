@@ -21,6 +21,13 @@ else
     PLATFORM := $(shell uname -s)
 endif
 
+# Define python command based on OS
+ifeq ($(PLATFORM),Darwin)
+    PYTHON := python3
+else
+    PYTHON := python
+endif
+
 # Define paste command based on OS
 ifeq ($(PLATFORM),Windows)
     PASTE_CMD := powershell.exe -command "Get-Clipboard" | tr -d '\r'
@@ -77,10 +84,10 @@ run:
 			fname=$$(basename "$$f"); \
 			echo "Running $$fname..."; \
 			if [ "$(MODE)" = "release" ]; then \
-				START_TIME=$$(python -c 'import time; print(time.time())'); \
+				START_TIME=$$($(PYTHON) -c 'import time; print(time.time())'); \
 				"$$BIN_PATH" < "$$f" > "$$OUT_DIR/$$fname"; \
-				END_TIME=$$(python -c 'import time; print(time.time())'); \
-				python -c "print(f'  Done. Time: {$$END_TIME - $$START_TIME:.4f}s')" >&2; \
+				END_TIME=$$($(PYTHON) -c 'import time; print(time.time())'); \
+				$(PYTHON) -c "print(f'  Done. Time: {$$END_TIME - $$START_TIME:.4f}s')" >&2; \
 			else \
 				"$$BIN_PATH" < "$$f" > "$$OUT_DIR/$$fname"; \
 			fi; \
@@ -88,12 +95,12 @@ run:
 	else \
 		if [ "$(MODE)" = "release" ]; then \
 			echo "Start: $$(date +'%H:%M:%S.%3N')" >&2; \
-			START_TIME=$$(python -c 'import time; print(time.time())'); \
+			START_TIME=$$($(PYTHON) -c 'import time; print(time.time())'); \
 			if [ -f $(INPUT_FILE) ]; then cat $(INPUT_FILE) | "$$BIN_PATH"; else "$$BIN_PATH"; fi; \
 			RET=$$?; \
-			END_TIME=$$(python -c 'import time; print(time.time())'); \
+			END_TIME=$$($(PYTHON) -c 'import time; print(time.time())'); \
 			echo "End:   $$(date +'%H:%M:%S.%3N')" >&2; \
-			python -c "print(f'Execution time: {$$END_TIME - $$START_TIME:.4f}s')" >&2; \
+			$(PYTHON) -c "print(f'Execution time: {$$END_TIME - $$START_TIME:.4f}s')" >&2; \
 		else \
 			if [ -f $(INPUT_FILE) ]; then cat $(INPUT_FILE) | "$$BIN_PATH"; else "$$BIN_PATH"; fi; \
 			RET=$$?; \
@@ -103,7 +110,7 @@ run:
 
 .PHONY: data
 data:
-	@python make_data.py > $(INPUT_FILE)
+	@$(PYTHON) make_data.py > $(INPUT_FILE)
 	@echo "Generated test data to $(INPUT_FILE)"
 
 .PHONY: use
@@ -116,7 +123,7 @@ use:
 		echo "Error: Usage: make use <tmpl> <type> <id> <prob>"; exit 1; \
 	fi
 	$(eval TARGET_FILE := src/$(T)/$(T)$(C)/$(P).rs)
-	@python scripts/inject.py "$(TMPL)" "$(TARGET_FILE)"
+	@$(PYTHON) scripts/inject.py "$(TMPL)" "$(TARGET_FILE)"
 
 .PHONY: paste
 paste:

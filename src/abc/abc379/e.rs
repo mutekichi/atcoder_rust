@@ -1,6 +1,96 @@
+#![allow(unused_imports)]
+#![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
-// --- SNAP START ---
+use memoise::memoise;
+use num_integer::gcd;
+use rand::Rng;
+use std::cmp::{Ordering, Reverse, max, min};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::io::{BufWriter, Write, stdout};
+use std::mem::swap;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
+
+use itertools::{Itertools, iproduct};
+use proconio::input;
+use proconio::marker::{Bytes, Chars, Usize1};
+
+const INF_I64: i64 = 1 << 60;
+const INF_USIZE: usize = 1 << 60;
+const INF_F64: f64 = 1e18;
+const INF_I128: i128 = 1 << 120;
+const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const C998244353: u64 = 998244353;
+const C1000000007: u64 = 1000000007;
+
+#[macro_export]
+#[cfg(debug_assertions)] // for debug build
+macro_rules! md { // stands for my_dbg
+    ($($arg:expr),* $(,)?) => {{
+        eprint!("[{}:{}] ", file!(), line!());
+
+        let mut _first = true;
+        $(
+            if !_first {
+                eprint!(", ");
+            }
+            eprint!("{}: {}", stringify!($arg), $arg);
+            _first = false;
+        )*
+        eprintln!();
+    }};
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))] // for release build
+macro_rules! md {
+    ($($arg:expr),* $(,)?) => {{
+        // do nothing
+    }};
+}
+
+#[allow(unused_variables)]
+fn main() {
+    input! {
+        n: usize,
+        S: Chars,
+    }
+
+    let mut lst = LazySegmentTree::new(
+        &vec![(0, 1); n],
+        |a, b| (a.0 + b.0, a.1 + b.1),
+        (0, 0),
+        |a, b| (a.0 + a.1 * b, a.1),
+        |new, old| new + old,
+        0,
+    );
+
+    for i in 0..n {
+        let op = (n - i) as i64 * ((S[n - i - 1] as u8 - b'0') as i64);
+        md!(i, S[n - i - 1], op);
+        lst.apply_range(0, i + 1, op);
+    }
+
+    for i in 0..n - 1 {
+        let val = lst.get(i).0;
+        lst.apply(i + 1, val / 10);
+        lst.apply(i, val / 10 * 10 * -1);
+    }
+    let mut ans = vec![];
+    for i in 0..n - 1 {
+        ans.push(lst.get(i).0);
+    }
+    let mut last = lst.get(n - 1).0;
+    while last > 0 {
+        ans.push(last % 10);
+        last /= 10;
+    }
+
+    println!("{}", ans.iter().rev().join(""));
+}
+
+// FOR TEMPLATE INJECTIONS
 
 /// Lazy Segment Tree (Range Update, Range Query)
 ///
@@ -389,3 +479,5 @@ where
         self.lazy[k] = self.id;
     }
 }
+
+// END TEMPLATE INJECTIONS
