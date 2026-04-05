@@ -53,15 +53,15 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
-        m: i64,
-        A: [i64; n],
+        S: Chars,
     }
-
-    let mut ans = 0;
-    
+    if S.iter().all(|e| *e == S[0]) {
+        println!("Won");
+    }
+    else {
+        println!("Lost");
+    }
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

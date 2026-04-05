@@ -54,14 +54,20 @@ macro_rules! md {
 fn main() {
     input! {
         n: usize,
-        m: i64,
-        A: [i64; n],
+        x: i64,
+        VP: [(i64, i64); n],
     }
-
-    let mut ans = 0;
-    
+    let mut total = 0;
+    for i in 0..n {
+        let (v, p) = VP[i];
+        total += v * p;
+        if total > x * 100 {
+            println!("{}", i + 1);
+            return;
+        }
+    }
+    println!("{}", -1);
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

@@ -53,15 +53,31 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
-        m: i64,
-        A: [i64; n],
+        S: [Chars; 8],
+    }
+    let mut state = vec![vec![true; 8]; 8];
+
+    for i in 0..8 {
+        for j in 0..8 {
+            if S[i][j] == '#' {
+                for k in 0..8 {
+                    state[i][k] = false;
+                    state[k][j] = false;
+                }
+            }
+        }
     }
 
     let mut ans = 0;
-    
+    for i in 0..8 {
+        for j in 0..8 {
+            if state[i][j] {
+                ans += 1;
+            }
+        }
+    }
+    println!("{}", ans);
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

@@ -53,10 +53,71 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        h: usize, w: usize,
+        k: usize,
+        S: [Chars; h],
     }
+    let mut count = 0i64;
+    let mut seen = vec![vec![false; w]; h];
+    for i in 0..h {
+        for j in 0..w {
+            if S[i][j] == '.' {
+                f(i, j, h, w, k, &S, &mut seen, &mut count);
+            }
+        }
+    }
+    println!("{}", count);
+}
+
+fn f(
+    i: usize,
+    j: usize,
+    h: usize,
+    w: usize,
+    rem: usize,
+    S: &Vec<Vec<char>>,
+    seen: &mut Vec<Vec<bool>>,
+    count: &mut i64,
+) {
+    if rem == 0 {
+        *count += 1;
+        return;
+    }
+    seen[i][j] = true;
+    for (ni, nj) in get_next_positions(h, w, i, j, &DIR) {
+        if S[ni][nj] == '.' && !seen[ni][nj] {
+            f(ni, nj, h, w, rem - 1, S, seen, count);
+        }
+    }
+    seen[i][j] = false;
 }
 
 // FOR TEMPLATE INJECTIONS
+
+/// Returns valid neighbor coordinates within the grid (h x w).
+/// Usage:
+/// ```
+/// for (nh, nw) in get_next_positions(h, w, hh, ww, &DIR) {
+///     // process (nh, nw)
+/// }
+/// ```
+fn get_next_positions(
+    h: usize,
+    w: usize,
+    i: usize,
+    j: usize,
+    directions: &[(isize, isize)],
+) -> Vec<(usize, usize)> {
+    let mut next_positions = Vec::with_capacity(directions.len());
+
+    for &(di, dj) in directions {
+        let next_i = i.wrapping_add_signed(di);
+        let next_j = j.wrapping_add_signed(dj);
+        if next_i < h && next_j < w {
+            next_positions.push((next_i, next_j));
+        }
+    }
+    next_positions
+}
 
 // END TEMPLATE INJECTIONS

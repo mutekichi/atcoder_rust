@@ -54,15 +54,32 @@ macro_rules! md {
 fn main() {
     input! {
         n: usize,
-        m: i64,
-        A: [i64; n],
+        c: i64,
+        ABC: [(i64, i64, i64); n],
     }
-
+    let mut days_set = BTreeSet::new();
+    for &(a, b, c) in &ABC {
+        let days = [a - 1, a, a + 1, b - 1, b, b + 1];
+        for day in days {
+            days_set.insert(day);
+        }
+    }
+    let days_vec = days_set.iter().collect::<Vec<_>>();
+    let mut to_day_map = BTreeMap::new();
+    for i in 0..days_vec.len() {
+        to_day_map.insert(days_vec[i], i);
+    }
+    let mut accum = vec![0i64; days_vec.len()];
+    for (a, b, c) in ABC {
+        accum[*to_day_map.get(&a).unwrap()] += c;
+        accum[*to_day_map.get(&(b + 1)).unwrap()] -= c;
+    }
+    for i in 1..accum.len() {
+        accum[i] += accum[i - 1];
+    }
     let mut ans = 0;
-    
+    for i in 0..days_vec.len() - 1 {
+        ans += min(c, accum[i]) * (days_vec[i + 1] - days_vec[i]);
+    }
+    println!("{}", ans);
 }
-
-
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS

@@ -3,13 +3,13 @@
 #![allow(dead_code)]
 
 // Common imports
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -37,7 +37,6 @@ fn main() {
 // Logic goes here
 #[allow(unused_macros)]
 #[allow(unused_variables)]
-#[rustfmt::skip]
 fn solve<W: Write>(out: &mut W) {
     macro_rules! wl {
         ($x:expr) => { writeln!(out, "{}", $x).unwrap(); };
@@ -46,17 +45,24 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         n: usize,
-        vec_a: [i64; n],
+        a: [usize; n],
     }
-    
-    let vec_api: Vec<i64> = vec_a.iter().enumerate().map(
-        |(i, v)| { i as i64  + v }
-    ).collect();
 
-    let vec_ami: Vec<i64> = vec_a.iter().enumerate().map(
-        |(i, v)| { i as i64 - v }
-    ).collect();
-
+    let size = 200010;
+    let mut counts = vec![vec![0, 0]; size];
+    for i in 0..n {
+        if i + a[i] < size {
+            counts[i + a[i]][0] += 1;
+        }
+        if i >= a[i] {
+            counts[i - a[i]][1] += 1;
+        }
+    }
+    let mut ans = 0i64;
+    for i in 0..size {
+        ans += counts[i][0] * counts[i][1];
+    }
+    println!("{}", ans);
 }
 
 // --- Macros ---

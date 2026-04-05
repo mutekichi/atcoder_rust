@@ -53,7 +53,20 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
+        QR: [(usize, usize); n],
+        q: usize,
+        TD: [(Usize1, usize); q],
+    }
+    for (t, d) in TD {
+        let (q, r) = QR[t];
+        let rem = d % q;
+        md!(q, r, d, rem);
+        if rem <= r {
+            println!("{}", d + (r - rem));
+        } else {
+            println!("{}", d + q - (rem - r));
+        }
     }
 }
 

@@ -53,7 +53,18 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
+        A: [i64; n],
+    }
+    let mut map = BTreeMap::new();
+    for i in 0..n {
+        if map.contains_key(&A[i]) {
+            println!("{}", map.get(&A[i]).unwrap());
+            *map.get_mut(&A[i]).unwrap() = i + 1;
+        } else {
+            println!("-1");
+            map.insert(A[i], i + 1);
+        }
     }
 }
 

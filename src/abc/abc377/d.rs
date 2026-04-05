@@ -54,14 +54,12 @@ macro_rules! md {
 fn main() {
     input! {
         n: usize,
-        m: i64,
-        A: [i64; n],
+        m: usize,
+        LR: [(usize, usize); n],
     }
 
-    let mut ans = 0;
-    
-}
 
+}
 
 // FOR TEMPLATE INJECTIONS
 

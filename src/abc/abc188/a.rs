@@ -53,15 +53,15 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
-        m: i64,
-        A: [i64; n],
+        x: usize, y: usize,
     }
 
-    let mut ans = 0;
-    
+    if x.abs_diff(y) < 3 {
+        println!("{}", "Yes");
+    } else {
+        println!("{}", "No");
+    }
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

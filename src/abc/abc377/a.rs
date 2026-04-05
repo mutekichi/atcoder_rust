@@ -53,15 +53,15 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
-        m: i64,
-        A: [i64; n],
+        mut S: Chars,
     }
-
-    let mut ans = 0;
-    
+    S.sort();
+    if S.iter().collect::<String>() == "ABC" {
+        println!("Yes");
+    } else {
+        println!("No");
+    }
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

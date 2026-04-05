@@ -46,8 +46,11 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        n: usize, a: usize, b: usize,
+        s: Chars,
     }
     
+    println!("{}", s.iter().skip(a).take(n - a - b).collect::<String>());
 }
 
 // --- Macros ---

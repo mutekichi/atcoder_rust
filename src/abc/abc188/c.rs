@@ -54,14 +54,35 @@ macro_rules! md {
 fn main() {
     input! {
         n: usize,
-        m: i64,
-        A: [i64; n],
+        A: [i64; 1<<n],
     }
-
-    let mut ans = 0;
-    
+    md!(A.len());
+    let mut players = (0..(1 << n)).zip(A.into_iter()).collect::<Vec<_>>();
+    let mut next = vec![];
+    md!(players.len());
+    while players.len() > 2 {
+        for i in 0..players.len() / 2 {
+            md!(i);
+            if players[2 * i].1 < players[2 * i + 1].1 {
+                next.push(players[2 * i + 1]);
+                md!(2 * i + 1);
+                md!(players[2 * i + 1].0)
+            } else {
+                next.push(players[2 * i]);
+                md!(2 * i);
+                md!(players[2 * i].0)
+            }
+        }
+        swap(&mut players, &mut next);
+        next.clear();
+    }
+    md!(players[0].0, players[1].0);
+    if players[0].1 < players[1].1 {
+        println!("{}", players[0].0 + 1);
+    } else {
+        println!("{}", players[1].0 + 1);
+    }
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

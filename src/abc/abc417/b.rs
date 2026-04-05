@@ -1,15 +1,16 @@
+#![allow(non_snake_case)]
 #![allow(unused_imports)]
 #![allow(unused_macros)]
 #![allow(dead_code)]
 
 // Common imports
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -46,8 +47,20 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        n: usize, m: usize,
+        mut A: [usize; n], B: [usize; m],
     }
     
+    for b in B {
+        for i in 0..n {
+            if A[i] == b {
+                A[i] = INF_USIZE;
+                break;
+            }
+        }
+    }
+    println!("{}", A.into_iter().filter(|e| *e != INF_USIZE).join(" "));
+
 }
 
 // --- Macros ---

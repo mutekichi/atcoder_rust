@@ -54,14 +54,49 @@ macro_rules! md {
 fn main() {
     input! {
         n: usize,
-        m: i64,
-        A: [i64; n],
+        A: [i64; n]
     }
-
+    let mut seen = vec![false; n];
+    let mut status = vec![1; n];
+    let order = (0..n)
+        .sorted_by(|i, j| A[*i].cmp(&A[*j]))
+        .collect::<Vec<_>>();
     let mut ans = 0;
-    
+    for &i in order.iter().rev() {
+        if i > 0 && seen[i - 1] {
+            if i < n - 1 && seen[i + 1] {
+                md!("both");
+                let width = 1 + status[i - 1] + status[i + 1];
+                ans = max(ans, width * A[i]);
+                let left = i - status[i - 1] as usize;
+                status[left] = width;
+                let right = i + status[i + 1] as usize;
+                status[right] = width;
+            } else {
+                md!("left");
+                let width = 1 + status[i - 1];
+                ans = max(ans, width * A[i]);
+                let left = i - status[i - 1] as usize;
+                status[left] = width;
+                status[i] = width;
+            }
+        } else if i < n - 1 && seen[i + 1] {
+            md!("right");
+            let width = 1 + status[i + 1];
+            ans = max(ans, width * A[i]);
+            let right = i + status[i + 1] as usize;
+            status[right] = width;
+            status[i] = width;
+        } else {
+            md!("alone");
+            ans = max(ans, A[i]);
+        }
+        seen[i] = true;
+        md!(i, ans);
+        md!(status.iter().join(" "));
+    }
+    println!("{}", ans);
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

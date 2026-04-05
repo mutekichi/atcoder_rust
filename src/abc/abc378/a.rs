@@ -53,8 +53,20 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        A: [Usize1; 4],
     }
+    let mut counter = vec![0; 4];
+    let mut ans = 0;
+    for a in A {
+        if counter[a] == 1 {
+            ans += 1;
+            counter[a] = 0;
+        }
+        else {
+            counter[a] += 1;
+        }
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

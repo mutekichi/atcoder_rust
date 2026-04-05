@@ -53,15 +53,47 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
-        m: i64,
-        A: [i64; n],
+        x: i64, y: i64,
     }
-
-    let mut ans = 0;
-    
+    let mut seen = BTreeSet::new();
+    let mut queue = VecDeque::new();
+    queue.push_back((x, 0usize, INF_USIZE));
+    // 0: -1, 1: +1, 2: *2
+    while let Some((val, count, prev)) = queue.pop_front() {
+        if val == y {
+            println!("{}", count);
+        } else {
+            
+            if prev == 0 {
+                if val > 0 && !seen.contains(&(2 * (val - 1))) {
+                    seen.insert(2 * (val - 1));
+                    queue.push_back((val - 1, count + 1, 0));
+                }
+                if !seen.contains(&(2 * val)) {
+                    seen.insert(2 * val);
+                    queue.push_back((val * 2, count + 1, 2));
+                }
+            } else if prev == 1 {
+                let next_vals = vec![(1, val + 1), (2, val * 2)];
+                for (prev, next_val) in next_vals {
+                    if !seen.contains(&next_val) {
+                        queue.push_back((next_val, count + 1, prev));
+                    }
+                }
+            } else {
+                let mut next_vals = vec![(1, val + 1), (2, val * 2)];
+                if val > 0 {
+                    next_vals.push((0, val - 1));
+                }
+                for (prev, next_val) in next_vals {
+                    if !seen.contains(&next_val) {
+                        queue.push_back((next_val, count + 1, prev));
+                    }
+                }
+            }
+        }
+    }
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

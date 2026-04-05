@@ -54,14 +54,43 @@ macro_rules! md {
 fn main() {
     input! {
         n: usize,
-        m: i64,
+        m: usize,
         A: [i64; n],
+        XY: [(Usize1, Usize1); m],
     }
-
-    let mut ans = 0;
-    
+    let forward = {
+        let mut mins = vec![INF_I64; n];
+        let mut graph = vec![vec![]; n];
+        for &(x, y) in &XY {
+            graph[x].push(y);
+        }
+        for i in 0..n {
+            for &j in &graph[i] {
+                mins[j] = min(mins[j], min(A[i], mins[i]));
+            }
+        }
+        mins
+    };
+    let backward = {
+        let mut maxes = A.iter().cloned().collect::<Vec<_>>();
+        let mut graph = vec![vec![]; n];
+        for &(x, y) in &XY {
+            graph[y].push(x);
+        }
+        for i in (0..n).rev() {
+            for &j in &graph[i] {
+                maxes[j] = max(maxes[j], maxes[i]);
+            }
+        }
+        maxes
+    };
+    let mut ans = -INF_I64;
+    for i in 0..n {
+        md!(backward[i], forward[i]);
+        ans = max(ans, backward[i] - forward[i]);
+    }
+    println!("{}", ans);
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

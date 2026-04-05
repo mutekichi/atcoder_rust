@@ -53,15 +53,31 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
-        m: i64,
-        A: [i64; n],
+        n: i64, m: usize,
+        AB: [(i64, i64); m],
     }
-
-    let mut ans = 0;
-    
+    let mut set = BTreeSet::new();
+    let dir = vec![
+        (1, 2),
+        (1, -2),
+        (2, 1),
+        (2, -1),
+        (-1, 2),
+        (-1, -2),
+        (-2, 1),
+        (-2, -1),
+    ];
+    for (a, b) in AB {
+        set.insert((a, b));
+        for &(dx, dy) in &dir {
+            let (nx, ny) = (a + dx, b + dy);
+            if 0 < nx && nx <= n && 0 < ny && ny <= n {
+                set.insert((nx, ny));
+            }
+        }
+    }
+    println!("{}", n * n - set.len() as i64);
 }
-
 
 // FOR TEMPLATE INJECTIONS
 

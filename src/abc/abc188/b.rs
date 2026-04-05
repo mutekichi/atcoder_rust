@@ -54,14 +54,19 @@ macro_rules! md {
 fn main() {
     input! {
         n: usize,
-        m: i64,
         A: [i64; n],
+        B:[ i64; n],
     }
-
-    let mut ans = 0;
-    
+    let mut sum = 0;
+    for i in 0..n {
+        sum += A[i] * B[i];
+    }
+    if sum == 0 {
+        println!("Yes");
+    } else {
+        println!("No");
+    }
 }
-
 
 // FOR TEMPLATE INJECTIONS
 
