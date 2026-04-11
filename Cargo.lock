@@ -960,6 +960,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "arc217"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "atcoder_rust"
 version = "0.1.0"
 dependencies = [

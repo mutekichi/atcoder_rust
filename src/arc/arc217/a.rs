@@ -51,24 +51,73 @@ macro_rules! md {
 }
 
 #[allow(unused_variables)]
+
 fn main() {
     input! {
-        m: usize, d: usize,
+        t: usize,
     }
-    let valids = vec![
-        (1, 7),
-        (3, 3),
-        (5, 5),
-        (7, 7),
-        (9, 9),
-    ];
-    for valids in valids {
-        if valids.0 == m && valids.1 == d {
-            println!("Yes");
-            return;
+    for _ in 0..t {
+        input! {
+            n: i64,
+        }
+        let mut ans = vec![];
+        for i in 0..(n + 8) / 4 {
+            let values = [i * 4, i * 4 + 1, i * 4 + 3, i * 4 + 2];
+            for val in values {
+                if val != 0 && val <= n {
+                    ans.push(val);
+                }
+            }
+        }
+        println!("{}", ans.iter().join(" "));
+        md!(calc(&ans));
+    }
+}
+
+fn test() {
+    input! {
+        n: i64,
+    }
+    let mut m = INF_I64;
+    for perm in (1..=n).permutations(n as usize) {
+        let mut accum = 0;
+        let mut sum = 0;
+        for p in perm {
+            accum ^= p;
+            sum += accum;
+        }
+        m = min(m, sum);
+    }
+    println!("minimum: {}", m);
+    for perm in (1..=n).permutations(n as usize) {
+        let mut accum = 0;
+        let mut sum = 0;
+        for &p in &perm {
+            accum ^= p;
+            sum += accum;
+        }
+        if sum == m {
+            md!(perm.iter().join(" "));
+            if false {
+                println!(
+                    "{}",
+                    perm.iter().map(|e| format!("{} {:04b}", e, e)).join("\n")
+                );
+
+                println!();
+            }
         }
     }
-    println!("No");
+}
+
+fn calc(perm: &Vec<i64>) -> i64 {
+    let mut accum = 0;
+    let mut sum = 0;
+    for &p in perm {
+        accum ^= p;
+        sum += accum;
+    }
+    sum
 }
 
 // FOR TEMPLATE INJECTIONS

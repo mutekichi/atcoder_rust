@@ -53,22 +53,8 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        m: usize, d: usize,
+        
     }
-    let valids = vec![
-        (1, 7),
-        (3, 3),
-        (5, 5),
-        (7, 7),
-        (9, 9),
-    ];
-    for valids in valids {
-        if valids.0 == m && valids.1 == d {
-            println!("Yes");
-            return;
-        }
-    }
-    println!("No");
 }
 
 // FOR TEMPLATE INJECTIONS

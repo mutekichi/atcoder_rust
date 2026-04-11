@@ -53,7 +53,8 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        S: Chars,
+        T: Chars,
     }
 }
 

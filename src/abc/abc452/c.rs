@@ -53,7 +53,36 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
+        AB: [(Usize1, Usize1); n],
+        m: usize,
+        S: [Chars; m],
+    }
+    let mut data = vec![vec![vec![false; 26]; 10]; 10];
+    for s in &S {
+        for i in 0..s.len() {
+            let c = (s[i] as u8 - b'a') as usize;
+            data[s.len() - 1][i][c] = true;
+        }
+    }
+    for s in &S {
+        if s.len() != n {
+            println!("No");
+        } else {
+            let mut ok = true;
+            for i in 0..n {
+                let c = (s[i] as u8 - b'a') as usize;
+                let (a, b) = AB[i];
+                if !data[AB[i].0][AB[i].1][c] {
+                    ok = false;
+                    println!("No");
+                    break;
+                }
+            }
+            if ok {
+                println!("Yes");
+            }
+        }
     }
 }
 
