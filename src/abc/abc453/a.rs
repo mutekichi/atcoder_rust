@@ -53,28 +53,11 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
+        n: usize,
         S: Chars,
-        T: Chars,
     }
-    let n = S.len();
-    let m = T.len();
-
-    let mut dp_table = vec![0; m + 1];
-    dp_table[0] = 1;
-    let mut ans = n * (n + 1) / 2;
-    for i in 0..n {
-        for j in (0..m).rev() {
-            if S[i] == T[j] {
-                dp_table[j + 1] += dp_table[j];
-                dp_table[j] = 0;
-            }
-        }
-        dp_table[0] += 1;
-        ans -= dp_table[m];
-        md!(dp_table.iter().join(" "));
-        md!(ans);
-    }
-    println!("{}", ans);
+    let len = S.iter().take_while(|e| **e == 'o').count();
+    println!("{}", S.iter().skip(len).collect::<String>());
 }
 
 // FOR TEMPLATE INJECTIONS

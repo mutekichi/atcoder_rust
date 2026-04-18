@@ -20,9 +20,11 @@ const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
-const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const DIR: [(isize, isize, usize); 4] = [(0, 1, 0), (1, 0, 1), (0, -1, 2), (-1, 0, 3)];
 const C998244353: u64 = 998244353;
 const C1000000007: u64 = 1000000007;
+
+const DC: [char; 4] = ['L', 'U', 'R', 'D'];
 
 #[macro_export]
 #[cfg(debug_assertions)] // for debug build
@@ -53,41 +55,123 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, m: usize,
-        A: [i64; n], B: [i64; m],
+        h: usize, w: usize,
+        S: [Chars; h],
     }
-    let A = A.iter().map(|e| Mint998::new(*e)).collect::<Vec<_>>();
-    let B = B.iter().map(|e| Mint998::new(*e)).collect::<Vec<_>>();
-
-    let mut accum_sum = Vec::with_capacity(n + 1);
-    accum_sum.push(Mint998::new(0));
-    for i in 0..n {
-        accum_sum.push(accum_sum[i] + A[i]);
-    }
-    let mut prod_sum = Mint998::new(0);
-    for i in 0..n {
-        prod_sum += A[i] * Mint998::new((i + 1) as i64);
-    }
-    md!(prod_sum);
-    let mut ans = Mint998::new(0);
-    for j in 1..=m {
-        let b = B[j - 1];
-        let mut to_mul = prod_sum;
-        let mut idx = 0;
-        let mut factor = Mint998::new(if j == 1 { 1 } else { 0 });
-        while idx < n {
-            let range_sum = accum_sum[min(n, idx + j)] - accum_sum[idx];
-            md!(j, factor, range_sum);
-            to_mul -= Mint998::new(j as i64) * factor * range_sum;
-            md!(to_mul);
-            factor += 1;
-            idx += j;
+    let (start, end) = {
+        let mut start = (0, 0);
+        let mut end = (0, 0);
+        for i in 0..h {
+            for j in 0..w {
+                if S[i][j] == 'S' {
+                    start = (i, j);
+                } else if S[i][j] == 'G' {
+                    end = (i, j);
+                }
+            }
         }
-        md!(b, to_mul);
-        ans += b * to_mul;
-        md!("ans", ans);
+        (start, end)
+    };
+
+    let mut dists = vec![vec![vec![INF_USIZE; 4]; w]; h];
+
+    let mut queue = VecDeque::new();
+    queue.push_back((start.0, start.1, INF_USIZE, 0));
+    while let Some((i, j, dir, dist)) = queue.pop_front() {
+        let mut directions = vec![];
+        if (i, j) == end {
+            break;
+        }
+        if S[i][j] == 'o' {
+            directions.push(DIR[dir]);
+        } else if S[i][j] == 'x' {
+            for i in 0..4 {
+                if i != dir {
+                    directions.push(DIR[i]);
+                }
+            }
+        } else if S[i][j] != '#' {
+            for i in 0..4 {
+                directions.push(DIR[i]);
+            }
+        }
+        for (ni, nj, dir) in get_next_positions(h, w, i, j, &directions) {
+            if dists[ni][nj][dir] == INF_USIZE {
+                dists[ni][nj][dir] = dist + 1usize;
+                queue.push_back((ni, nj, dir, dist + 1));
+            }
+        }
     }
-    println!("{}", ans);
+
+    let mut ans = vec![];
+    let (i, j) = end;
+    let mut dir = INF_USIZE;
+    let mut dist = INF_USIZE;
+    for d in 0..4 {
+        if dists[i][j][d] != INF_USIZE {
+            dir = (d + 2) % 4;
+            dist = dists[i][j][d];
+            md!(dir, dist);
+        }
+    }
+    if dist == INF_USIZE {
+        println!("No");
+        return;
+    }
+    println!("Yes");
+    let mut ok = false;
+
+    dfs(i, j, h, w, dir, dist, &S, &dists, &mut ans, &mut ok, &start);
+}
+
+fn dfs(
+    i: usize,
+    j: usize,
+    h: usize,
+    w: usize,
+    dir: usize,
+    dist: usize,
+    S: &Vec<Vec<char>>,
+    dists: &Vec<Vec<Vec<usize>>>,
+    ans: &mut Vec<usize>,
+    ok: &mut bool,
+    start: &(usize, usize),
+) {
+    md!(i, j, dir, dist, S[i][j]);
+    if *ok {
+        return;
+    }
+    if (i, j) == *start {
+        *ok = true;
+        println!("{}", ans.iter().rev().map(|e| DC[*e]).join(""));
+        return;
+    }
+
+    let mut directions = vec![];
+    if S[i][j] == 'G' {
+        directions.push(DIR[dir]);
+    } else if S[i][j] == 'o' {
+        directions.push(DIR[dir]);
+    } else if S[i][j] == 'x' {
+        for i in 0..4 {
+            if i != dir {
+                directions.push(DIR[i]);
+            }
+        }
+    } else {
+        for i in 0..4 {
+            directions.push(DIR[i]);
+        }
+    }
+
+    for (ni, nj, dir) in get_next_positions(h, w, i, j, &directions) {
+        md!(dists[i][j][(dir + 2) % 4]);
+        if dists[i][j][(dir + 2) % 4] == dist {
+            ans.push(dir);
+            dfs(ni, nj, h, w, dir, dist - 1, S, dists, ans, ok, start);
+            ans.pop();
+        }
+    }
 }
 
 // FOR TEMPLATE INJECTIONS
@@ -379,6 +463,33 @@ impl<const M: u64> Default for ModInt<M> {
     fn default() -> Self {
         ModInt::new(0)
     }
+}
+
+
+/// Returns valid neighbor coordinates within the grid (h x w).
+/// Usage:
+/// ```
+/// for (nh, nw) in get_next_positions(h, w, hh, ww, &DIR) {
+///     // process (nh, nw)
+/// }
+/// ```
+fn get_next_positions(
+    h: usize,
+    w: usize,
+    i: usize,
+    j: usize,
+    directions: &[(isize, isize, usize)],
+) -> Vec<(usize, usize, usize)> {
+    let mut next_positions = Vec::with_capacity(directions.len());
+
+    for &(di, dj, dir) in directions {
+        let next_i = i.wrapping_add_signed(di);
+        let next_j = j.wrapping_add_signed(dj);
+        if next_i < h && next_j < w {
+            next_positions.push((next_i, next_j, dir));
+        }
+    }
+    next_positions
 }
 
 // END TEMPLATE INJECTIONS

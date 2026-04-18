@@ -53,41 +53,23 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, m: usize,
-        A: [i64; n], B: [i64; m],
+        n: usize,
+        LR: [(usize ,usize); n],
     }
-    let A = A.iter().map(|e| Mint998::new(*e)).collect::<Vec<_>>();
-    let B = B.iter().map(|e| Mint998::new(*e)).collect::<Vec<_>>();
-
-    let mut accum_sum = Vec::with_capacity(n + 1);
-    accum_sum.push(Mint998::new(0));
-    for i in 0..n {
-        accum_sum.push(accum_sum[i] + A[i]);
-    }
-    let mut prod_sum = Mint998::new(0);
-    for i in 0..n {
-        prod_sum += A[i] * Mint998::new((i + 1) as i64);
-    }
-    md!(prod_sum);
     let mut ans = Mint998::new(0);
-    for j in 1..=m {
-        let b = B[j - 1];
-        let mut to_mul = prod_sum;
-        let mut idx = 0;
-        let mut factor = Mint998::new(if j == 1 { 1 } else { 0 });
-        while idx < n {
-            let range_sum = accum_sum[min(n, idx + j)] - accum_sum[idx];
-            md!(j, factor, range_sum);
-            to_mul -= Mint998::new(j as i64) * factor * range_sum;
-            md!(to_mul);
-            factor += 1;
-            idx += j;
-        }
-        md!(b, to_mul);
-        ans += b * to_mul;
-        md!("ans", ans);
+    let mut state_a = (0, 0, 0);
+    let mut state_b = (0, 0, 0);
+
+    let mut counter_l = BTreeMap::new();
+    let mut counter_r = BTreeMap::new();
+
+    for (l, r) in LR {
+        *counter_l.entry((l, r)).or_insert(0) += 1;
+        *counter_r.entry((r, l)).or_insert(0) += 1;
     }
-    println!("{}", ans);
+
+    
+
 }
 
 // FOR TEMPLATE INJECTIONS

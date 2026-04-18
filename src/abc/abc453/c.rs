@@ -53,26 +53,27 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        S: Chars,
-        T: Chars,
+        n: usize,
+        L: [i128; n]
     }
-    let n = S.len();
-    let m = T.len();
-
-    let mut dp_table = vec![0; m + 1];
-    dp_table[0] = 1;
-    let mut ans = n * (n + 1) / 2;
-    for i in 0..n {
-        for j in (0..m).rev() {
-            if S[i] == T[j] {
-                dp_table[j + 1] += dp_table[j];
-                dp_table[j] = 0;
+    let mut ans = 0;
+    for s in 0..(1 << n) {
+        let mut pos = 1;
+        let mut count = 0usize;
+        for i in 0..n {
+            if (s >> i) & 1 == 0 {
+                if pos > 0 && pos < L[i] * 2 {
+                    count += 1;
+                }
+                pos -= L[i] * 2;
+            } else {
+                if pos < 0 && -1 * pos < L[i] * 2 {
+                    count += 1;
+                }
+                pos += L[i] * 2;
             }
         }
-        dp_table[0] += 1;
-        ans -= dp_table[m];
-        md!(dp_table.iter().join(" "));
-        md!(ans);
+        ans = max(ans, count);
     }
     println!("{}", ans);
 }
