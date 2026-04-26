@@ -53,52 +53,24 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, k: i64,
-        P: [Usize1; n],
+        n: usize, k: usize,
+        A: [i64; n],
     }
-    let mut P = P;
-    let mut seen = vec![false; n];
-
-    let mut ans = vec![INF_USIZE; n];
-
-    for i in 0..n {
-        if seen[i] {
-            continue;
-        }
-        let mut len = 1;
-        let mut idx = i;
-        let mut vec = vec![];
-        vec.push(i);
-        seen[i] = true;
-        while P[idx] != i {
-            idx = P[idx];
-            vec.push(idx);
-            len += 1;
-            seen[idx] = true;
-        }
-        let mut modulo = 1;
-        let mut pow = 2;
-        for i in 0..63 {
-            if (k >> i) & 1 == 1 {
-                md!(i, modulo, pow);
-                modulo *= pow;
-                modulo %= vec.len() as i64;
-                md!(modulo);
-            }
-            pow *= pow;
-            pow %= vec.len() as i64;
-        }
-        let mut idx = modulo as usize;
-
-        md!(vec.iter().join(" "));
-
-        for i in 0..vec.len() {
-            ans[vec[i]] = vec[idx];
-            idx += 1;
-            idx %= vec.len();
-        }
+    let mut counter = BTreeMap::new();
+    for a in A {
+        *counter.entry(a).or_insert(0) += 1usize;
     }
-    println!("{}", ans.iter().map(|e| *e + 1).join(" "));
+    let mut data = vec![];
+    for (&i, &j) in counter.iter() {
+        data.push(i * (j as i64));
+    }
+    data.sort_unstable();
+    md!(data.iter().join(" "));
+    if data.len() < k {
+        println!("0");
+    } else {
+        println!("{}", data.iter().take(data.len() - k).sum::<i64>());
+    }
 }
 
 // FOR TEMPLATE INJECTIONS

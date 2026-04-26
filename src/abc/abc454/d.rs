@@ -53,8 +53,65 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        t: usize,
     }
+    for _ in 0..t {
+        input! {
+            mut A: Chars,
+            mut B: Chars,
+        }
+        A.insert(0, ')');
+        B.insert(0, ')');
+
+        let A = compress(&mut A);
+        let B = compress(&mut B);
+        md!(A, B);
+
+        if A == B {
+            println!("Yes");
+        } else {
+            println!("No");
+        }
+    }
+}
+
+fn compress(S: &mut Vec<char>) -> String {
+    let mut state = 0; // 0: invalid, 1: (, 2: (x, 3: (xx
+    let mut prev = 0;
+    for i in 0..S.len() {
+        md!(i, state, prev);
+        md!(S.iter().join(""));
+
+        if S[i] == '(' {
+            state = 1;
+            prev = i;
+        } else if S[i] == ')' {
+            if state == 3 {
+                S[prev] = '*';
+                S[i] = '*';
+                if S[prev - 1] == '(' {
+                    prev = prev - 1;
+                    state = 3;
+                } else {
+                    state = 0;
+                }
+            } else {
+                state = 0;
+            }
+        } else if S[i] == 'x' {
+            if state == 0 {
+                continue;
+            } else if state == 1 {
+                state = 2;
+            } else if state == 2 {
+                state = 3;
+            } else {
+                state = 0;
+            }
+        }
+    }
+
+    S.iter().filter(|&c| *c != '*').collect::<String>()
 }
 
 // FOR TEMPLATE INJECTIONS

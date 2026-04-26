@@ -53,52 +53,59 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, k: i64,
-        P: [Usize1; n],
+        n: usize, q: usize,
+        CP: [(Usize1, Usize1); q],
     }
-    let mut P = P;
-    let mut seen = vec![false; n];
-
-    let mut ans = vec![INF_USIZE; n];
-
+    let mut data = vec![];
     for i in 0..n {
-        if seen[i] {
-            continue;
+        data.push((INF_USIZE, INF_USIZE));
+    }
+    let mut tos = (0..n).collect::<Vec<_>>();
+    for (c, p) in CP {
+        let (from, to) = data[c].clone();
+        if from == INF_USIZE {
+            tos[c] = INF_USIZE;
+        } else {
+            let to_change = data[c].0;
+            data[to_change].1 = INF_USIZE;
         }
-        let mut len = 1;
-        let mut idx = i;
-        let mut vec = vec![];
-        vec.push(i);
-        seen[i] = true;
-        while P[idx] != i {
-            idx = P[idx];
-            vec.push(idx);
-            len += 1;
-            seen[idx] = true;
-        }
-        let mut modulo = 1;
-        let mut pow = 2;
-        for i in 0..63 {
-            if (k >> i) & 1 == 1 {
-                md!(i, modulo, pow);
-                modulo *= pow;
-                modulo %= vec.len() as i64;
-                md!(modulo);
+        data[c].0 = p;
+        data[p].1 = c;
+        if false {
+            let mut ans = vec![];
+            for i in 0..n {
+                if tos[i] == INF_USIZE {
+                    ans.push(0);
+                } else {
+                    let mut cnt = 0;
+                    let mut d = data[i];
+                    while d.1 != INF_USIZE {
+                        cnt += 1;
+                        d = data[d.1];
+                    }
+                    ans.push(cnt);
+                }
             }
-            pow *= pow;
-            pow %= vec.len() as i64;
-        }
-        let mut idx = modulo as usize;
-
-        md!(vec.iter().join(" "));
-
-        for i in 0..vec.len() {
-            ans[vec[i]] = vec[idx];
-            idx += 1;
-            idx %= vec.len();
+            println!("{}", ans.iter().join(" "));
         }
     }
-    println!("{}", ans.iter().map(|e| *e + 1).join(" "));
+    {
+        let mut ans = vec![];
+        for i in 0..n {
+            if tos[i] == INF_USIZE {
+                ans.push(0);
+            } else {
+                let mut cnt = 1;
+                let mut d = data[i];
+                while d.1 != INF_USIZE {
+                    cnt += 1;
+                    d = data[d.1];
+                }
+                ans.push(cnt);
+            }
+        }
+        println!("{}", ans.iter().join(" "));
+    }
 }
 
 // FOR TEMPLATE INJECTIONS

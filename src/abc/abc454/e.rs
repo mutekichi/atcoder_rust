@@ -3,60 +3,109 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-use memoise::memoise;
-use num_integer::gcd;
-use rand::Rng;
-use std::cmp::{Ordering, Reverse, max, min};
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{BufWriter, Write, stdout};
-use std::mem::swap;
-use std::ops::Bound::{self, Excluded, Included, Unbounded};
-
-use itertools::{Itertools, iproduct};
 use proconio::input;
-use proconio::marker::{Bytes, Chars, Usize1};
-
-const INF_I64: i64 = 1 << 60;
-const INF_USIZE: usize = 1 << 60;
-const INF_F64: f64 = 1e18;
-const INF_I128: i128 = 1 << 120;
-const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
-const C998244353: u64 = 998244353;
-const C1000000007: u64 = 1000000007;
-
-#[macro_export]
-#[cfg(debug_assertions)] // for debug build
-macro_rules! md { // stands for my_dbg
-    ($($arg:expr),* $(,)?) => {{
-        eprint!("[{}:{}] ", file!(), line!());
-
-        let mut _first = true;
-        $(
-            if !_first {
-                eprint!(", ");
-            }
-            eprint!("{}: {}", stringify!($arg), $arg);
-            _first = false;
-        )*
-        eprintln!();
-    }};
-}
-
-#[macro_export]
-#[cfg(not(debug_assertions))] // for release build
-macro_rules! md {
-    ($($arg:expr),* $(,)?) => {{
-        // do nothing
-    }};
-}
+use proconio::marker::Usize1;
+use std::io::{BufWriter, Write, stdin, stdout};
+use std::mem::swap;
 
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        t: usize,
+    }
+
+    for _ in 0..t {
+        input! {
+            n: usize,
+            mut a: Usize1,
+            mut b: Usize1,
+        }
+        if n % 2 == 1 {
+            println!("No");
+            continue;
+        }
+        if (a + b) % 2 == 0 {
+            println!("No");
+            continue;
+        }
+        println!("Yes");
+        let mut ans = Vec::with_capacity(n * n - 2);
+        let mut before = true;
+        for i in 0..n / 2 {
+            if a / 2 == i {
+                {
+                    let mut before_2 = true;
+                    for j in 0..n / 2 {
+                        if b / 2 == j {
+                            if a % 2 == 0 {
+                                ans.push('D');
+                                ans.push('R');
+                            } else {
+                                ans.push('R');
+                                ans.push('D');
+                            }
+                            before_2 = false;
+                        } else {
+                            if before_2 {
+                                ans.push('D');
+                                ans.push('R');
+                                ans.push('U');
+                            } else {
+                                ans.push('U');
+                                ans.push('R');
+                                ans.push('D');
+                            }
+                        }
+                        if j != n / 2 - 1 {
+                            ans.push('R');
+                        }
+                    }
+                }
+
+                before = false;
+            } else {
+                if before {
+                    for _ in 0..n - 1 {
+                        ans.push('R');
+                    }
+                    ans.push('D');
+                    for _ in 0..n - 1 {
+                        ans.push('L');
+                    }
+                } else {
+                    for _ in 0..n - 1 {
+                        ans.push('L');
+                    }
+                    ans.push('D');
+                    for _ in 0..n - 1 {
+                        ans.push('R');
+                    }
+                }
+            }
+            if i != n / 2 - 1 {
+                ans.push('D');
+            }
+        }
+
+        println!("{}", ans.iter().collect::<String>());
+        {
+            let mut i = 0;
+            let mut j = 0;
+            for &c in &ans {
+                if c == 'D' {
+                    i += 1;
+                } else if c == 'U' {
+                    i -= 1;
+                } else if c == 'R' {
+                    j += 1;
+                } else if c == 'L' {
+                    j -= 1;
+                }
+                assert!(i < n, "i");
+                assert!(j < n, "j");
+                assert!((i, j) != (a, b), "{} {} {}", n, a, b);
+            }
+            assert!((i, j) == (n - 1, n - 1));
+        }
     }
 }
-
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS

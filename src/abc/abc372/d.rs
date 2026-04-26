@@ -53,52 +53,26 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, k: i64,
-        P: [Usize1; n],
+        n: usize,
+        H: [i32; n],
     }
-    let mut P = P;
-    let mut seen = vec![false; n];
+    let mut data = (0..n).collect::<Vec<_>>();
+    data.sort_by_key(|e| H[*e]);
 
-    let mut ans = vec![INF_USIZE; n];
-
+    let mut set = BTreeSet::new();
+    let mut ans = vec![0isize; n + 1];
+    for &i in data.iter().rev() {
+        let prev = set.range(..i).next_back();
+        let plus = if prev.is_none() { 0 } else { prev.unwrap() + 1 };
+        md!(plus, i);
+        ans[plus] += 1;
+        ans[i + 1] -= 1;
+        set.insert(i);
+    }
     for i in 0..n {
-        if seen[i] {
-            continue;
-        }
-        let mut len = 1;
-        let mut idx = i;
-        let mut vec = vec![];
-        vec.push(i);
-        seen[i] = true;
-        while P[idx] != i {
-            idx = P[idx];
-            vec.push(idx);
-            len += 1;
-            seen[idx] = true;
-        }
-        let mut modulo = 1;
-        let mut pow = 2;
-        for i in 0..63 {
-            if (k >> i) & 1 == 1 {
-                md!(i, modulo, pow);
-                modulo *= pow;
-                modulo %= vec.len() as i64;
-                md!(modulo);
-            }
-            pow *= pow;
-            pow %= vec.len() as i64;
-        }
-        let mut idx = modulo as usize;
-
-        md!(vec.iter().join(" "));
-
-        for i in 0..vec.len() {
-            ans[vec[i]] = vec[idx];
-            idx += 1;
-            idx %= vec.len();
-        }
+        ans[i + 1] += ans[i];
     }
-    println!("{}", ans.iter().map(|e| *e + 1).join(" "));
+    println!("{}", ans.iter().skip(1).join(" "));
 }
 
 // FOR TEMPLATE INJECTIONS

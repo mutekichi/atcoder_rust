@@ -53,8 +53,33 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
+        m: usize,
+        AB: [(Usize1, Usize1); m],
     }
+    let mut graph = vec![vec![]; n];
+    for (a, b) in AB {
+        graph[a].push(b);
+    }
+    let mut seen = vec![false; n];
+
+    let mut queue = VecDeque::new();
+    queue.push_back(0);
+    seen[0] = true;
+    let mut count = 1;
+
+    while let Some(i) = queue.pop_front() {
+        md!(i);
+        for &j in &graph[i] {
+            if !seen[j] {
+                queue.push_back(j);
+                seen[j] = true;
+                count += 1;
+            }
+        }
+    }
+
+    println!("{}", count);
 }
 
 // FOR TEMPLATE INJECTIONS

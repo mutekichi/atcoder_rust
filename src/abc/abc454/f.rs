@@ -53,7 +53,53 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        t: usize,
+    }
+
+    for _ in 0..t {
+        input! {
+            n: usize, m: i64, A: [i64; n],
+        }
+        let mut diff_set = BTreeSet::new();
+        let mut array = vec![0];
+        for i in 0..n / 2 {
+            array.push((A[i] + m - A[n - i - 1]) % m);
+        }
+        array.push(0);
+        let mut idx = 0;
+        for w in array.windows(2) {
+            diff_set.insert(((w[1] + m - w[0]) % m, idx));
+            idx += 1;
+        }
+
+        let mut ans = 0;
+        while !diff_set.is_empty() {
+            let min_val = diff_set.first().unwrap().0;
+            let max_val = diff_set.last().unwrap().0;
+            if diff_set.len() > 1 {
+                if min_val == m - max_val {
+                    ans += min_val;
+                    diff_set.pop_first();
+                    diff_set.pop_last();
+                } else if min_val < m - max_val {
+                    ans += min_val;
+                    diff_set.pop_first();
+                    diff_set.pop_last();
+                    diff_set.insert(((max_val + min_val) % m, idx));
+                    idx += 1;
+                } else {
+                    ans += m - max_val;
+                    diff_set.pop_first();
+                    diff_set.pop_last();
+                    diff_set.insert(((min_val + m - (m - max_val)) % m, idx));
+                    idx += 1;
+                }
+            } else {
+                ans += min(min_val, m - max_val);
+                diff_set.pop_last();
+            }
+        }
+        println!("{ans}");
     }
 }
 

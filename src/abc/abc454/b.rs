@@ -53,7 +53,32 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize, m: usize,
+        E: [Usize1; n],
+    }
+    let mut used = vec![false; m];
+    let mut ok = true;
+    for &e in &E {
+        if used[e] {
+            println!("No");
+            ok = false;
+            break;
+        } else {
+            used[e] = true;
+        }
+    }
+    if ok {
+        println!("Yes");
+    }
+
+    let mut used = vec![false; m];
+    for e in E {
+        used[e] = true;
+    }
+    if used.iter().all(|&e| e) {
+        println!("Yes");
+    } else {
+        println!("No");
     }
 }
 

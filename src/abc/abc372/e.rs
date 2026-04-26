@@ -1,6 +1,66 @@
+#![allow(unused_imports)]
+#![allow(unused_macros)]
 #![allow(dead_code)]
+#![allow(non_snake_case)]
 
-// --- SNAP START ---
+use memoise::memoise;
+use num_integer::gcd;
+use rand::Rng;
+use std::cmp::{Ordering, Reverse, max, min};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::io::{BufWriter, Write, stdout};
+use std::mem::swap;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
+
+use itertools::{Itertools, iproduct};
+use proconio::input;
+use proconio::marker::{Bytes, Chars, Usize1};
+
+const INF_I64: i64 = 1 << 60;
+const INF_USIZE: usize = 1 << 60;
+const INF_F64: f64 = 1e18;
+const INF_I128: i128 = 1 << 120;
+const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const C998244353: u64 = 998244353;
+const C1000000007: u64 = 1000000007;
+
+#[macro_export]
+#[cfg(debug_assertions)] // for debug build
+macro_rules! md { // stands for my_dbg
+    ($($arg:expr),* $(,)?) => {{
+        eprint!("[{}:{}] ", file!(), line!());
+
+        let mut _first = true;
+        $(
+            if !_first {
+                eprint!(", ");
+            }
+            eprint!("{}: {}", stringify!($arg), $arg);
+            _first = false;
+        )*
+        eprintln!();
+    }};
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))] // for release build
+macro_rules! md {
+    ($($arg:expr),* $(,)?) => {{
+        // do nothing
+    }};
+}
+
+#[allow(unused_variables)]
+fn main() {
+    input! {
+        n: usize,
+        q: usize,
+    }
+    let mut uf = UnionFind::new(n);
+    
+}
+
+// FOR TEMPLATE INJECTIONS
 
 #[derive(Debug, Clone)]
 /// Union-Find (Disjoint Set Union)
@@ -26,14 +86,21 @@ pub struct UnionFind {
     parent: Vec<usize>,
     size: Vec<usize>,
     rank: Vec<usize>,
+    data: Vec<BTreeSet<usize>>,
 }
 
 impl UnionFind {
     pub fn new(n: usize) -> Self {
+        let mut data = vec![BTreeSet::new(); n];
+        for i in 0..n {
+            data[i].insert(i);
+        }
+
         UnionFind {
             parent: (0..n).collect(),
             size: vec![1; n],
             rank: vec![0; n],
+            data
         }
     }
 
@@ -57,8 +124,26 @@ impl UnionFind {
     }
 
     pub fn unite(&mut self, x: usize, y: usize) -> bool {
-        // self.unite_by_size(x, y)
-        self.unite_by_rank(x, y)
+        self.unite_by_size(x, y)
+        // self.unite_by_rank(x, y)
+    }
+
+    pub fn get(&mut self, x: usize, k: usize) -> Option<usize> {
+        if self.data[x].len() < k {
+            None
+        }
+        else {
+            self.data[x].iter().rev().nth(k).copied()
+        }
+    }
+
+    pub fn merge(&mut self, bef: usize, aft: usize) {
+        while let Some(v) = self.data[aft].pop_last() {
+            self.data[bef].insert(v);
+            if self.data[bef].len() > 10 {
+                self.data[bef].pop_first();
+            }
+        }
     }
 
     pub fn unite_by_rank(&mut self, x: usize, y: usize) -> bool {
@@ -89,9 +174,11 @@ impl UnionFind {
         if self.size[root_x] < self.size[root_y] {
             self.parent[root_x] = root_y;
             self.size[root_y] += self.size[root_x];
+            self.merge(root_y, root_x);
         } else {
             self.parent[root_y] = root_x;
             self.size[root_x] += self.size[root_y];
+            self.merge(root_x, root_y);
         }
         true
     }
@@ -106,17 +193,6 @@ impl UnionFind {
     }
 }
 
-// --- SNAP END ---
 
-#[cfg(test)]
-mod tests {
-    use super::*;
 
-    #[test]
-    fn test_union_find() {
-        let mut uf = UnionFind::new(5);
-        uf.unite(0, 1);
-        assert!(uf.same(0, 1));
-        assert!(!uf.same(0, 2));
-    }
-}
+// END TEMPLATE INJECTIONS

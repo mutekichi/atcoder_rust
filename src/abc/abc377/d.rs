@@ -55,10 +55,27 @@ fn main() {
     input! {
         n: usize,
         m: usize,
-        LR: [(usize, usize); n],
+        LR: [(Usize1, Usize1); n],
     }
-
-
+    let mut rights = vec![vec![]; m];
+    let mut right_set = BTreeSet::new();
+    for i in 0..n {
+        let (l, r) = LR[i];
+        rights[l].push((r, i));
+        right_set.insert((r, i));
+    }
+    let mut ans = 0;
+    for i in 0..m {
+        if right_set.is_empty() {
+            ans += m - i;
+        } else {
+            ans += right_set.first().unwrap().0 - i;
+        }
+        for &elem in &rights[i] {
+            right_set.remove(&elem);
+        }
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

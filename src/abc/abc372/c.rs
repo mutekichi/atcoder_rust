@@ -53,52 +53,35 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, k: i64,
-        P: [Usize1; n],
+        n: usize, q: usize,
+        mut S: Chars,
+        XC: [(Usize1, char); q],
     }
-    let mut P = P;
-    let mut seen = vec![false; n];
-
-    let mut ans = vec![INF_USIZE; n];
-
-    for i in 0..n {
-        if seen[i] {
-            continue;
-        }
-        let mut len = 1;
-        let mut idx = i;
-        let mut vec = vec![];
-        vec.push(i);
-        seen[i] = true;
-        while P[idx] != i {
-            idx = P[idx];
-            vec.push(idx);
-            len += 1;
-            seen[idx] = true;
-        }
-        let mut modulo = 1;
-        let mut pow = 2;
-        for i in 0..63 {
-            if (k >> i) & 1 == 1 {
-                md!(i, modulo, pow);
-                modulo *= pow;
-                modulo %= vec.len() as i64;
-                md!(modulo);
-            }
-            pow *= pow;
-            pow %= vec.len() as i64;
-        }
-        let mut idx = modulo as usize;
-
-        md!(vec.iter().join(" "));
-
-        for i in 0..vec.len() {
-            ans[vec[i]] = vec[idx];
-            idx += 1;
-            idx %= vec.len();
-        }
+    S.insert(n, '.');
+    S.insert(n, '.');
+    S.insert(0, '.');
+    S.insert(0, '.');
+    let mut ans = S
+        .windows(3)
+        .filter(|&w| w.iter().collect::<String>() == "ABC")
+        .count();
+    for (x, c) in XC {
+        let x = x + 2;
+        if (S[x] == 'A' && S[x + 1] == 'B' && S[x + 2] == 'C')
+            || (S[x - 1] == 'A' && S[x] == 'B' && S[x + 1] == 'C')
+            || (S[x - 2] == 'A' && S[x - 1] == 'B' && S[x] == 'C')
+        {
+            ans -= 1;
+        };
+        S[x] = c;
+        if (S[x] == 'A' && S[x + 1] == 'B' && S[x + 2] == 'C')
+            || (S[x - 1] == 'A' && S[x] == 'B' && S[x + 1] == 'C')
+            || (S[x - 2] == 'A' && S[x - 1] == 'B' && S[x] == 'C')
+        {
+            ans += 1;
+        };
+        println!("{}", ans);
     }
-    println!("{}", ans.iter().map(|e| *e + 1).join(" "));
 }
 
 // FOR TEMPLATE INJECTIONS

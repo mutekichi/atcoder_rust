@@ -53,52 +53,14 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, k: i64,
-        P: [Usize1; n],
+        a: usize, b: usize, c: usize,
     }
-    let mut P = P;
-    let mut seen = vec![false; n];
-
-    let mut ans = vec![INF_USIZE; n];
-
-    for i in 0..n {
-        if seen[i] {
-            continue;
-        }
-        let mut len = 1;
-        let mut idx = i;
-        let mut vec = vec![];
-        vec.push(i);
-        seen[i] = true;
-        while P[idx] != i {
-            idx = P[idx];
-            vec.push(idx);
-            len += 1;
-            seen[idx] = true;
-        }
-        let mut modulo = 1;
-        let mut pow = 2;
-        for i in 0..63 {
-            if (k >> i) & 1 == 1 {
-                md!(i, modulo, pow);
-                modulo *= pow;
-                modulo %= vec.len() as i64;
-                md!(modulo);
-            }
-            pow *= pow;
-            pow %= vec.len() as i64;
-        }
-        let mut idx = modulo as usize;
-
-        md!(vec.iter().join(" "));
-
-        for i in 0..vec.len() {
-            ans[vec[i]] = vec[idx];
-            idx += 1;
-            idx %= vec.len();
-        }
+    if a != b && b == c {
+        println!("Yes");
     }
-    println!("{}", ans.iter().map(|e| *e + 1).join(" "));
+    else {
+        println!("No");
+    }
 }
 
 // FOR TEMPLATE INJECTIONS
