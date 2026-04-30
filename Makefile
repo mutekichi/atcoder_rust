@@ -9,6 +9,8 @@ help:
 	@echo "  make run abc 341 a release      : Run solution in release mode"
 	@echo "  make data                       : Generate test data"
 	@echo "  make use src/tmpl.rs abc 341 a  : Inject template"
+	@echo "  make use src/tmpl.rs abc 341 a  : Inject template"
+	@echo "  make randtest abc 341 a         : Run randomized test"
 
 INPUT_FILE = input.txt
 KEYWORDS = new run use data release p in
@@ -129,6 +131,10 @@ use:
 paste:
 	@$(PASTE_CMD) > $(INPUT_FILE)
 	@echo "Copied clipboard content to $(INPUT_FILE)"
+
+.PHONY: randtest
+randtest:
+	bash scripts/randtest.sh $(word 2, $(MAKECMDGOALS)) $(word 3, $(MAKECMDGOALS)) $(word 4, $(MAKECMDGOALS))
 
 %:
 	@:
