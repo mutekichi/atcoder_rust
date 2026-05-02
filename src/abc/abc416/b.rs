@@ -45,9 +45,22 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        mut s: Chars,
     }
-    
+    let n = s.len();
+    let mut need_akari = true;
+    for i in 0..n {
+        if s[i] == '.' {
+            if need_akari {
+            s[i] = 'o';
+            need_akari = false;
+            } 
+        }
+        else {
+            need_akari = true;
+        }
+    }
+    println!("{}", s.iter().collect::<String>());
 }
 
 // --- Macros ---

@@ -47,8 +47,22 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        s: Chars,
     }
-    
+    let mut first = None;
+
+    for i in 0..s.len() {
+        let c = s[i];
+        if c == '#' {
+            if first.is_none() {
+                first = Some(i);
+            }
+            else {
+                println!("{},{}", first.unwrap() + 1, i + 1);
+                first = None;
+            }
+        }
+    }
 }
 
 // --- Macros ---

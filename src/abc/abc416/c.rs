@@ -3,13 +3,13 @@
 #![allow(dead_code)]
 
 // Common imports
-use std::cmp::{max, min, Ordering, Reverse};
+use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
-use std::io::{stdout, BufWriter, Write};
+use std::io::{BufWriter, Write, stdout};
 use std::mem;
 
 // External crates (Available in AtCoder)
-use itertools::{iproduct, Itertools};
+use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -45,9 +45,21 @@ fn solve<W: Write>(out: &mut W) {
     }
 
     input! {
-        // INPUT
+        n: usize, k: u32, x: Usize1,
+        chars: [String; n],
     }
-    
+    let mut all = vec![];
+    for i in 0..n.pow(k) {
+        let mut s = "".to_string();
+        let mut i = i;
+        for _ in 0..k {
+            s.push_str(&chars[i % n]);
+            i /= n;
+        }
+        all.push(s);
+    }
+    all.sort_unstable();
+    println!("{}", all.iter().nth(x).unwrap());
 }
 
 // --- Macros ---

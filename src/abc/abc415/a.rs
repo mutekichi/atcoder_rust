@@ -47,8 +47,14 @@ fn solve<W: Write>(out: &mut W) {
 
     input! {
         // INPUT
+        n: usize, a: [usize; n], x: usize,
     }
-    
+    if a.iter().contains(&x) {
+        println!("Yes");
+    }
+    else {
+        println!("No");
+    }
 }
 
 // --- Macros ---

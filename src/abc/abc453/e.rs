@@ -12,7 +12,7 @@ use std::io::{BufWriter, Write, stdout};
 use std::mem::swap;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
-use itertools::{Itertools, iproduct};
+use itertools::{InterleaveShortest, Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
@@ -54,78 +54,81 @@ macro_rules! md {
 fn main() {
     input! {
         n: usize,
-        LR: [(usize ,usize); n],
+        LR: [(usize, usize); n],
     }
     let mut ans = Mint998::new(0);
-    let mut state_a = (0, 0, 0);
-    let mut state_b = (0, 0, 0);
+    let mut intersect_list = vec![0isize; n + 1];
+    let mut banned_lower = INF_USIZE;
+    let mut banned_upper = 0;
+    let mut lower_inter_banned = 0;
+    let mut upper_inter_banned = 0;
 
-    let mut counter_l = BTreeMap::new();
-    let mut counter_r = BTreeMap::new();
+    for &(l, r) in &LR {
+        banned_lower = min(r, banned_lower);
+        banned_upper = max(l, banned_upper);
+        lower_inter_banned = max(min(n - r, l), lower_inter_banned);
+        upper_inter_banned = min(max(r, n - l), upper_inter_banned);
 
-    for (l, r) in LR {
-        *counter_l.entry((l, r)).or_insert(0) += 1;
-        *counter_r.entry((r, l)).or_insert(0) += 1;
+        intersect_list[l] += 1;
+        intersect_list[r + 1] -= 1;
     }
+    for i in 1..=n {
+        intersect_list[i] += intersect_list[i - 1];
+    }
+    let intersect_list = intersect_list
+        .iter()
+        .map(|e| *e as usize)
+        .collect::<Vec<_>>();
 
-    
+    md!(
+        banned_lower,
+        banned_upper,
+        upper_inter_banned,
+        lower_inter_banned
+    );
 
+    let comb = Combination::<C998244353>::new(n + 3);
+
+    for a in 1..=n - 1 {
+        let (l, r) = (min(n - a, a), max(n - a, a));
+        if l > banned_lower {
+            md!(1, a);
+            continue;
+        }
+        if r < banned_upper {
+            md!(2, a);
+            continue;
+        }
+        if l < lower_inter_banned && upper_inter_banned < r {
+            md!(3, a);
+            continue;
+        }
+        let (a, b) = (min(a, n - a), max(a, n - a));
+
+        let inter_lower = intersect_list[a];
+        let inter_upper = intersect_list[b];
+
+        if inter_lower < a {
+            continue;
+        }
+        if inter_upper < b {
+            continue;
+        }
+
+        let both = inter_lower + inter_upper - n;
+
+        let to_add = comb.ncr(both, a - (inter_lower - both));
+        md!(to_add);
+        ans += to_add;
+    }
+    println!("{}", ans);
 }
-
-// FOR TEMPLATE INJECTIONS
 
 use std::fmt;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
-/// Type alias for ModInt with modulus 998244353
-pub type Mint998 = ModInt<998_244_353>;
+type Mint998 = ModInt<998244353>;
 
-/// Type alias for ModInt with modulus 1000000007
-pub type Mint107 = ModInt<1_000_000_007>;
-
-/// A struct for modular arithmetic.
-///
-/// Automatically handles modulo operations for addition, subtraction, multiplication, and division.
-///
-/// # Generics
-/// - `M`: The modulus (e.g., 998244353). Must be a prime number for division to work correctly via Fermat's Little Theorem.
-///
-/// # Examples
-///
-/// ## 1. Basic Arithmetic
-/// ```
-/// use atcoder_rust::template::modint::Mint998;
-///
-/// let a = Mint998::new(10);
-/// let b = Mint998::new(20);
-///
-/// assert_eq!((a + b).val(), 30);
-/// assert_eq!((a - b).val(), 998244343); // 10 - 20 + MOD
-/// assert_eq!((a * b).val(), 200);
-/// assert_eq!(a.pow(3).val(), 1000);
-/// ```
-///
-/// ## 2. Combination (nCr) Calculation
-/// ```
-/// use atcoder_rust::template::modint::Mint998;
-///
-/// fn combinations(n: usize, k: usize) -> Mint998 {
-///     if k > n { return Mint998::new(0); }
-///     
-///     let mut num = Mint998::new(1);
-///     let mut den = Mint998::new(1);
-///     
-///     for i in 0..k {
-///         num *= (n - i) as i64;
-///         den *= (i + 1) as i64;
-///     }
-///     
-///     num / den
-/// }
-///
-/// // 5C2 = 10
-/// assert_eq!(combinations(5, 2).val(), 10);
-/// ```
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct ModInt<const M: u64> {
     val: u64,
@@ -357,10 +360,88 @@ impl<const M: u64> proconio::source::Readable for ModInt<M> {
     }
 }
 
-impl<const M: u64> Default for ModInt<M> {
-    fn default() -> Self {
-        ModInt::new(0)
-    }
+/// Combination utilities using precomputed factorials and inverse factorials.
+///
+/// Works with `ModInt`.
+///
+/// # Examples
+///
+/// ```
+/// use atcoder_rust::template::math::modint::Mint998;
+/// use atcoder_rust::template::math::combination::Combination;
+///
+/// let comb = Combination::<998244353>::new(1000);
+///
+/// // 5C2 = 10
+/// assert_eq!(comb.ncr(5, 2).val(), 10);
+/// // 5P2 = 20
+/// assert_eq!(comb.npr(5, 2).val(), 20);
+/// ```
+pub struct Combination<const M: u64> {
+    fact: Vec<ModInt<M>>,
+    inv_fact: Vec<ModInt<M>>,
 }
 
-// END TEMPLATE INJECTIONS
+impl<const M: u64> Combination<M> {
+    /// Precomputes factorials up to `max_n`. Complexity: O(max_n)
+    pub fn new(max_n: usize) -> Self {
+        let mut fact = vec![ModInt::new(1); max_n + 1];
+        let mut inv_fact = vec![ModInt::new(1); max_n + 1];
+
+        for i in 1..=max_n {
+            fact[i] = fact[i - 1] * (i as i64);
+        }
+
+        inv_fact[max_n] = fact[max_n].inv();
+        for i in (1..=max_n).rev() {
+            inv_fact[i - 1] = inv_fact[i] * (i as i64);
+        }
+
+        Combination { fact, inv_fact }
+    }
+
+    /// Calculates nCr (Combinations). O(1)
+    pub fn ncr(
+        &self,
+        n: usize,
+        r: usize,
+    ) -> ModInt<M> {
+        if r > n {
+            return ModInt::new(0);
+        }
+        self.fact[n] * self.inv_fact[r] * self.inv_fact[n - r]
+    }
+
+    /// Calculates nPr (Permutations). O(1)
+    pub fn npr(
+        &self,
+        n: usize,
+        r: usize,
+    ) -> ModInt<M> {
+        if r > n {
+            return ModInt::new(0);
+        }
+        self.fact[n] * self.inv_fact[n - r]
+    }
+
+    /// Calculates nHr (Homogeneous Combinations). O(1)
+    /// nHr = (n+r-1)Cr
+    pub fn nhr(
+        &self,
+        n: usize,
+        r: usize,
+    ) -> ModInt<M> {
+        if n == 0 && r == 0 {
+            return ModInt::new(1);
+        }
+        self.ncr(n + r - 1, r)
+    }
+
+    /// Returns n! (Factorial). O(1)
+    pub fn fact(
+        &self,
+        n: usize,
+    ) -> ModInt<M> {
+        self.fact[n]
+    }
+}
