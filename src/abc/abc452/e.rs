@@ -59,34 +59,40 @@ fn main() {
     let A = A.iter().map(|e| Mint998::new(*e)).collect::<Vec<_>>();
     let B = B.iter().map(|e| Mint998::new(*e)).collect::<Vec<_>>();
 
-    let mut accum_sum = Vec::with_capacity(n + 1);
-    accum_sum.push(Mint998::new(0));
+    let mut accum_sums = vec![Mint998::new(0)];
+    let mut accum_mul_sums = vec![Mint998::new(0)];
     for i in 0..n {
-        accum_sum.push(accum_sum[i] + A[i]);
+        accum_sums.push(accum_sums[i] + A[i]);
+        accum_mul_sums.push(accum_mul_sums[i] + A[i] * (i as i64 + 1));
     }
-    let mut prod_sum = Mint998::new(0);
-    for i in 0..n {
-        prod_sum += A[i] * Mint998::new((i + 1) as i64);
-    }
-    md!(prod_sum);
+
     let mut ans = Mint998::new(0);
+
     for j in 1..=m {
-        let b = B[j - 1];
-        let mut to_mul = prod_sum;
-        let mut idx = 0;
-        let mut factor = Mint998::new(if j == 1 { 1 } else { 0 });
-        while idx < n {
-            let range_sum = accum_sum[min(n, idx + j)] - accum_sum[idx];
-            md!(j, factor, range_sum);
-            to_mul -= Mint998::new(j as i64) * factor * range_sum;
-            md!(to_mul);
-            factor += 1;
-            idx += j;
-        }
-        md!(b, to_mul);
-        ans += b * to_mul;
-        md!("ans", ans);
+        let first_term = accum_mul_sums[n];
+        md!(first_term);
+        let second_term = if j > n { Mint998::new(0) } else {
+            let mut term = Mint998::new(0);
+            let mut division = 1;
+            loop {
+                let start = j * division;
+                let end = j * (division + 1);
+                md!(j, start, end, division);
+                term += (accum_sums[min(n, end - 1)] - accum_sums[start - 1]) * division as i64;
+                md!(term);
+                if end > n {
+                    break;
+                }
+                division += 1;
+            }
+            md!(term);
+            term
+        };
+        md!(second_term);
+
+        ans += B[j - 1] * (first_term - second_term * j as i64);
     }
+
     println!("{}", ans);
 }
 

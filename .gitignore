@@ -12,6 +12,8 @@ Cargo.lock
 Thumbs.db
 
 input.txt
+out.txt
+out_naive.txt
 make_data.py
 to_implement.txt
 scripts/atcoder_history.csv

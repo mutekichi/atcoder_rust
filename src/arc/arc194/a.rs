@@ -53,17 +53,49 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        A: [[usize; 6]; 3],
+        n: usize, A: [i64; n],
     }
-    let mut ans = 0;
-    for i in [4usize, 5, 6].iter().permutations(3) {
-        let mut val = 1;
-        for j in 0..3 {
-            val *= A[j].iter().filter(|e| **e == *i[j]).count();
+    let mut memo = vec![INF_I64; n];
+    let ans = f(0, n, &mut memo, &A);
+    println!("{}", ans);
+}
+
+fn f(
+    idx: usize,
+    n: usize,
+    memo: &mut Vec<i64>,
+    A: &Vec<i64>,
+) -> i64 {
+    md!("S", idx);
+    let ret = if idx == n {
+        0
+    } else if idx == n - 1 {
+        A[idx]
+    } else {
+        let cand1 = if memo[idx + 1] != INF_I64 {
+            memo[idx + 1]
+        } else {
+            f(idx + 1, n, memo, A)
+        };
+
+        let cand2 = if idx + 2 == n {
+            0
+        } else if memo[idx + 2] != INF_I64 {
+            memo[idx + 2]
+        } else {
+            f(idx + 2, n, memo, A)
+        };
+
+        if idx == 3 {
+            md!(cand1, A[idx], cand2);
         }
-        ans += val;
-    }
-    println!("{}", ans as f64 / 216.);
+
+        let ret = max(cand1 + A[idx], cand2);
+        ret
+    };
+    memo[idx] = ret;
+    md!("G", idx, ret);
+    return ret;
 }
 
 // FOR TEMPLATE INJECTIONS

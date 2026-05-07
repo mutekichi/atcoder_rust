@@ -53,98 +53,79 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        t: usize,
+        n: usize,
+        mut A: [Usize1; n],
     }
-    for _ in 0..t {
-        input! {
-            n: usize, k: usize,
-            A: [i64; n],
-        }
-        let data = A
-            .iter()
-            .map(|e| {
-                let mut matrix = Matrix::new(2, 2, *e);
-                matrix.data[1][0] = 0;
-                matrix.data[1][1] = INF_I64;
-                matrix
-            })
-            .collect::<Vec<_>>();
 
-        let identity_add = INF_I64;
-        let identity_mul = 0;
-        let op_add = |a, b| min(a, b);
-        let op_mul = |a, b| {
-            if a == identity_mul {
-                b
-            } else if b == identity_mul {
-                a
-            } else {
-                a + b
-            }
-        };
-        let identity_matrix = {
-            let mut identity_matrix = Matrix::new(2, 2, identity_add);
-            for i in 0..2 {
-                identity_matrix.data[i][i] = identity_mul;
-            }
-            identity_matrix
-        };
-        let st = SegmentTree::new(
-            &data,
-            |a, b| b.multiply(&a, op_add, op_mul, identity_add),
-            identity_matrix,
-        );
-        let mut ans = INF_I64;
-        let intervals = if k == n { vec![k - 1] } else { vec![k - 1, k] };
-        for interval in intervals {
-            md!(interval);
-            for i in 0..n - interval {
-                let matrix_total = st.query(i + 1, i + 1 + interval);
-                let mut vector = Matrix::new(2, 1, 0);
-                vector.data[0][0] = A[i];
-                vector.data[1][0] = INF_I64;
-                let res = matrix_total.multiply(&vector, op_add, op_mul, identity_add);
-                if false {
-                    for i in 0..2 {
-                        for j in 0..2 {
-                            print!(
-                                "{}",
-                                if matrix_total.data[i][j] == identity_add {
-                                    "♾️".to_string()
-                                } else {
-                                    matrix_total.data[i][j].to_string()
-                                }
-                            );
-                            if j != 1 {
-                                print!(" ");
-                            }
-                        }
-                        println!();
-                    }
-                }
-                if false {
-                    for i in 0..2 {
-                        for j in 0..1 {
-                            print!(
-                                "{}",
-                                if res.data[i][j] == identity_add {
-                                    "♾️".to_string()
-                                } else {
-                                    res.data[i][j].to_string()
-                                }
-                            );
-                            if j != 1 {
-                                print!(" ");
-                            }
-                        }
-                        println!();
-                    }
-                }
-                md!(i, A[i], res.data[0][0]);
-                ans = min(ans, res.data[0][0]);
-            }
+    let st = SegmentTree::new(&A, |a, b| max(a, b), 0);
+    let val_to_idx = {
+        let mut ret = vec![0; n];
+        for i in 0..n {
+            ret[A[i]] = i;
         }
-        println!("{}", ans);
+        ret
+    };
+
+    let mut next_list = vec![INF_USIZE; n];
+    f(n, &A, &st, &val_to_idx, 0, n, &mut next_list, n);
+    md!(next_list.iter().join(" "));
+    let mut ans = 0;
+    g(n, &A, &next_list, 0, 0, n, &mut ans);
+    println!("{}", ans);
+}
+
+fn g(
+    n: usize,
+    A: &Vec<usize>,
+    next_list: &Vec<usize>,
+    offset: usize,
+    idx: usize,
+    right: usize,
+    ans: &mut usize,
+) {
+    if idx + 1 >= right {
+        return;
+    }
+    let next_idx = next_list[idx];
+    let start = idx - offset + 1;
+    let len = next_idx - idx - 1;
+    if len > 0 {
+        *ans += (start + (start + len - 1)) * len / 2;
+    }
+    // idx + 1 ~ next_idx
+    g(n, A, next_list, offset + 1, idx + 1, next_idx, ans);
+    // next_idx ~ right
+    g(n, A, next_list, offset, next_idx, right, ans);
+}
+
+fn f(
+    n: usize,
+    A: &Vec<usize>,
+    st: &SegmentTree<usize, impl Fn(usize, usize) -> usize>,
+    val_to_idx: &Vec<usize>,
+    left: usize,
+    right: usize,
+    next_list: &mut Vec<usize>,
+    next_idx: usize,
+) {
+    let max_val = st.query(left, right);
+    let max_idx = val_to_idx[max_val];
+
+    next_list[max_idx] = next_idx;
+    if max_idx > left {
+        f(n, A, st, val_to_idx, left, max_idx, next_list, max_idx);
+    }
+    if max_idx + 1 < right {
+        f(
+            n,
+            A,
+            st,
+            val_to_idx,
+            max_idx + 1,
+            right,
+            next_list,
+            next_idx,
+        );
     }
 }
 
@@ -573,115 +554,6 @@ where
             }
         }
         0
-    }
-}
-
-/// Generic matrix structure for competitive programming.
-///
-/// # Examples
-///
-/// ## Standard Matrix Exponentiation (Fibonacci)
-/// ```
-/// let mut m = Matrix::new(2, 2, 0i64);
-/// m.data[0][0] = 1; m.data[0][1] = 1;
-/// m.data[1][0] = 1; m.data[1][1] = 0;
-///
-/// let res = m.pow(10, |a, b| a + b, |a, b| a * b, 0, 1);
-/// ```
-///
-/// ## Min-Plus Algebra (Shortest Path / DP)
-/// ```
-/// let inf = 1e18 as i64;
-/// let mut m = Matrix::new(2, 2, inf);
-/// m.data[0][0] = 0; m.data[0][1] = 5;
-/// m.data[1][0] = inf; m.data[1][1] = 0;
-///
-/// let op_add = |a, b| std::cmp::min(a, b);
-/// let op_mul = |a, b| a + b;
-/// let res = m.pow(10, op_add, op_mul, inf, 0);
-/// ```
-#[derive(Clone, Debug)]
-pub struct Matrix<T> {
-    pub rows: usize,
-    pub cols: usize,
-    pub data: Vec<Vec<T>>,
-}
-
-impl<T> Matrix<T>
-where
-    T: Clone + Copy,
-{
-    pub fn new(
-        rows: usize,
-        cols: usize,
-        val: T,
-    ) -> Self {
-        Self {
-            rows,
-            cols,
-            data: vec![vec![val; cols]; rows],
-        }
-    }
-
-    pub fn identity(
-        size: usize,
-        add_identity: T,
-        mul_identity: T,
-    ) -> Self {
-        let mut res = Self::new(size, size, add_identity);
-        for i in 0..size {
-            res.data[i][i] = mul_identity;
-        }
-        res
-    }
-
-    pub fn multiply<F1, F2>(
-        &self,
-        other: &Self,
-        op_add: F1,
-        op_mul: F2,
-        add_identity: T,
-    ) -> Self
-    where
-        F1: Fn(T, T) -> T,
-        F2: Fn(T, T) -> T,
-    {
-        assert_eq!(self.cols, other.rows);
-        let mut res = Self::new(self.rows, other.cols, add_identity);
-        for i in 0..self.rows {
-            for k in 0..self.cols {
-                for j in 0..other.cols {
-                    res.data[i][j] =
-                        op_add(res.data[i][j], op_mul(self.data[i][k], other.data[k][j]));
-                }
-            }
-        }
-        res
-    }
-
-    pub fn pow<F1, F2>(
-        &self,
-        mut n: u64,
-        op_add: F1,
-        op_mul: F2,
-        add_identity: T,
-        mul_identity: T,
-    ) -> Self
-    where
-        F1: Fn(T, T) -> T + Copy,
-        F2: Fn(T, T) -> T + Copy,
-    {
-        assert_eq!(self.rows, self.cols);
-        let mut res = Self::identity(self.rows, add_identity, mul_identity);
-        let mut base = self.clone();
-        while n > 0 {
-            if n & 1 == 1 {
-                res = res.multiply(&base, op_add, op_mul, add_identity);
-            }
-            base = base.multiply(&base, op_add, op_mul, add_identity);
-            n >>= 1;
-        }
-        res
     }
 }
 

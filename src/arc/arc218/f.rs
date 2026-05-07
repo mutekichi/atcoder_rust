@@ -53,17 +53,8 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        A: [[usize; 6]; 3],
+        
     }
-    let mut ans = 0;
-    for i in [4usize, 5, 6].iter().permutations(3) {
-        let mut val = 1;
-        for j in 0..3 {
-            val *= A[j].iter().filter(|e| **e == *i[j]).count();
-        }
-        ans += val;
-    }
-    println!("{}", ans as f64 / 216.);
 }
 
 // FOR TEMPLATE INJECTIONS

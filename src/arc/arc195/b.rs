@@ -52,6 +52,7 @@ fn solve<W: Write>(out: &mut W) {
         if a != -1 {
             A.push(a);
         } else {
+
         }
     }
     for b in BB {

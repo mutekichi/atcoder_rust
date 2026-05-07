@@ -53,17 +53,30 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        A: [[usize; 6]; 3],
+        n: usize,
+        A: [Usize1; n],
     }
-    let mut ans = 0;
-    for i in [4usize, 5, 6].iter().permutations(3) {
-        let mut val = 1;
-        for j in 0..3 {
-            val *= A[j].iter().filter(|e| **e == *i[j]).count();
-        }
-        ans += val;
+    let mut ans = INF_USIZE;
+    f(n, A, 0, &mut ans);
+    println!("{}", ans);
+}
+
+fn f(
+    n: usize,
+    A: Vec<usize>,
+    accum: usize,
+    ans: &mut usize,
+) {
+    let indices = (0..n - 1).filter(|&i| A[i] > A[i + 1]).collect::<Vec<_>>();
+    if indices.is_empty() {
+        *ans = min(*ans, accum);
+        return;
     }
-    println!("{}", ans as f64 / 216.);
+    for idx in indices {
+        let mut A = A.clone();
+        A.swap(idx, idx + 1);
+        f(n, A, accum + idx + 1, ans);
+    }
 }
 
 // FOR TEMPLATE INJECTIONS

@@ -53,27 +53,30 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        S: Chars,
+        n: usize, m: usize, A: [[Usize1; m]; n],
     }
-    let S = S
-        .iter()
-        .map(|e| (*e as u8 - b'a') as usize)
-        .collect::<Vec<_>>();
-    let n = S.len();
-    let mut dp = vec![vec![Mint998::new(0); 3]; n + 1];
 
-    for i in 1..=n {
-        for j in 0..3 {
-            if S[i - 1] == j {
-                dp[i][j] = dp[i - 1][0] + dp[i - 1][1] + dp[i - 1][2] + 1;
-            } else {
-                dp[i][j] = dp[i - 1][j];
-            }
+    let mut ans = Mint998::new(1);
+    ans *= n;
+    ans *= m;
+    for i in 0..n {
+        ans *= m;
+    }
+    let mut accums = vec![Mint998::new(1); n * m];
+    for i in 0..n {
+        let mut counts = vec![Mint998::new(m as i64); n * m];
+        for j in 0..m {
+            counts[A[i][j]] -= 1;
         }
-        md!(dp[i].iter().join(" "));
+        for j in 0..n * m {
+            accums[j] *= counts[j];
+        }
+    }
+    for i in 0..n * m {
+        ans -= accums[i];
     }
 
-    println!("{}", dp[n][0] + dp[n][1] + dp[n][2]);
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

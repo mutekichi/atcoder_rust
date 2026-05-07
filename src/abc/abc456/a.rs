@@ -53,7 +53,13 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        x: usize,
+    }
+    if 3 <= x && x <= 18 {
+         println!("Yes");
+    }
+    else {
+        println!("No");
     }
 }
 
