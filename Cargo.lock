@@ -940,6 +940,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "abc457"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "abca"
 version = "0.1.0"
 dependencies = [
@@ -1112,6 +1124,18 @@ dependencies = [
  "itertools",
  "num-integer",
  "proconio",
+ "superslice",
+]
+
+[[package]]
+name = "arc214"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
  "superslice",
 ]
 
