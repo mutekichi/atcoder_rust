@@ -7,14 +7,15 @@ const EXIT_R: u8 = 0;
 const EXIT_C: u8 = 10;
 const MAX_MOVES: usize = 100000;
 
-const BEAM_WIDTH: usize = 30;
-const BEAM_DEPTH: usize = 4;
-const LOOKAHEAD_K: usize = 30;
-const FOCUS_K: usize = 5;
+const BEAM_WIDTH: usize = 15;
+const BEAM_DEPTH: usize = 6;
+const LOOKAHEAD_K: usize = 400;
+const FOCUS_K: usize = 4;
 
 const SCORE_BASE_WEIGHT: f64 = 10000.0;
 const SCORE_DIST_WEIGHT_INIT: f64 = 100.0;
-const SCORE_DIST_DECAY: f64 = 0.9;
+const SCORE_DIST_DECAY: f64 = 0.95;
+const SCORE_DIST_DECAY_FIRST: f64 = 0.7;
 
 const ENABLE_DEBUG_LOG: bool = false;
 
@@ -124,7 +125,12 @@ impl State {
                 let d = r.abs_diff(EXIT_R) + c.abs_diff(EXIT_C);
                 score += d as f64 * weight;
             }
-            weight *= SCORE_DIST_DECAY;
+
+            if i == 0 {
+                weight *= SCORE_DIST_DECAY_FIRST;
+            } else {
+                weight *= SCORE_DIST_DECAY;
+            }
         }
         score
     }
@@ -145,10 +151,7 @@ fn get_best_move(
                 continue;
             }
 
-            let mut active_conveyors = Vec::with_capacity(FOCUS_K * 2 + 2);
-            active_conveyors.push(EXIT_R as usize / 2);
-            active_conveyors.push(10 + EXIT_C as usize / 2);
-
+            let mut active_conveyors = Vec::with_capacity(FOCUS_K * 2);
             for i in 0..FOCUS_K {
                 let id = st.target as usize + i;
                 if id < N_SQ {
@@ -161,8 +164,20 @@ fn get_best_move(
             active_conveyors.dedup();
 
             for &m in &active_conveyors {
+                let cells = &conveyors[m].cells;
+                let first_val = st.grid[cells[0].0 as usize][cells[0].1 as usize];
+                let mut is_meaningless = true;
+                for &(r, c) in cells.iter().skip(1) {
+                    if st.grid[r as usize][c as usize] != first_val {
+                        is_meaningless = false;
+                        break;
+                    }
+                }
+                if is_meaningless {
+                    continue;
+                }
+
                 for &d in &[-1, 1] {
-                    // Prevent reversing the immediately preceding move
                     if let Some((prev_m, prev_d)) = st.last_move {
                         if prev_m == m && prev_d == -d {
                             continue;
@@ -178,19 +193,24 @@ fn get_best_move(
             }
         }
 
+        if next_beam.is_empty() {
+            break;
+        }
+
         next_beam.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
         next_beam.truncate(BEAM_WIDTH);
         current_beam = next_beam;
     }
 
-    current_beam[0].2.unwrap()
+    current_beam[0].2.expect("No valid move found")
 }
 
 fn main() {
-    let start_time = Instant::now();
+    let _start_time = Instant::now();
     let stdin = io::stdin();
     let mut lines = stdin.lock().lines();
-    let n_in: usize = lines.next().unwrap().unwrap().trim().parse().unwrap();
+    let n_in_line = lines.next().unwrap().unwrap();
+    let n_in: usize = n_in_line.trim().parse().unwrap();
     let mut initial_grid = [[0i16; N]; N];
     for r in 0..n_in {
         let line = lines.next().unwrap().unwrap();
@@ -238,35 +258,11 @@ fn main() {
 
     let mut current_state = State::new(&initial_grid);
     let mut final_moves = Vec::new();
-    let mut last_target = -1;
 
     while current_state.target < N_SQ as i16 && final_moves.len() < MAX_MOVES {
-        if current_state.target != last_target || final_moves.len() % 1000 == 0 {
-            if ENABLE_DEBUG_LOG {
-                eprintln!(
-                    "Target: {:3} / {}, Moves: {:5}, Elapsed: {:?}",
-                    current_state.target,
-                    N_SQ,
-                    final_moves.len(),
-                    start_time.elapsed()
-                );
-            }
-            last_target = current_state.target;
-        }
-
         let (m, d) = get_best_move(&current_state, &conveyors);
         current_state.apply_op(&conveyors[m], m, d);
         final_moves.push((m, d));
-    }
-
-    if ENABLE_DEBUG_LOG {
-        eprintln!(
-            "Finished. Target: {:3} / {}, Moves: {:5}, Elapsed: {:?}",
-            current_state.target,
-            N_SQ,
-            final_moves.len(),
-            start_time.elapsed()
-        );
     }
 
     println!("{}", final_moves.len());
