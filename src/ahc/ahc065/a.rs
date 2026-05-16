@@ -7,10 +7,9 @@ const EXIT_R: u8 = 0;
 const EXIT_C: u8 = 10;
 const MAX_MOVES: usize = 100000;
 
-const BEAM_WIDTH: usize = 15;
+const BEAM_WIDTH: usize = 14;
 const BEAM_DEPTH: usize = 6;
-const LOOKAHEAD_K: usize = 400;
-const FOCUS_K: usize = 4;
+const FOCUS_K: usize = 5;
 
 const SCORE_BASE_WEIGHT: f64 = 10000.0;
 const SCORE_DIST_WEIGHT_INIT: f64 = 100.0;
@@ -118,15 +117,12 @@ impl State {
         let mut score = -(self.target as f64) * SCORE_BASE_WEIGHT;
         let mut weight = SCORE_DIST_WEIGHT_INIT;
 
-        for i in 0..LOOKAHEAD_K {
-            let id = self.target as usize + i;
-            if id < N_SQ {
-                let (r, c) = self.pos[id];
-                let d = r.abs_diff(EXIT_R) + c.abs_diff(EXIT_C);
-                score += d as f64 * weight;
-            }
+        for id in (self.target as usize)..N_SQ {
+            let (r, c) = self.pos[id];
+            let d = r.abs_diff(EXIT_R) + c.abs_diff(EXIT_C);
+            score += d as f64 * weight;
 
-            if i == 0 {
+            if id == self.target as usize {
                 weight *= SCORE_DIST_DECAY_FIRST;
             } else {
                 weight *= SCORE_DIST_DECAY;
@@ -164,19 +160,6 @@ fn get_best_move(
             active_conveyors.dedup();
 
             for &m in &active_conveyors {
-                let cells = &conveyors[m].cells;
-                let first_val = st.grid[cells[0].0 as usize][cells[0].1 as usize];
-                let mut is_meaningless = true;
-                for &(r, c) in cells.iter().skip(1) {
-                    if st.grid[r as usize][c as usize] != first_val {
-                        is_meaningless = false;
-                        break;
-                    }
-                }
-                if is_meaningless {
-                    continue;
-                }
-
                 for &d in &[-1, 1] {
                     if let Some((prev_m, prev_d)) = st.last_move {
                         if prev_m == m && prev_d == -d {
