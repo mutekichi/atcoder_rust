@@ -53,8 +53,11 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
+        A: [usize; n],
+        x: Usize1
     }
+    println!("{}", A[x]);
 }
 
 // FOR TEMPLATE INJECTIONS

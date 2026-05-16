@@ -53,32 +53,7 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
-        mut k: i64,
-    }
-    k = k - 1;
-    let mut A = Vec::with_capacity(n);
-    for _ in 0..n {
-        input! {
-            l: usize,
-            B: [i64; l],
-        }
-        A.push(B);
-    }
-    input! {
-        C: [i64; n],
-    }
-    for i in 0..n {
-        let A = &A[i];
-        let c = C[i];
-        if A.len() as i64 * c <= k {
-            k -= A.len() as i64 * c;
-            continue;
-        } 
-        let rem = k % A.len() as i64;
-        md!(i, k, rem);
-        println!("{}", A[rem as usize]);
-        return;
+        
     }
 }
 

@@ -53,8 +53,20 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
     }
+    let mut arrays = Vec::with_capacity(n);
+    for _ in 0..n {
+        input! {
+            l: usize,
+            A: [usize; l],
+        }
+        arrays.push(A);
+    }
+    input! {
+        x: Usize1, y: Usize1,
+    }
+    println!("{}", arrays[x][y]);
 }
 
 // FOR TEMPLATE INJECTIONS

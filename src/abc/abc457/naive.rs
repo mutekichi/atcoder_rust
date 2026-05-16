@@ -53,7 +53,29 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize, m: usize,
+        LR: [(Usize1, Usize1); m],
+        q: usize,
+        ST: [(Usize1, Usize1); q],
+    }
+    for i in 0..q {
+        let (s, t) = ST[i];
+        let mut ok = false;
+        for j in 0..m - 1 {
+            for k in j + 1..m {
+                let l = min(LR[j].0, LR[k].0);
+                let r = max(LR[j].1, LR[k].1);
+                if l == s && r == t {
+                    ok = true;
+                }
+            }
+        }
+        if ok {
+            println!("Yes");
+        }
+        else {
+            println!("No");
+        }
     }
 }
 

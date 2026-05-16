@@ -53,8 +53,31 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
+        k: i128,
+        A: [i128; n],
     }
+    let mut ok = 0;
+    let mut ng = INF_I128;
+
+    while ng - ok > 1 {
+        let mid = (ng + ok) / 2;
+        let mut sum = 0;
+        for i in 0..n {
+            let a = A[i];
+            let i = i as i128 + 1;
+            if mid > a {
+                sum += (mid - a) / i + if (mid - a) % i == 0 { 0 } else { 1 };
+            }
+        }
+        md!(ok, ng, mid, sum);
+        if sum <= k {
+            ok = mid;
+        } else {
+            ng = mid;
+        }
+    }
+    println!("{}", ok);
 }
 
 // FOR TEMPLATE INJECTIONS

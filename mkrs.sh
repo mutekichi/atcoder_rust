@@ -49,11 +49,14 @@ path = "${PROBLEM}.rs"
 EOL
     done
 
-    cat >> "$LOCAL_CARGO" <<EOL
+    if [ "$CATEGORY" == "ahc" ]; then
+        cat >> "$LOCAL_CARGO" <<EOL
 [[bin]]
-name = "naive"
-path = "naive.rs"
+name = "calc_score"
+path = "calc_score.rs"
+
 EOL
+    fi
 fi
 
 for PROBLEM in $PROBLEMS; do
@@ -63,20 +66,29 @@ for PROBLEM in $PROBLEMS; do
     fi
 done
 
-if [ ! -f "${TARGET_DIR}/gen.py" ]; then
-    cat << 'EOF' > "${TARGET_DIR}/gen.py"
-import random
+if [ "$CATEGORY" == "ahc" ]; then
+    FILE_PATH="${TARGET_DIR}/calc_score.rs"
+    if [ ! -f "$FILE_PATH" ]; then
+        cat > "$FILE_PATH" <<'EOF'
+use std::env;
+use std::fs;
 
-n = random.randint(1, 10)
-a = [random.randint(1, 100) for _ in range(n)]
-
-print(n)
-print(*a)
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 3 {
+        eprintln!("Usage: {} <in_file> <out_file>", args[0]);
+        std::process::exit(1);
+    }
+    let in_file = &args[1];
+    let out_file = &args[2];
+    
+    let score: i64 = 0;
+    
+    println!("{}", score);
+}
 EOF
-fi
-
-if [ ! -f "${TARGET_DIR}/naive.rs" ]; then
-    cp "$TEMPLATE" "${TARGET_DIR}/naive.rs"
+    fi
+    mkdir -p "${TARGET_DIR}/in" "${TARGET_DIR}/out"
 fi
 
 echo "Setup completed for workspace member: $PREFIX"
