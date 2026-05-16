@@ -7,9 +7,14 @@ const EXIT_R: u8 = 0;
 const EXIT_C: u8 = 10;
 const MAX_MOVES: usize = 100000;
 
-const BEAM_WIDTH: usize = 10;
-const BEAM_DEPTH: usize = 3;
-const LOOKAHEAD_K: usize = 8;
+const BEAM_WIDTH: usize = 30;
+const BEAM_DEPTH: usize = 4;
+const LOOKAHEAD_K: usize = 30;
+const FOCUS_K: usize = 5;
+
+const SCORE_BASE_WEIGHT: f64 = 10000.0;
+const SCORE_DIST_WEIGHT_INIT: f64 = 100.0;
+const SCORE_DIST_DECAY: f64 = 0.9;
 
 const ENABLE_DEBUG_LOG: bool = false;
 
@@ -18,6 +23,7 @@ struct State {
     grid: [[i16; N]; N],
     pos: [(u8, u8); N_SQ],
     target: i16,
+    last_move: Option<(usize, i8)>,
 }
 
 struct Conveyor {
@@ -40,6 +46,7 @@ impl State {
             grid,
             pos,
             target: 0,
+            last_move: None,
         };
         state.check_exit();
         state
@@ -59,6 +66,7 @@ impl State {
     fn apply_op(
         &mut self,
         conveyor: &Conveyor,
+        conv_id: usize,
         dir: i8,
     ) {
         let len = conveyor.cells.len();
@@ -101,12 +109,13 @@ impl State {
                 self.pos[first_val as usize] = (last_r, last_c);
             }
         }
+        self.last_move = Some((conv_id, dir));
         self.check_exit();
     }
 
     fn calc_score(&self) -> f64 {
-        let mut score = -(self.target as f64) * 10000.0;
-        let mut weight = 100.0;
+        let mut score = -(self.target as f64) * SCORE_BASE_WEIGHT;
+        let mut weight = SCORE_DIST_WEIGHT_INIT;
 
         for i in 0..LOOKAHEAD_K {
             let id = self.target as usize + i;
@@ -115,7 +124,7 @@ impl State {
                 let d = r.abs_diff(EXIT_R) + c.abs_diff(EXIT_C);
                 score += d as f64 * weight;
             }
-            weight *= 0.5;
+            weight *= SCORE_DIST_DECAY;
         }
         score
     }
@@ -128,7 +137,7 @@ fn get_best_move(
     let mut current_beam = vec![(initial_state.calc_score(), initial_state.clone(), None)];
 
     for _ in 0..BEAM_DEPTH {
-        let mut next_beam = Vec::with_capacity(current_beam.len() * 40);
+        let mut next_beam = Vec::with_capacity(current_beam.len() * 16);
 
         for (score, st, first_move) in &current_beam {
             if st.target == N_SQ as i16 {
@@ -136,10 +145,32 @@ fn get_best_move(
                 continue;
             }
 
-            for m in 0..conveyors.len() {
+            let mut active_conveyors = Vec::with_capacity(FOCUS_K * 2 + 2);
+            active_conveyors.push(EXIT_R as usize / 2);
+            active_conveyors.push(10 + EXIT_C as usize / 2);
+
+            for i in 0..FOCUS_K {
+                let id = st.target as usize + i;
+                if id < N_SQ {
+                    let (r, c) = st.pos[id];
+                    active_conveyors.push(r as usize / 2);
+                    active_conveyors.push(10 + c as usize / 2);
+                }
+            }
+            active_conveyors.sort_unstable();
+            active_conveyors.dedup();
+
+            for &m in &active_conveyors {
                 for &d in &[-1, 1] {
+                    // Prevent reversing the immediately preceding move
+                    if let Some((prev_m, prev_d)) = st.last_move {
+                        if prev_m == m && prev_d == -d {
+                            continue;
+                        }
+                    }
+
                     let mut next_st = st.clone();
-                    next_st.apply_op(&conveyors[m], d);
+                    next_st.apply_op(&conveyors[m], m, d);
                     let next_score = next_st.calc_score();
                     let fm = first_move.unwrap_or((m, d));
                     next_beam.push((next_score, next_st, Some(fm)));
@@ -224,7 +255,7 @@ fn main() {
         }
 
         let (m, d) = get_best_move(&current_state, &conveyors);
-        current_state.apply_op(&conveyors[m], d);
+        current_state.apply_op(&conveyors[m], m, d);
         final_moves.push((m, d));
     }
 

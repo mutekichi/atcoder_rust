@@ -71,7 +71,6 @@ if [ "$CATEGORY" == "ahc" ]; then
     if [ ! -f "$FILE_PATH" ]; then
         cat > "$FILE_PATH" <<'EOF'
 use std::env;
-use std::fs;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -79,11 +78,10 @@ fn main() {
         eprintln!("Usage: {} <in_file> <out_file>", args[0]);
         std::process::exit(1);
     }
-    let in_file = &args[1];
-    let out_file = &args[2];
+    let _in_file = &args[1];
+    let _out_file = &args[2];
     
     let score: i64 = 0;
-    
     println!("{}", score);
 }
 EOF

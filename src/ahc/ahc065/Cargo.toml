@@ -16,5 +16,5 @@ name = "a"
 path = "a.rs"
 
 [[bin]]
-name = "naive"
-path = "naive.rs"
+name = "calc_score"
+path = "calc_score.rs"
