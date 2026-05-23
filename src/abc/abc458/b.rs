@@ -53,7 +53,19 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        h: usize, w: usize,
+    }
+    for i in 0..h {
+        let mut ans = vec![];
+        for j in 0..w {
+            let mut cnt = 4;
+            if i == 0 { cnt -= 1;}
+            if i == h - 1{ cnt -= 1;}
+            if j == 0 { cnt -= 1;}
+            if j == w - 1 { cnt -= 1;}
+            ans.push(cnt);
+        }
+        println!("{}", ans.iter().join(" "));
     }
 }
 

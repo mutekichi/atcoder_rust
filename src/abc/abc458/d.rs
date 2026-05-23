@@ -8,6 +8,7 @@ use num_integer::gcd;
 use rand::Rng;
 use std::cmp::{Ordering, Reverse, max, min};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::fmt::Binary;
 use std::io::{BufWriter, Write, stdout};
 use std::mem::swap;
 use std::ops::Bound::{self, Excluded, Included, Unbounded};
@@ -53,7 +54,43 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        x: i64,
+        q: usize,
+        AB: [(i64, i64); q]
+    }
+
+    {
+        let mut heap = BinaryHeap::new();
+        heap.push(1); heap.push(2);
+    }
+
+    let mut upper = BinaryHeap::new();
+    let mut lower = BinaryHeap::new();
+    let mut center = x;
+    for (a, b) in AB {
+        if center <= a {
+            upper.push(Reverse(a));
+            lower.push(center);
+        }
+        else {
+            upper.push(Reverse(center));
+            lower.push(a);
+        }
+        let Reverse(upper_peek) = *upper.peek().unwrap();
+        let lower_peek = *lower.peek().unwrap();
+        if b < lower_peek {
+            center = lower_peek;
+            lower.pop();
+            lower.push(b);
+        } else if b < upper_peek {
+            center = b;
+        }
+        else {
+            center = upper_peek;
+            upper.pop();
+            upper.push(Reverse(b));
+        }
+        println!("{}", center);
     }
 }
 

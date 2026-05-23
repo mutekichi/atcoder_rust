@@ -53,8 +53,16 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        S: Chars,
     }
+    let l = S.len();
+    let mut ans = 0usize;
+    for i in 0..l {
+        if S[i] == 'C' {
+            ans += min(i + 1, l - i);
+        }
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

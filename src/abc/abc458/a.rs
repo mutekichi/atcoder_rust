@@ -53,8 +53,10 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        S: String,
+        n: usize,
     }
+    println!("{}", &S[n..S.len() - n]);
 }
 
 // FOR TEMPLATE INJECTIONS
