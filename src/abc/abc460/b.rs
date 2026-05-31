@@ -57,19 +57,21 @@ fn main() {
     }
     for _ in 0..t {
         input! {
-            n: usize,
-            A: [i64; n],
+            x: i128,
+            y: i128,
+            r: i128,
+            xx: i128,
+            yy: i128,
+            rr: i128,
         }
-        if n == 1 {
-            println!("0");
-            continue;
+        let dist = (xx - x) * (xx - x) + (yy - y) * (yy - y);
+
+        if (rr - r) * (rr - r) <= dist && dist <= (rr + r) * (rr + r) {
+            println!("Yes");
         }
-        let mut diffs = A.windows(2).map(|w| w[1] - w[0]).collect::<Vec<_>>();
-        let first = diffs[0];
-        for i in 0..n - 1 {
-            diffs[i] -= first + i as i64;
+        else {
+            println!("No");
         }
-        md!(diffs.iter().join(" "));
     }
 }
 

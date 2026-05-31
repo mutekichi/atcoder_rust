@@ -5,14 +5,15 @@ help:
 	@echo "  make run abc 341 a              : Run solution for ABC341 problem A"
 	@echo "  make run ahc 060                : Run solution for AHC060 (implicitly runs a)"
 	@echo "  make run ahc 062 in             : Run all inputs in src/ahc/ahc062/in/"
-	@echo "  make score ahc 062 10           : Run up to 10 inputs and calculate score for AHC062"
 	@echo "  make run abc 341 a p            : Paste from clipboard and run"
 	@echo "  make run abc 341 a release      : Run solution in release mode"
 	@echo "  make data                       : Generate test data"
 	@echo "  make use src/tmpl.rs abc 341 a  : Inject template"
+	@echo "  make use src/tmpl.rs abc 341 a  : Inject template"
+	@echo "  make randtest abc 341 a         : Run randomized test"
 
 INPUT_FILE = input.txt
-KEYWORDS = new run use data release p in score
+KEYWORDS = new run use data release p in
 ARGS = $(filter-out $(KEYWORDS) $@,$(MAKECMDGOALS))
 
 # OS detection
@@ -109,45 +110,6 @@ run:
 		exit $$RET; \
 	fi
 
-.PHONY: score
-score:
-	$(eval T := $(word 1, $(ARGS)))
-	$(eval C := $(word 2, $(ARGS)))
-	$(eval FILE_LIMIT := $(word 3, $(ARGS)))
-	@if [ -z "$(T)" ] || [ -z "$(C)" ]; then echo "Error: Type and ID required."; exit 1; fi
-	@if [ "$(T)" != "ahc" ]; then echo "Error: Category must be ahc for score command."; exit 1; fi
-	$(eval PKG_NAME := $(T)$(C))
-	@cargo build $(CARGO_FLAGS) --quiet -p $(PKG_NAME) --bin a
-	@cargo build $(CARGO_FLAGS) --quiet -p $(PKG_NAME) --bin calc_score
-	@BIN_PATH="./target/$(MODE)/a"; \
-	CALC_BIN="./target/$(MODE)/calc_score"; \
-	if [ -f "$${BIN_PATH}.exe" ]; then BIN_PATH="$${BIN_PATH}.exe"; fi; \
-	if [ -f "$${CALC_BIN}.exe" ]; then CALC_BIN="$${CALC_BIN}.exe"; fi; \
-	IN_DIR="src/$(T)/$(T)$(C)/in"; \
-	OUT_DIR="src/$(T)/$(T)$(C)/out"; \
-	mkdir -p "$$OUT_DIR"; \
-	if [ ! -d "$$IN_DIR" ]; then echo "Error: Input dir $$IN_DIR not found."; exit 1; fi; \
-	TOTAL_SCORE=0; \
-	COUNT=0; \
-	FILES=$$(ls "$$IN_DIR"/*.txt 2>/dev/null); \
-	if [ -z "$$FILES" ]; then echo "No input files found in $$IN_DIR."; exit 0; fi; \
-	for f in $$FILES; do \
-		if [ -n "$(FILE_LIMIT)" ] && [ "$$COUNT" -ge "$(FILE_LIMIT)" ]; then break; fi; \
-		fname=$$(basename "$$f"); \
-		START_TIME=$$($(PYTHON) -c 'import time; print(time.time())'); \
-		"$$BIN_PATH" < "$$f" > "$$OUT_DIR/$$fname"; \
-		END_TIME=$$($(PYTHON) -c 'import time; print(time.time())'); \
-		ELAPSED=$$($(PYTHON) -c "print(f'{$$END_TIME - $$START_TIME:.4f}')"); \
-		SCORE=$$("$$CALC_BIN" "$$f" "$$OUT_DIR/$$fname" 2>/dev/null || echo "0"); \
-		printf "File: %-15s | Time: %6ss | Score: %s\n" "$$fname" "$$ELAPSED" "$$SCORE"; \
-		TOTAL_SCORE=$$($(PYTHON) -c "t = float('$$TOTAL_SCORE') + float('$$SCORE'); print(f'{t:g}')" 2>/dev/null || echo "$$TOTAL_SCORE"); \
-		COUNT=$$((COUNT + 1)); \
-	done; \
-	if [ "$$COUNT" -gt 0 ]; then \
-		echo "----------------------------------------"; \
-		printf "Total Score: %s\n" "$$TOTAL_SCORE"; \
-	fi
-
 .PHONY: data
 data:
 	@$(PYTHON) make_data.py > $(INPUT_FILE)
@@ -169,6 +131,10 @@ use:
 paste:
 	@$(PASTE_CMD) > $(INPUT_FILE)
 	@echo "Copied clipboard content to $(INPUT_FILE)"
+
+.PHONY: randtest
+randtest:
+	bash scripts/randtest.sh $(word 2, $(MAKECMDGOALS)) $(word 3, $(MAKECMDGOALS)) $(word 4, $(MAKECMDGOALS))
 
 %:
 	@:

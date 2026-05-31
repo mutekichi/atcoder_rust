@@ -53,7 +53,39 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        t: usize,
+        S: [Chars; t]
+    }
+    for S in S {
+        let mut counter = vec![0; 26];
+        for &c in &S {
+            counter[(c as u8 - b'a') as usize] += 1;
+        }
+        let mut set = BTreeSet::new();
+        for i in 0..26 {
+            set.insert((counter[i], i));
+        }
+        let max_cnt = set.last().unwrap().0;
+        let lim = (S.len() + 1) / 2;
+        if max_cnt > lim {
+            println!("No");
+            continue;
+        }
+        else {
+            println!("Yes");
+            let mut idx = 0;
+            let mut ans = vec!['a'; S.len()];
+            for &(cnt, c) in set.iter().rev() {
+                for i in 0..cnt {
+                    ans[idx] = (c as u8+ b'a') as char;
+                    idx += 2;
+                    if idx >= S.len() {
+                        idx = 1;
+                    }
+                }
+            }
+            println!("{}", ans.iter().join(""));
+        }
     }
 }
 

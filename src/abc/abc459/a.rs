@@ -53,8 +53,10 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        x: Usize1,
     }
+    let S = "HelloWorld";
+    println!("{}{}", &S[0..x], &S[x + 1..]);
 }
 
 // FOR TEMPLATE INJECTIONS

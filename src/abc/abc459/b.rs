@@ -53,8 +53,39 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
+        S: [Chars; n]
     }
+    let mut ans = vec![];
+    for i in 0..n {
+        let c = S[i][0];
+        md!(c);
+        if c == 'a' || c == 'b' || c == 'c' {
+            ans.push(2);
+        }
+        if c == 'd' || c == 'e' || c == 'f' {
+            ans.push(3);
+        }
+        if c == 'g' || c == 'h' || c == 'i' {
+            ans.push(4);
+        }
+        if c == 'j' || c == 'k' || c == 'l' {
+            ans.push(5);
+        }
+        if c == 'm' || c == 'n' || c == 'o' {
+            ans.push(6);
+        }
+        if c == 'p' || c == 'q' || c == 'r' || c == 's' {
+            ans.push(7);
+        }
+        if c == 't' || c == 'u' || c == 'v' {
+            ans.push(8);
+        }
+        if c == 'w' || c == 'x' || c == 'y' || c == 'z' {
+            ans.push(9);
+        }
+    }
+    println!("{}", ans.iter().join(""));
 }
 
 // FOR TEMPLATE INJECTIONS

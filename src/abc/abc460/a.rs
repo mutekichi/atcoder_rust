@@ -53,24 +53,14 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        t: usize,
+        mut n: usize, mut m: usize,
     }
-    for _ in 0..t {
-        input! {
-            n: usize,
-            A: [i64; n],
-        }
-        if n == 1 {
-            println!("0");
-            continue;
-        }
-        let mut diffs = A.windows(2).map(|w| w[1] - w[0]).collect::<Vec<_>>();
-        let first = diffs[0];
-        for i in 0..n - 1 {
-            diffs[i] -= first + i as i64;
-        }
-        md!(diffs.iter().join(" "));
+    let mut cnt = 0;
+    while m > 0 {
+        m = n % m;
+        cnt += 1;
     }
+    println!("{}", cnt);
 }
 
 // FOR TEMPLATE INJECTIONS
