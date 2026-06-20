@@ -20,7 +20,17 @@ const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
 const INF_I128: i128 = 1 << 120;
-const DIR: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const DIR4: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const DIR8: [(isize, isize); 8] = [
+    (0, 1),
+    (0, -1),
+    (1, 0),
+    (-1, 0),
+    (1, 1),
+    (1, -1),
+    (-1, 1),
+    (-1, -1),
+];
 const C998244353: u64 = 998244353;
 const C1000000007: u64 = 1000000007;
 
@@ -52,9 +62,7 @@ macro_rules! md {
 
 #[allow(unused_variables)]
 fn main() {
-    input! {
-        
-    }
+    input! {}
 }
 
 // FOR TEMPLATE INJECTIONS

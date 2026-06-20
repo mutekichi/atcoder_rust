@@ -16,9 +16,9 @@ members = ["src/abc/*", "src/arc/*", "src/ahc/*"]
 resolver = "2"
 
 [workspace.dependencies]
-proconio = "0.4.5"
-itertools = "0.13.0"
+proconio = "0.5.0"
+itertools = "0.15.0"
 superslice = "1.0.0"
 num-integer = "0.1.44"
-rand = "0.9.2"
+rand = "0.10.1"
 memoise = "0.3.2"

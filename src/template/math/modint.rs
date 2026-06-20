@@ -7,42 +7,271 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 pub type Mint998 = ModInt<998_244_353>;
 pub type Mint107 = ModInt<1_000_000_007>;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+// Tracker active only when debug assertions are enabled.
+#[cfg(debug_assertions)]
+#[derive(Copy, Clone)]
+pub struct ModTracker {
+    float_val: f64,
+    num: i64,
+    den: i64,
+}
+
+// Zero-sized tracker for release.
+#[cfg(not(debug_assertions))]
+#[derive(Copy, Clone)]
+pub struct ModTracker;
+
+#[cfg(debug_assertions)]
+impl ModTracker {
+    fn new(val: i64) -> Self {
+        Self {
+            float_val: val as f64,
+            num: val,
+            den: 1,
+        }
+    }
+
+    fn reduce(
+        num: i64,
+        den: i64,
+    ) -> (i64, i64) {
+        if den == 0 {
+            return (num, den);
+        }
+        let g = Self::gcd(num.abs(), den.abs());
+        let (n, d) = (num / g, den / g);
+        if d < 0 { (-n, -d) } else { (n, d) }
+    }
+
+    fn gcd(
+        mut a: i64,
+        mut b: i64,
+    ) -> i64 {
+        while b != 0 {
+            let t = b;
+            b = a % b;
+            a = t;
+        }
+        a
+    }
+
+    fn add(
+        self,
+        other: Self,
+    ) -> Self {
+        let (num, den) = Self::reduce(
+            self.num * other.den + other.num * self.den,
+            self.den * other.den,
+        );
+        Self {
+            float_val: self.float_val + other.float_val,
+            num,
+            den,
+        }
+    }
+
+    fn sub(
+        self,
+        other: Self,
+    ) -> Self {
+        let (num, den) = Self::reduce(
+            self.num * other.den - other.num * self.den,
+            self.den * other.den,
+        );
+        Self {
+            float_val: self.float_val - other.float_val,
+            num,
+            den,
+        }
+    }
+
+    fn mul(
+        self,
+        other: Self,
+    ) -> Self {
+        let (num, den) = Self::reduce(self.num * other.num, self.den * other.den);
+        Self {
+            float_val: self.float_val * other.float_val,
+            num,
+            den,
+        }
+    }
+
+    fn div(
+        self,
+        other: Self,
+    ) -> Self {
+        let (num, den) = Self::reduce(self.num * other.den, self.den * other.num);
+        Self {
+            float_val: self.float_val / other.float_val,
+            num,
+            den,
+        }
+    }
+
+    fn inv(self) -> Self {
+        let (num, den) = Self::reduce(self.den, self.num);
+        Self {
+            float_val: 1.0 / self.float_val,
+            num,
+            den,
+        }
+    }
+
+    fn neg(self) -> Self {
+        Self {
+            float_val: -self.float_val,
+            num: -self.num,
+            den: self.den,
+        }
+    }
+
+    fn pow(
+        self,
+        mut exp: u64,
+    ) -> Self {
+        let mut base = self;
+        let mut res = Self::new(1);
+        while exp > 0 {
+            if exp % 2 == 1 {
+                res = res.mul(base);
+            }
+            base = base.mul(base);
+            exp /= 2;
+        }
+        res
+    }
+}
+
+#[cfg(not(debug_assertions))]
+impl ModTracker {
+    #[inline(always)]
+    fn new(_val: i64) -> Self {
+        Self
+    }
+    #[inline(always)]
+    fn add(
+        self,
+        _other: Self,
+    ) -> Self {
+        Self
+    }
+    #[inline(always)]
+    fn sub(
+        self,
+        _other: Self,
+    ) -> Self {
+        Self
+    }
+    #[inline(always)]
+    fn mul(
+        self,
+        _other: Self,
+    ) -> Self {
+        Self
+    }
+    #[inline(always)]
+    fn div(
+        self,
+        _other: Self,
+    ) -> Self {
+        Self
+    }
+    #[inline(always)]
+    fn inv(self) -> Self {
+        Self
+    }
+    #[inline(always)]
+    fn neg(self) -> Self {
+        Self
+    }
+    #[inline(always)]
+    fn pow(
+        self,
+        _exp: u64,
+    ) -> Self {
+        Self
+    }
+}
+
+#[derive(Copy, Clone)]
 pub struct ModInt<const M: u64> {
     val: u64,
+    tracker: ModTracker,
 }
+
+impl<const M: u64> PartialEq for ModInt<M> {
+    fn eq(
+        &self,
+        other: &Self,
+    ) -> bool {
+        self.val == other.val
+    }
+}
+
+impl<const M: u64> Eq for ModInt<M> {}
 
 impl<const M: u64> ModInt<M> {
     pub fn new(x: i64) -> Self {
-        let mut x = x % M as i64;
-        if x < 0 {
-            x += M as i64;
+        let mut rem = x % M as i64;
+        if rem < 0 {
+            rem += M as i64;
         }
-        ModInt { val: x as u64 }
+        ModInt {
+            val: rem as u64,
+            tracker: ModTracker::new(x),
+        }
     }
 
     pub fn val(&self) -> u64 {
         self.val
     }
 
+    #[cfg(debug_assertions)]
+    pub fn float_val(&self) -> f64 {
+        self.tracker.float_val
+    }
+
+    #[cfg(debug_assertions)]
+    pub fn rational_val(&self) -> (i64, i64) {
+        (self.tracker.num, self.tracker.den)
+    }
+
     pub fn pow(
         &self,
-        mut exp: u64,
+        exp: u64,
     ) -> Self {
         let mut base = self.val;
         let mut res = 1;
-        while exp > 0 {
-            if exp % 2 == 1 {
+        let mut e = exp;
+        while e > 0 {
+            if e % 2 == 1 {
                 res = (res * base) % M;
             }
             base = (base * base) % M;
-            exp /= 2;
+            e /= 2;
         }
-        ModInt { val: res }
+        ModInt {
+            val: res,
+            tracker: self.tracker.pow(exp),
+        }
     }
 
     pub fn inv(&self) -> Self {
-        self.pow(M - 2)
+        let mut base = self.val;
+        let mut res = 1;
+        let mut e = M - 2;
+        while e > 0 {
+            if e % 2 == 1 {
+                res = (res * base) % M;
+            }
+            base = (base * base) % M;
+            e /= 2;
+        }
+        ModInt {
+            val: res,
+            tracker: self.tracker.inv(),
+        }
     }
 }
 
@@ -60,7 +289,18 @@ impl<const M: u64> fmt::Debug for ModInt<M> {
         &self,
         f: &mut fmt::Formatter<'_>,
     ) -> fmt::Result {
-        write!(f, "{}", self.val)
+        #[cfg(debug_assertions)]
+        {
+            write!(
+                f,
+                "{} (approx: {}, {}/{})",
+                self.val, self.tracker.float_val, self.tracker.num, self.tracker.den
+            )
+        }
+        #[cfg(not(debug_assertions))]
+        {
+            write!(f, "{}", self.val)
+        }
     }
 }
 
@@ -97,7 +337,11 @@ impl<const M: u64> From<u32> for ModInt<M> {
 impl<const M: u64> Neg for ModInt<M> {
     type Output = Self;
     fn neg(self) -> Self {
-        ModInt::new(-(self.val as i64))
+        let val = if self.val == 0 { 0 } else { M - self.val };
+        ModInt {
+            val,
+            tracker: self.tracker.neg(),
+        }
     }
 }
 
@@ -123,7 +367,10 @@ impl<const M: u64> Add for ModInt<M> {
         if res >= M {
             res -= M;
         }
-        ModInt { val: res }
+        ModInt {
+            val: res,
+            tracker: self.tracker.add(other.tracker),
+        }
     }
 }
 
@@ -147,7 +394,10 @@ impl<const M: u64> Sub for ModInt<M> {
             res += M;
         }
         res -= other.val;
-        ModInt { val: res }
+        ModInt {
+            val: res,
+            tracker: self.tracker.sub(other.tracker),
+        }
     }
 }
 
@@ -168,6 +418,7 @@ impl<const M: u64> Mul for ModInt<M> {
     ) -> Self {
         ModInt {
             val: (self.val * other.val) % M,
+            tracker: self.tracker.mul(other.tracker),
         }
     }
 }
@@ -187,7 +438,9 @@ impl<const M: u64> Div for ModInt<M> {
         self,
         other: Self,
     ) -> Self {
-        self * other.inv()
+        let mut res = self * other.inv();
+        res.tracker = self.tracker.div(other.tracker);
+        res
     }
 }
 
