@@ -53,8 +53,17 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
+        A: [Usize1; n],
+        B: [Usize1; n],
     }
+    for i in 0..n {
+        if B[A[i]] != i {
+            println!("No");
+            return;
+        }
+    }
+    println!("Yes");
 }
 
 // FOR TEMPLATE INJECTIONS

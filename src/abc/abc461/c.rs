@@ -53,8 +53,36 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        
+        n: usize,
+        k: usize,
+        m: usize,
+        CV: [(Usize1, i64); n],
     }
+    let mut max_values = vec![-INF_I64; n];
+    let mut rem_values = vec![];
+    for i in 0..n {
+        let (c, v) = CV[i];
+        if max_values[c] < v {
+            if max_values[c] != INF_I64 {
+                rem_values.push(max_values[c]);
+            }
+            max_values[c] = v;
+        }
+        else {
+            rem_values.push(v);
+        }
+    }
+    max_values.sort_unstable();
+    max_values.reverse();
+    let mut ans = 0;
+    ans += max_values.iter().take(m).sum::<i64>();
+    for val in max_values.iter().skip(m) {
+        rem_values.push(*val);
+    }
+    rem_values.sort_unstable();
+    rem_values.reverse();
+    ans += rem_values.iter().take(k - m).sum::<i64>();
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

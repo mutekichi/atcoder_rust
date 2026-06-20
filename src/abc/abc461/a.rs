@@ -53,9 +53,14 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
+        a: usize, d: usize,
     }
-    println!("{}", if n == 10 { n + 1 } else { n });
+    if d >= a {
+        println!("Yes");
+    }
+    else {
+        println!("No");
+    }
 }
 
 // FOR TEMPLATE INJECTIONS

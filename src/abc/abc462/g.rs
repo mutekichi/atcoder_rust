@@ -47,15 +47,14 @@ macro_rules! md { // stands for my_dbg
 macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
-    }}
+    }};
 }
 
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
+        
     }
-    println!("{}", n);
 }
 
 // FOR TEMPLATE INJECTIONS

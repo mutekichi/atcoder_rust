@@ -47,15 +47,32 @@ macro_rules! md { // stands for my_dbg
 macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
-    }}
+    }};
+}
+
+#[allow(unused_variables)]
+fn testcase() {
+    input! {
+        S: Chars, k: usize,
+    }
+    let n = S.len();
+    let mut prev_abc = vec![false; n];
+    for i in 2..n {
+        if S[i - 2] == 'A' && S[i - 1] == 'B' && S[i] == 'C' {
+            prev_abc[i] = true;
+        }
+    }
+    
 }
 
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
+        t: usize,
     }
-    println!("{}", n);
+    for _ in 0..t {
+        testcase();
+    }
 }
 
 // FOR TEMPLATE INJECTIONS

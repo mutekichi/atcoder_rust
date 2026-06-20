@@ -47,7 +47,7 @@ macro_rules! md { // stands for my_dbg
 macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
-    }}
+    }};
 }
 
 #[allow(unused_variables)]
@@ -55,7 +55,19 @@ fn main() {
     input! {
         n: usize,
     }
-    println!("{}", n);
+    let mut given = vec![vec![]; n];
+    for i in 0..n {
+        input! {
+            k: usize,
+            A: [Usize1; k],
+        }
+        for a in A {
+            given[a].push(i + 1);
+        }
+    }
+    for given in given {
+        println!("{} {}", given.len(), given.iter().join(" "));
+    }
 }
 
 // FOR TEMPLATE INJECTIONS

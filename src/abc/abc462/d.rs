@@ -47,15 +47,37 @@ macro_rules! md { // stands for my_dbg
 macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
-    }}
+    }};
 }
 
 #[allow(unused_variables)]
 fn main() {
     input! {
         n: usize,
+        d: usize,
+        ST: [(Usize1 , Usize1); n],
     }
-    println!("{}", n);
+    let mut in_counter = vec![0; 1000010];
+    let mut out_counter = vec![0; 1000010];
+    for i in 0..n {
+        let (s, t) = ST[i];
+        if s + d > t {
+            continue;
+        }
+        else {
+            in_counter[s] += 1;
+            out_counter[t - d] += 1;
+        }
+    }
+    let mut count = 0u64;
+    let mut ans = 0;
+    for i in 0..1000010 {
+        count += in_counter[i];
+        ans += count * (count - 1) / 2;
+        count -= out_counter[i];
+        md!(i, count, ans);
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

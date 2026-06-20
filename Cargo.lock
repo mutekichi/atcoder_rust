@@ -1000,6 +1000,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "abc462"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "ahc055"
 version = "0.1.0"
 dependencies = [

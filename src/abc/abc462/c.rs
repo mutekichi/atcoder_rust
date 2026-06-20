@@ -47,15 +47,28 @@ macro_rules! md { // stands for my_dbg
 macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
-    }}
+    }};
 }
 
 #[allow(unused_variables)]
 fn main() {
     input! {
         n: usize,
+        mut XY: [(Usize1, Usize1); n],
     }
-    println!("{}", n);
+    XY.sort_unstable();
+    let mut min_y = n;
+    let mut ans = 0;
+    for (_, y) in XY {
+        if y > min_y {
+            continue;
+        }
+        else {
+            min_y = y;
+            ans += 1;
+        }
+    }
+    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

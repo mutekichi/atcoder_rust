@@ -47,7 +47,7 @@ macro_rules! md { // stands for my_dbg
 macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
-    }}
+    }};
 }
 
 #[allow(unused_variables)]
@@ -55,7 +55,47 @@ fn main() {
     input! {
         n: usize,
     }
-    println!("{}", n);
+    for _ in 0..n {
+        input! {
+            a: i64, b: i64,
+            x: i64, y: i64,
+        }
+        let x = x.abs();
+        let y = y.abs();
+
+        let ans = {
+            let mut ans = 0;
+            ans += min(x, y) * min(a, b) * 2;
+            let diff = x.abs_diff(y) as i64;
+            ans += diff / 2 * (a + b);
+            if diff % 2 != 0 {
+                if (a < b) == (x < y) {
+                    ans += max(a, b);
+                } else {
+                    ans += min(a, b);
+                }
+            }
+            ans
+        };
+
+        let ans2 = {
+            let mut ans = 0;
+            ans += min(x, y) * min(a, b) * 2;
+            let diff = x.abs_diff(y) as i64;
+            ans += min(a, b) * (diff / 2) * 4;
+            md!(ans);
+            if diff % 2 != 0 {
+                if (a < b) == (x < y) {
+                    ans += min(max(a, b), min(a, b) * 3);
+                } else {
+                    ans += min(a, b);
+                }
+            }
+            ans
+        };
+
+        println!("{}", min(ans, ans2));
+    }
 }
 
 // FOR TEMPLATE INJECTIONS
