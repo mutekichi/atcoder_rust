@@ -7,6 +7,20 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 pub type Mint998 = ModInt<998_244_353>;
 pub type Mint107 = ModInt<1_000_000_007>;
 
+#[cfg(debug_assertions)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Rational(pub i64, pub i64);
+
+#[cfg(debug_assertions)]
+impl fmt::Display for Rational {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
+        write!(f, "({}/{})", self.0, self.1)
+    }
+}
+
 // Tracker active only when debug assertions are enabled.
 #[cfg(debug_assertions)]
 #[derive(Copy, Clone)]
@@ -233,8 +247,8 @@ impl<const M: u64> ModInt<M> {
     }
 
     #[cfg(debug_assertions)]
-    pub fn rational_val(&self) -> (i64, i64) {
-        (self.tracker.num, self.tracker.den)
+    pub fn rational_val(&self) -> Rational {
+        Rational(self.tracker.num, self.tracker.den)
     }
 
     pub fn pow(

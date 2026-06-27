@@ -1,52 +1,64 @@
 import os
 import sys
 
-# Usage: python3 inject.py <template_path> <target_file>
-
 if len(sys.argv) < 3:
     print("Usage: python3 inject.py <template_path> <target_file>")
     sys.exit(1)
 
-# 変更点: 引数をそのままパスとして扱う
 template_path = sys.argv[1]
 target_file = sys.argv[2]
 
-# --- 以下、以前と同じロジック ---
+def extract_snippet(filepath, visited=None):
+    if visited is None:
+        visited = set()
+    
+    abs_path = os.path.abspath(filepath)
+    if abs_path in visited:
+        return []
+    visited.add(abs_path)
 
-# 1. テンプレートの読み込み
-if not os.path.exists(template_path):
-    print(f"Error: Template not found at {template_path}")
-    sys.exit(1)
+    if not os.path.exists(filepath):
+        print(f"Error: Template not found at {filepath}")
+        sys.exit(1)
 
-with open(template_path, 'r', encoding="utf-8") as f:
-    t_lines = f.readlines()
+    with open(filepath, "r", encoding="utf-8") as f:
+        lines = f.readlines()
 
-# (スニペット抽出ロジックはそのまま)
-snippet = []
-in_snippet = False
-for line in t_lines:
-    if "// --- SNAP START ---" in line:
-        in_snippet = True
-        continue
-    if "// --- SNAP END ---" in line:
-        in_snippet = False
-        break
-    if in_snippet:
-        snippet.append(line)
+    snippet = []
+    in_snippet = False
+
+    for line in lines:
+        if line.strip().startswith("// INJECT:"):
+            dep_path = line.strip().split(":", 1)[1].strip()
+            dep_snippet = extract_snippet(dep_path, visited)
+            snippet.extend(dep_snippet)
+            continue
+
+        if "// --- SNAP START ---" in line:
+            in_snippet = True
+            continue
+        if "// --- SNAP END ---" in line:
+            in_snippet = False
+            break
+        
+        if in_snippet:
+            snippet.append(line)
+
+    return snippet
+
+snippet = extract_snippet(template_path)
 
 if not snippet:
-    print(f"Error: No snippet markers found in {template_path}")
+    print(f"Error: No snippet markers found or snippet is empty in {template_path}")
     sys.exit(1)
 
-# 2. ターゲットファイルの読み込み
 if not os.path.exists(target_file):
     print(f"Error: Target file '{target_file}' not found")
     sys.exit(1)
 
-with open(target_file, 'r', encoding="utf-8") as f:
+with open(target_file, "r", encoding="utf-8") as f:
     target_lines = f.readlines()
 
-# 3. 挿入位置の決定 (fn solve の直前を推奨)
 insert_idx = -1
 for i, line in enumerate(target_lines):
     if "// FOR TEMPLATE INJECTIONS" in line:
@@ -54,12 +66,11 @@ for i, line in enumerate(target_lines):
         break
 
 if insert_idx == -1:
-    target_lines.extend(['\n'] + snippet)
+    target_lines.extend(["\n"] + snippet)
 else:
     target_lines.insert(insert_idx, "".join(snippet) + "\n")
 
-# 4. 書き込み
-with open(target_file, 'w', encoding="utf-8") as f:
+with open(target_file, "w", encoding="utf-8") as f:
     f.writelines(target_lines)
 
-print(f"Successfully injected '{template_path}' into {target_file}")
+print(f"Successfully injected '{template_path}' (and dependencies) into {target_file}")
