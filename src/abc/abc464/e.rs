@@ -63,10 +63,32 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        h: usize, w: usize, q: usize,
+        RCX: [(Usize1, Usize1, char); q],
+    }
+    let mut data = vec![vec![0; w]; h];
+    let mut dict = vec!['A'];
+    for i in 0..q {
+        let (r, c, x) = RCX[i];
+        dict.push(x);
+        data[r][c] = i + 1;
+    }
+    for i in (0..h).rev() {
+        for j in (0..w).rev() {
+            if i != h - 1 {
+                data[i][j] = max(data[i][j], data[i + 1][j]);
+            }
+            if j != w - 1 {
+                data[i][j] = max(data[i][j], data[i][j + 1]);
+            }
+        }
+    }
+    for i in 0..h {
+        for j in 0..w {
+            print!("{}", dict[data[i][j]]);
+        }
+        println!();
     }
 }
 
 // FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS

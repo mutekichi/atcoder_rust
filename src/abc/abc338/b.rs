@@ -62,8 +62,17 @@ macro_rules! md {
 
 #[allow(unused_variables)]
 fn main() {
-    input! {
-
+    input! {S: Chars,}
+    let mut counter = vec![0; 26];
+    for c in S {
+        counter[(c as u8- b'a') as usize] += 1;
+    }
+    let max_count = counter.iter().max().unwrap();
+    for c in 'a'..='z' {
+        if counter[(c as u8 - b'a') as usize] == *max_count {
+            println!("{}", c);
+            return;
+        }
     }
 }
 

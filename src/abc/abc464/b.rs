@@ -63,7 +63,28 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        h: usize, w: usize,
+        S: [Chars; h],
+    }
+    let mut minh = h;
+    let mut maxh = 0;
+    let mut minw = w;
+    let mut maxw = 0;
+    for i in 0..h {
+        for j in 0..w {
+            if S[i][j] == '#' {
+                minh = min(minh, i);
+                maxh = max(maxh, i);
+                minw = min(minw, j);
+                maxw = max(maxw, j);
+            }
+        }
+    }
+    for i in minh..=maxh {
+        for j in minw..=maxw {
+            print!("{}", S[i][j]);
+        }
+        println!();
     }
 }
 

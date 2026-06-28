@@ -63,8 +63,11 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        X: i64,
+        A: [i64; n],
     }
+    
 }
 
 // FOR TEMPLATE INJECTIONS

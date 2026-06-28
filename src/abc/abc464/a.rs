@@ -63,7 +63,13 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        S: Chars,
+    }
+    if S.iter().filter(|c| **c == 'E').count() > S.iter().filter(|c| **c == 'W').count() {
+        println!("East");
+    }
+    else {
+        println!("West");
     }
 }
 

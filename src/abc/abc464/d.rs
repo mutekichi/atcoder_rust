@@ -61,9 +61,41 @@ macro_rules! md {
 }
 
 #[allow(unused_variables)]
+fn testcase() {
+    input! {
+        n: usize,
+        S: Chars,
+        X: [i64; n],
+        Y: [i64; n - 1],
+    }
+    let mut dp =  vec![vec![0; 2]; n];
+    if S[0] == 'S' {
+        dp[0][1] -= X[0];
+    }
+    else {
+        dp[0][0] -= X[0];
+    }
+    for i in 1..n {
+        if S[i] == 'S' {
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + Y[i - 1]);
+            dp[i][1] = max(dp[i - 1][0], dp[i - 1][1]) - X[i];
+        }
+        else {
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + Y[i - 1]) - X[i];
+            dp[i][1] = max(dp[i - 1][0], dp[i - 1][1]);
+        }
+    }
+    println!("{}", max(dp[n - 1][0], dp[n - 1][1]));
+}
+
+
+#[allow(unused_variables)]
 fn main() {
     input! {
-
+        t: usize,
+    }
+    for _ in 0..t {
+        testcase();
     }
 }
 

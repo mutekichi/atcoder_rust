@@ -63,7 +63,31 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        m: usize,
+        ADB: [(Usize1, Usize1, Usize1); n]
+    }
+    let mut colors_count = vec![0; 300010];
+    let mut diffs = vec![vec![]; 300010];
+    for i in 0..n {
+        let (a, d, b) = ADB[i];
+        colors_count[a] += 1usize;
+        diffs[d].push((a, b));
+    }
+    let mut types = colors_count.iter().filter(|c| **c > 0).count();
+    for j in 0..m {
+        for &diffs in &diffs[j] {
+            let (a, b) = diffs;
+            colors_count[a] -= 1;
+            if colors_count[a] == 0 {
+                types -= 1;
+            }
+            colors_count[b] += 1;
+            if colors_count[b] == 1 {
+                types += 1;
+            }
+        }
+        println!("{}", types);
     }
 }
 

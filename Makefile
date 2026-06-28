@@ -9,7 +9,6 @@ help:
 	@echo "  make run abc 341 a release      : Run solution in release mode"
 	@echo "  make data                       : Generate test data"
 	@echo "  make use src/tmpl.rs abc 341 a  : Inject template"
-	@echo "  make use src/tmpl.rs abc 341 a  : Inject template"
 	@echo "  make randtest abc 341 a         : Run randomized test"
 
 INPUT_FILE = input.txt
@@ -58,7 +57,7 @@ new:
 	$(eval T := $(word 1, $(ARGS)))
 	$(eval C := $(word 2, $(ARGS)))
 	@if [ -z "$(T)" ] || [ -z "$(C)" ]; then echo "Error: Type and ID required."; exit 1; fi
-	@if [ "$(T)" != "abc" ] && [ "$(T)" != "arc" ] && [ "$(T)" != "ahc" ]; then echo "Error: Category must be abc, arc, or ahc."; exit 1; fi
+	@if [ "$(T)" != "abc" ] && [ "$(T)" != "arc" ] && [ "$(T)" != "ahc" ] && [ "$(T)" != "awc" ]; then echo "Error: Category must be abc, arc, ahc, or awc."; exit 1; fi
 	@./mkrs.sh $(C) $(T)
 
 .PHONY: run
@@ -67,7 +66,7 @@ run:
 	$(eval C := $(word 2, $(ARGS)))
 	$(eval P_ARG := $(word 3, $(ARGS)))
 	@if [ -z "$(T)" ] || [ -z "$(C)" ]; then echo "Error: Type and ID required."; exit 1; fi
-	@if [ "$(T)" != "abc" ] && [ "$(T)" != "arc" ] && [ "$(T)" != "ahc" ]; then echo "Error: Category must be abc, arc, or ahc."; exit 1; fi
+	@if [ "$(T)" != "abc" ] && [ "$(T)" != "arc" ] && [ "$(T)" != "ahc" ] && [ "$(T)" != "awc" ]; then echo "Error: Category must be abc, arc, ahc, or awc."; exit 1; fi
 	$(eval P := $(if $(filter ahc,$(T)),a,$(P_ARG)))
 	@if [ -z "$(P)" ] && [ -z "$(DO_BATCH)" ]; then echo "Error: Prob required for $(T)."; exit 1; fi
 	$(eval PKG_NAME := $(T)$(C))

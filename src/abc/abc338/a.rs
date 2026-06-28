@@ -63,7 +63,13 @@ macro_rules! md {
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        S: Chars,
+    }
+    if S[0].is_ascii_uppercase() && S.iter().skip(1).all(|c| c.is_ascii_lowercase()) {
+        println!("Yes");
+    }
+    else {
+        println!("No");
     }
 }
 

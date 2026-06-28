@@ -62,9 +62,7 @@ macro_rules! md {
 
 #[allow(unused_variables)]
 fn main() {
-    input! {
-
-    }
+    input! {}
 }
 
 // FOR TEMPLATE INJECTIONS
