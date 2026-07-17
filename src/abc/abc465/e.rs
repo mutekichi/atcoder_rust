@@ -1,4 +1,201 @@
-// --- SNAP START ---
+#![allow(unused_imports)]
+#![allow(unused_macros)]
+#![allow(dead_code)]
+#![allow(non_snake_case)]
+
+use memoise::memoise;
+use num_integer::gcd;
+use rand::Rng;
+use std::cmp::{Ordering, Reverse, max, min};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
+use std::io::{BufWriter, Write, stdout};
+use std::mem::swap;
+use std::ops::Bound::{self, Excluded, Included, Unbounded};
+
+use itertools::{Itertools, iproduct};
+use proconio::input;
+use proconio::marker::{Bytes, Chars, Usize1};
+
+const INF_I64: i64 = 1 << 60;
+const INF_USIZE: usize = 1 << 60;
+const INF_F64: f64 = 1e18;
+const INF_I128: i128 = 1 << 120;
+const DIR4: [(isize, isize); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+const DIR8: [(isize, isize); 8] = [
+    (0, 1),
+    (0, -1),
+    (1, 0),
+    (-1, 0),
+    (1, 1),
+    (1, -1),
+    (-1, 1),
+    (-1, -1),
+];
+const C998244353: u64 = 998244353;
+const C1000000007: u64 = 1000000007;
+
+#[macro_export]
+#[cfg(debug_assertions)] // for debug build
+macro_rules! md { // stands for my_dbg
+    ($($arg:expr),* $(,)?) => {{
+        eprint!("[{}:{}] ", file!(), line!());
+
+        let mut _first = true;
+        $(
+            if !_first {
+                eprint!(", ");
+            }
+            eprint!("{}: {}", stringify!($arg), $arg);
+            _first = false;
+        )*
+        eprintln!();
+    }};
+}
+
+#[macro_export]
+#[cfg(not(debug_assertions))] // for release build
+macro_rules! md {
+    ($($arg:expr),* $(,)?) => {{
+        // do nothing
+    }};
+}
+
+#[allow(unused_variables)]
+fn main() {
+    input! {
+        N: Chars,
+    }
+    let mut digits = vec![];
+    for c in N {
+        digits.push(c.to_digit(10).unwrap());
+    }
+    let mut data = vec![];
+    // 0
+    data.push(vec![]);
+    // 1
+    for i in 0..10 {
+        data.push(vec![i]);
+    }
+    // 2
+    for i in 0..10 {
+        let mut vec = vec![];
+        vec.push(i);
+        for j in i + 1..10 {
+            vec.push(j);
+            data.push(vec.clone());
+            vec.pop();
+        }
+    }
+    // 3
+    let mut vec = vec![];
+    for i in 0..10 {
+        vec.push(i);
+        for j in i + 1..10 {
+            vec.push(j);
+            for k in j + 1..10 {
+                vec.push(k);
+                data.push(vec.clone());
+                vec.pop();
+            }
+            vec.pop();
+        }
+        vec.pop();
+    }
+
+    let l = data.len();
+
+    let mut prev_set = BTreeSet::new();
+    // let mut prev_data = vec![];
+
+    let mut dp = vec![vec![Mint998::new(0); l]; digits.len() + 1];
+
+    let idx1 = 1;
+    let idx2 = 11;
+    let idx3 = 56;
+
+    let mut map = BTreeMap::new();
+    for i in 0..data.len() {
+        map.insert(data[i].clone(), i);
+    }
+
+    for i in 0..digits.len() {
+        for next_digit in 0..10 {
+            for j in 0..data.len() {
+                let mut set = BTreeSet::from_iter(data[i].iter().cloned());
+                if set.len() == 1 && *set.first().unwrap() == 0 {
+                    continue;
+                }
+                set.insert(next_digit);
+                if set.len() > 3 {
+                    continue;
+                }
+                let next_vec = set.iter().cloned().collect::<Vec<_>>();
+                let next_idx = map.get(&next_vec).unwrap().clone();
+                let to_add = dp[i][j];
+                dp[i + 1][next_idx] += to_add;
+            }
+        }
+
+        let digit = digits[i];
+        if prev_set.len() < 3 {
+            for next_digit in 0..digit {
+                let mut set = prev_set.clone();
+                set.insert(next_digit);
+                let next_vec = set.iter().cloned().collect::<Vec<_>>();
+                let next_idx = map.get(&next_vec).unwrap().clone();
+                dp[i + 1][next_idx] += 1;
+            }
+            prev_set.insert(digit);
+        } else if prev_set.len() == 3 {
+            for &next_digit in prev_set.iter() {
+                let next_vec = prev_set.iter().cloned().collect::<Vec<_>>();
+                let next_idx = map.get(&next_vec).unwrap().clone();
+                dp[i + 1][next_idx] += 1;
+            }
+            prev_set.insert(digit);
+        } else {
+            continue;
+        }
+    }
+
+    let mut ans = Mint998::new(0);
+    for i in 0..data.len() {
+        let vec = data[i].clone();
+        let mut sum = 0;
+        let mut cond2 = true;
+        for &v in &vec {
+            sum += v;
+            if v == 3 {
+                cond2 = false;
+            }
+        }
+        let cond1 = sum % 3 == 0;
+        let cond3 = vec.len() == 3;
+
+        let mut ok = false;
+        if cond1 && !cond2 && !cond3 {
+            ok = true;
+        }
+        if !cond1 && cond2 && !cond3 {
+            ok = true;
+        }
+        if !cond1 && !cond2 && cond3 {
+            ok = true;
+        }
+        if ok {
+            ans += dp[digits.len()][i];
+        }
+    }
+    for i in 0..dp.len() {
+        for j in 0..data.len() {
+            let vec = data[j].clone();
+            md!(i, vec.iter().join(" "), dp[i][j]);
+        }
+    }
+    println!("{}", ans);
+}
+
+// FOR TEMPLATE INJECTIONS
 
 use std::fmt;
 use std::iter::{Product, Sum};
@@ -266,3 +463,5 @@ impl<const M: u64> Default for ModInt<M> {
         ModInt::new(0)
     }
 }
+
+// END TEMPLATE INJECTIONS

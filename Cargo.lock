@@ -1048,6 +1048,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "abc465"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "ahc055"
 version = "0.1.0"
 dependencies = [
@@ -1273,6 +1285,30 @@ dependencies = [
 
 [[package]]
 name = "arc219"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "arc223"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "arc224"
 version = "0.1.0"
 dependencies = [
  "itertools",
