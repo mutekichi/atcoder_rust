@@ -19,8 +19,13 @@ use proconio::marker::{Bytes, Chars, Usize1};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        A: [usize; n],
     }
+    println!(
+        "{}",
+        A.windows(3).filter(|w| w[1] > w[0] && w[1] > w[2]).count()
+    );
 }
 
 const INF_I64: i64 = 1 << 60;

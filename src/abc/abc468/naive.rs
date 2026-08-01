@@ -19,8 +19,33 @@ use proconio::marker::{Bytes, Chars, Usize1};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        P: [usize; n],
     }
+    let mut ans = 0;
+    for k in 0..(1 << n) {
+        let mut x = 0;
+        let mut y = 0;
+        let mut c = 0;
+        for i in 0..n {
+            let p = P[i];
+            if (k >> i) & 1 == 0 {
+                if x < p {
+                    c += 1;
+                }
+                x = max(x, p);
+            } else {
+                if y < p {
+                    c += 1;
+                }
+                y = max(y, p);
+            }
+        }
+        // println!("{} {} {} ", x, y, c);
+        ans = max(ans, c);
+        // println!();
+    }
+    println!("{}", ans);
 }
 
 const INF_I64: i64 = 1 << 60;

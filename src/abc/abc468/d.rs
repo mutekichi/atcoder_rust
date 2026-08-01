@@ -19,8 +19,47 @@ use proconio::marker::{Bytes, Chars, Usize1};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        S: Chars,
     }
+    let n = S.len();
+    let mut ans = 0usize;
+    for i in 0..n {
+        let mut len = 0;
+        let mut used = false;
+        loop {
+            if i < len || i + len >= n {
+                break;
+            }
+            if S[i - len] != S[i + len] {
+                if used {
+                    break;
+                } else {
+                    used = true;
+                }
+            }
+            len += 1;
+        }
+        ans += len;
+    }
+    for i in 0..n - 1 {
+        let mut len = 0;
+        let mut used = false;
+        loop {
+            if i < len || i + len + 1 >= n {
+                break;
+            }
+            if S[i - len] != S[i + len + 1] {
+                if used {
+                    break;
+                } else {
+                    used = true;
+                }
+            }
+            len += 1;
+        }
+        ans += len;
+    }
+    println!("{}", ans);
 }
 
 const INF_I64: i64 = 1 << 60;

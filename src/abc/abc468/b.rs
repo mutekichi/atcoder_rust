@@ -19,8 +19,18 @@ use proconio::marker::{Bytes, Chars, Usize1};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        m: usize, d: usize,
+        S: Chars,
     }
+    let mut state = vec![true; m];
+    for i in 0..m {
+        if S[i] == 'G' {
+            for j in i.saturating_sub(d)..min(m, i + d + 1) {
+                state[j] = false;
+            }
+        }
+    }
+    println!("{}", state.iter().filter(|v| **v).count());
 }
 
 const INF_I64: i64 = 1 << 60;

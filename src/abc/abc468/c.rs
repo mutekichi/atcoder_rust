@@ -19,8 +19,17 @@ use proconio::marker::{Bytes, Chars, Usize1};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        P: [Usize1; n],
+        Q: [Usize1; n],
     }
+    let mut count = 0u64;
+    for perm in (0..n).permutations(n) {
+        if P < perm && perm < Q {
+            count += 1;
+        }
+    }
+    println!("{}", count);
 }
 
 const INF_I64: i64 = 1 << 60;
