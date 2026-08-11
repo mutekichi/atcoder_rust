@@ -18,15 +18,7 @@ use proconio::marker::{Bytes, Chars, Usize1};
 
 #[allow(unused_variables)]
 fn main() {
-    input! {
-        n: usize,
-        C: [Usize1; n],
-    }
-    let mut counts = vec![0; n];
-    for c in C {
-        counts[c] += 1usize;
-    }
-    println!("{}", n - counts.iter().max().unwrap());
+    
 }
 
 const INF_I64: i64 = 1 << 60;

@@ -19,7 +19,42 @@ use proconio::marker::{Bytes, Chars, Usize1};
 #[allow(unused_variables)]
 fn main() {
     input! {
+        n: usize,
+        q: usize,
+    }
+    let mut set = BTreeSet::new();
+    let mut counter = vec![0; n];
 
+    let mut ans = 0;
+    for _ in 0..q {
+        input! {
+            t: usize,
+        }
+        if t == 1 {
+            input! {
+                x: Usize1,
+            }
+            if counter[x] == 0 {
+                set.insert(x);
+            }
+            ans ^= counter[x];
+            counter[x] += 1;
+            ans ^= counter[x];
+        } else {
+            let mut to_remove = vec![];
+            for &x in set.iter() {
+                ans ^= counter[x];
+                counter[x] -= 1;
+                ans ^= counter[x];
+                if counter[x] == 0 {
+                    to_remove.push(x);
+                }
+            }
+            for x in to_remove {
+                set.remove(&x);
+            }
+        }
+        println!("{}", ans);
     }
 }
 

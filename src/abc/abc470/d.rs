@@ -19,8 +19,37 @@ use proconio::marker::{Bytes, Chars, Usize1};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        q: usize,
+        mut P: [Usize1; n],
     }
+    let mut Q = vec![INF_USIZE; n];
+    for i in 0..n {
+        Q[P[i]] = i;
+    }
+    for _ in 0..q {
+        input! {
+            t: usize,
+        }
+        if t == 1 {
+            input! {
+                x: Usize1, y: Usize1,
+            }
+            let vx = P[x];
+            let vy = P[y];
+
+            let tmp = P[x];
+            P[x] = P[y];
+            P[y] = tmp;
+
+            let tmp = Q[vx];
+            Q[vx] = Q[vy];
+            Q[vy] = tmp;
+        } else {
+            swap(&mut P, &mut Q);
+        }
+    }
+    println!("{}", P.iter().map(|&x| x + 1).join(" "));
 }
 
 const INF_I64: i64 = 1 << 60;

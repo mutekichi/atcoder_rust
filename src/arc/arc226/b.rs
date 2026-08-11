@@ -19,14 +19,31 @@ use proconio::marker::{Bytes, Chars, Usize1};
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize,
-        C: [Usize1; n],
+        t: usize,
     }
-    let mut counts = vec![0; n];
-    for c in C {
-        counts[c] += 1usize;
+    for _ in 0..t {
+        input! {
+            n: i64, m: usize,
+            A: [i64; m],
+        }
+        let mut rem = 0;
+        let mut height = 0;
+        for i in (0..m).rev() {
+            height *= 2;
+            rem *= 2;
+            md!(height, rem);
+
+            let mut a = A[i];
+            if a >= rem {
+                a -= rem;
+                height += a / n + if a % n == 0 { 0 } else { 1 };
+                rem = (n - a % n) % n;
+            } else {
+                rem -= a;
+            }
+        }
+        println!("{}", height);
     }
-    println!("{}", n - counts.iter().max().unwrap());
 }
 
 const INF_I64: i64 = 1 << 60;
