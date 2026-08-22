@@ -1,2 +1,4 @@
 blank_lines_upper_bound = 3
+imports_layout = "Horizontal"
 fn_params_layout = "Vertical"
+max_width = 75

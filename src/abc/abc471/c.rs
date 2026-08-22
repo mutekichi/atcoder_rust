@@ -16,6 +16,46 @@ use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
+#[allow(unused_variables)]
+fn main() {
+    input! {
+        n: usize,
+        mut A: [i64; n],
+    }
+    A.push(-INF_I64);
+    A.push(INF_I64);
+    A.push(0);
+    A.sort_unstable();
+    let mut idx = INF_USIZE;
+    for i in 0..A.len() {
+        if A[i] == 0 {
+            idx = i;
+            break;
+        }
+    }
+    md!(idx);
+    let mut ans = 0;
+    let mut before = idx - 1;
+    let mut after = idx + 1;
+    for i in 0..n {
+        md!(ans);
+        let a = A[idx];
+        let b = A[before];
+        let c = A[after];
+        md!(a, b, c);
+        if a - b <= c - a {
+            ans += a - b;
+            idx = before;
+            before = before - 1;
+        } else {
+            ans += c - a;
+            idx = after;
+            after = after + 1;
+        }
+    }
+    println!("{}", ans);
+}
+
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
@@ -58,41 +98,6 @@ macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
     }};
-}
-
-#[allow(unused_variables)]
-fn main() {
-    input! {
-        n: usize,
-        Q: [usize; n],
-        A: [usize; n],
-        B: [usize; n],
-    }
-
-    let mut ans = 0;
-    for a in 0..=10_000_000 {
-        let mut rems = vec![];
-        let mut ok = true;
-        for i in 0..n {
-            if Q[i] >= a * A[i] {
-                rems.push(Q[i] - a * A[i]);
-            } else {
-                ok = false;
-                break;
-            }
-        }
-        if !ok {
-            break;
-        }
-        let mut min_b = INF_USIZE;
-        for i in 0..n {
-            if B[i] != 0 {
-                min_b = min(min_b, rems[i] / B[i]);
-            }
-        }
-        ans = max(ans, a + min_b);
-    }
-    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

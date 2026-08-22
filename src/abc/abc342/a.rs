@@ -16,6 +16,28 @@ use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
+#[allow(unused_variables)]
+fn main() {
+    input! {
+        S: Chars,
+    }
+    let mut counter = BTreeMap::new();
+    for &c in &S {
+        *counter.entry(c).or_insert(0) += 1;
+    }
+    let mut c = '.';
+    for (&d, &v) in counter.iter() {
+        if v == 1 {
+            c = d;
+        }
+    }
+    for i in 0..S.len() {
+        if S[i] == c {
+            println!("{}", i + 1);
+        }
+    }
+}
+
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
@@ -58,41 +80,6 @@ macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
     }};
-}
-
-#[allow(unused_variables)]
-fn main() {
-    input! {
-        n: usize,
-        Q: [usize; n],
-        A: [usize; n],
-        B: [usize; n],
-    }
-
-    let mut ans = 0;
-    for a in 0..=10_000_000 {
-        let mut rems = vec![];
-        let mut ok = true;
-        for i in 0..n {
-            if Q[i] >= a * A[i] {
-                rems.push(Q[i] - a * A[i]);
-            } else {
-                ok = false;
-                break;
-            }
-        }
-        if !ok {
-            break;
-        }
-        let mut min_b = INF_USIZE;
-        for i in 0..n {
-            if B[i] != 0 {
-                min_b = min(min_b, rems[i] / B[i]);
-            }
-        }
-        ans = max(ans, a + min_b);
-    }
-    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS

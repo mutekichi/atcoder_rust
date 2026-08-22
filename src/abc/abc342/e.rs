@@ -16,6 +16,57 @@ use itertools::{Itertools, iproduct};
 use proconio::input;
 use proconio::marker::{Bytes, Chars, Usize1};
 
+#[allow(unused_variables)]
+fn main() {
+    input! {
+        n: usize,
+        m: usize,
+        LDKCAB: [(i64, i64, i64, i64, Usize1, Usize1); m],
+    }
+    let mut pq = BinaryHeap::new();
+    let mut ans = vec![-1i64; n];
+    let mut graph = vec![vec![]; n];
+    for (l, d, k, c, a, b) in LDKCAB {
+        graph[b].push((a, l, d, k, c));
+    }
+    pq.push((INF_I64, n - 1));
+    while let Some((t, v)) = pq.pop() {
+        if ans[v] != -1 {
+            continue;
+        }
+        ans[v] = t;
+        for &(nv, l, d, k, c) in &graph[v] {
+            if let Some(next_time) = get_next_time(l, d, k, c, t) {
+                md!(next_time);
+                pq.push((next_time, nv));
+            }
+        }
+    }
+    for i in 0..n - 1 {
+        if ans[i] == -1 {
+            println!("Unreachable");
+        } else {
+            println!("{}", ans[i]);
+        }
+    }
+}
+
+fn get_next_time(
+    l: i64,
+    d: i64,
+    k: i64,
+    c: i64,
+    t: i64,
+) -> Option<i64> {
+    if t - c - l <= 0 {
+        return None;
+    } else {
+        let mut x = (t - c - l) / d;
+        x = min(x, k - 1);
+        return Some(l + x * d);
+    }
+}
+
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;
@@ -58,41 +109,6 @@ macro_rules! md {
     ($($arg:expr),* $(,)?) => {{
         // do nothing
     }};
-}
-
-#[allow(unused_variables)]
-fn main() {
-    input! {
-        n: usize,
-        Q: [usize; n],
-        A: [usize; n],
-        B: [usize; n],
-    }
-
-    let mut ans = 0;
-    for a in 0..=10_000_000 {
-        let mut rems = vec![];
-        let mut ok = true;
-        for i in 0..n {
-            if Q[i] >= a * A[i] {
-                rems.push(Q[i] - a * A[i]);
-            } else {
-                ok = false;
-                break;
-            }
-        }
-        if !ok {
-            break;
-        }
-        let mut min_b = INF_USIZE;
-        for i in 0..n {
-            if B[i] != 0 {
-                min_b = min(min_b, rems[i] / B[i]);
-            }
-        }
-        ans = max(ans, a + min_b);
-    }
-    println!("{}", ans);
 }
 
 // FOR TEMPLATE INJECTIONS
