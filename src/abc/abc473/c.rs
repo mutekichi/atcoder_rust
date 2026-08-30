@@ -21,8 +21,22 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        k: usize,
+        A: [Usize1; n],
     }
+    let mut counts = vec![0; n];
+    for i in 0..n {
+        counts[A[i]] += 1usize;
+    }
+    let max_count = counts.iter().max().unwrap();
+    let mut ans = 0;
+    for i in 0..n {
+        if counts[i] >= max_count - 1 {
+            ans += 1;
+        }
+    }
+    println!("{}", ans);
 }
 
 const INF_I64: i64 = 1 << 60;

@@ -21,8 +21,24 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        A: [usize; n],
     }
+    let mut used = vec![false; 120];
+    for a in A {
+        if used[a] {
+            used[a] = false;
+        } else {
+            used[a] = true;
+        }
+    }
+    let mut sum = 0;
+    for i in 0..120 {
+        if used[i] {
+            sum += i;
+        }
+    }
+    println!("{}", sum);
 }
 
 const INF_I64: i64 = 1 << 60;

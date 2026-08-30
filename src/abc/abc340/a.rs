@@ -21,8 +21,20 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        a: usize, b: usize, d: usize,
     }
+
+    let mut data = vec![];
+    let mut val = a;
+    loop {
+        data.push(val);
+        if val == b {
+            break;
+        }
+        val += d;
+    }
+
+    println!("{}", data.iter().join(" "));
 }
 
 const INF_I64: i64 = 1 << 60;

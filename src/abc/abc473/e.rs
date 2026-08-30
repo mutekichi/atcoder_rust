@@ -21,8 +21,47 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize, k: i64,
+        A: [i64; n],
     }
+    let mut count = 0;
+    let mut idx = 0;
+    let mut prev_sums_map = BTreeMap::new();
+    prev_sums_map.insert(0, 0);
+
+    let mut prev_sums = 0;
+
+    for i in 0..n {
+        let a = A[i];
+        if a == 0 {
+            count += 1;
+            idx = i;
+            md!(idx, 0, count);
+            prev_sums_map.insert(prev_sums, i);
+            continue;
+        }
+        prev_sums += a;
+        prev_sums %= k;
+        md!(prev_sums);
+        /*
+        for (val, idx) in prev_sums_map.iter() {
+            print!("{} {}, ", val, idx);
+        }
+        println!();
+        */
+        if let Some(&prev_idx) = prev_sums_map.get(&prev_sums) {
+            if prev_idx >= idx {
+                if prev_idx == idx {
+                    md!("equ");
+                }
+                md!(i, idx, prev_idx, count);
+                count += 1usize;
+                idx = i;
+            }
+        }
+        prev_sums_map.insert(prev_sums, i);
+    }
+    println!("{}", count);
 }
 
 const INF_I64: i64 = 1 << 60;

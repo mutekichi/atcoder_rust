@@ -21,8 +21,26 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        A: [i64; n],
     }
+    let mut next_list = vec![INF_USIZE; n + 2];
+
+    for i in 0..n {
+        if A[i] == -1 {
+            next_list[0] = i + 1;
+        } else {
+            next_list[A[i] as usize] = i + 1;
+        }
+    }
+
+    let mut cur = 0;
+    let mut ans = vec![];
+    while next_list[cur] != INF_USIZE {
+        ans.push(next_list[cur]);
+        cur = next_list[cur];
+    }
+    println!("{}", ans.iter().join(" "));
 }
 
 const INF_I64: i64 = 1 << 60;

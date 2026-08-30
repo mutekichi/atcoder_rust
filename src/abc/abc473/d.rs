@@ -21,8 +21,35 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        k: usize,
     }
+    let mut prev = vec![];
+
+    f(0, &mut prev, k, n);
+}
+fn f(
+    idx: usize,
+    prev: &mut Vec<usize>,
+    rem: usize,
+    n: usize,
+) {
+    if idx == n - 1 {
+        if rem % n == 0 {
+            prev.push(rem / n);
+            println!("{}", prev.iter().join(" "));
+            prev.pop();
+        }
+        return;
+    }
+    let mut val = 0;
+    while val * (idx + 1) <= rem {
+        prev.push(val);
+        f(idx + 1, prev, rem - val * (idx + 1), n);
+        prev.pop();
+        val += 1;
+    }
+    return;
 }
 
 const INF_I64: i64 = 1 << 60;

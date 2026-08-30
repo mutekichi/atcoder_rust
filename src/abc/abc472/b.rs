@@ -21,8 +21,17 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        L: [i64; n],
     }
+    let sum = L.iter().sum::<i64>();
+    let mut ans = INF_I64;
+    let mut accum = 0;
+    for l in L {
+        ans = min(ans, (accum + l).abs_diff(sum - accum - l) as i64);
+        accum += l;
+    }
+    println!("{}", ans);
 }
 
 const INF_I64: i64 = 1 << 60;

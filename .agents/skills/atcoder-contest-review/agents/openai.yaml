@@ -1,0 +1,7 @@
+interface:
+  display_name: "AtCoder Contest Review"
+  short_description: "Review completed AtCoder solutions for contest-time improvements"
+  default_prompt: "Use $atcoder-contest-review to review ABC473 for practical improvements useful during contests."
+
+policy:
+  allow_implicit_invocation: true

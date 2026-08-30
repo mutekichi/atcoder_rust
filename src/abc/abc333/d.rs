@@ -21,7 +21,39 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
+        n: usize,
+        UV: [(Usize1, Usize1); n - 1],
+    }
+    let mut tree = vec![vec![]; n];
+    for (u, v) in UV {
+        tree[u].push(v);
+        tree[v].push(u);
+    }
+    if tree[0].len() == 1 {
+        println!("{}", 1);
+    } else {
+        let mut ans = 0;
+        for &nv in &tree[0] {
+            let mut count = 0;
+            dfs(nv, 0, &mut count, &tree);
+            md!(count);
+            ans = max(ans, count);
+        }
+        println!("{}", n - ans);
+    }
+}
 
+fn dfs(
+    v: usize,
+    from: usize,
+    count: &mut usize,
+    tree: &Vec<Vec<usize>>,
+) {
+    *count += 1;
+    for &nv in tree[v].iter() {
+        if nv != from {
+            dfs(nv, v, count, tree);
+        }
     }
 }
 

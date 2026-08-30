@@ -21,8 +21,12 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
     }
+    for i in 0..n {
+        print!("{}", n);
+    }
+    println!();
 }
 
 const INF_I64: i64 = 1 << 60;

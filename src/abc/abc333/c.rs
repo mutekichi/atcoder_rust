@@ -21,8 +21,24 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
     }
+    let mut set = BTreeSet::new();
+    for i in 1..13 {
+        for j in 1..13 {
+            for k in 1..13 {
+                let repi = get_repunit(i);
+                let repj = get_repunit(j);
+                let repk = get_repunit(k);
+                set.insert(repi + repj + repk);
+            }
+        }
+    }
+    md!(set.len());
+    println!("{}", set.iter().nth(n - 1).unwrap())
+}
+fn get_repunit(k: i64) -> i128 {
+    (10i128.pow(k as u32) as i128 - 1) / 9
 }
 
 const INF_I64: i64 = 1 << 60;

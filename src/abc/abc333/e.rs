@@ -21,8 +21,42 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        TX: [(usize, Usize1); n],
     }
+    let mut data = vec![vec![]; n];
+    for i in 0..n {
+        let (t, x) = TX[i];
+        data[x].push((t, i));
+    }
+    let mut moves = vec![2; n];
+    let mut diffs = vec![0; n];
+    for i in 0..n {
+        let mut sum = 0;
+        while let Some((t, i)) = data[i].pop() {
+            if t == 2 {
+                sum += 1usize;
+                diffs[i] -= 1;
+            } else {
+                if sum > 0 {
+                    sum -= 1;
+                    moves[i] = 1;
+                    diffs[i] += 1;
+                } else {
+                    moves[i] = 0;
+                }
+            }
+        }
+        if sum > 0 {
+            println!("{}", -1);
+            return;
+        }
+    }
+    for i in 1..n {
+        diffs[i] += diffs[i - 1];
+    }
+    println!("{}", diffs.iter().max().unwrap());
+    println!("{}", moves.iter().filter(|v| **v != 2).join(" "));
 }
 
 const INF_I64: i64 = 1 << 60;

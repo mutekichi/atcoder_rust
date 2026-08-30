@@ -21,7 +21,24 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize, m: usize, k: i64,
+        A: [i64; n],
+    }
+    let mut eat_list = vec![None; n];
+    let mut sum = 0;
+    for i in 0..n {
+        if sum + A[i] <= k {
+            println!("Yes");
+            eat_list[i] = Some(A[i]);
+            sum += A[i];
+        } else {
+            println!("No");
+        }
+        if i >= m - 1 {
+            if let Some(p) = eat_list[i + 1 - m] {
+                sum -= p;
+            }
+        }
     }
 }
 

@@ -21,7 +21,16 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        S: Bytes, T: Bytes,
+    }
+    let mut diff_s = S[0].abs_diff(S[1]);
+    diff_s = min(diff_s, 5 - diff_s);
+    let mut diff_t = T[0].abs_diff(T[1]);
+    diff_t = min(diff_t, 5 - diff_t);
+    if diff_s == diff_t {
+        println!("Yes");
+    } else {
+        println!("No");
     }
 }
 

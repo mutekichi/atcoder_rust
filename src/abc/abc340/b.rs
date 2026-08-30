@@ -21,7 +21,24 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        q: usize,
+    }
+    let mut data = vec![];
+    for _ in 0..q {
+        input! {
+            t: usize,
+        }
+        if t == 1 {
+            input! {
+                x: i64,
+            }
+            data.push(x);
+        } else {
+            input! {
+                k: usize,
+            }
+            println!("{}", data[data.len() - k])
+        }
     }
 }
 

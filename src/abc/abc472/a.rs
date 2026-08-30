@@ -21,8 +21,13 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        S: Chars,
     }
+
+    println!(
+        "{}",
+        S.iter().map(|c| if *c == 'A' { 'A' } else { '.' }).join("")
+    );
 }
 
 const INF_I64: i64 = 1 << 60;

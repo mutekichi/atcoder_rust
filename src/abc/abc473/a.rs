@@ -21,8 +21,10 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        A: [i64; n],
     }
+    println!("{}", A.iter().skip(n / 2).sum::<i64>());
 }
 
 const INF_I64: i64 = 1 << 60;

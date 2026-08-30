@@ -21,7 +21,14 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        S: Chars,
+    }
+    let ok = S.windows(2).all(|w| w[0] <= w[1]);
+    if ok { 
+        println!("Yes");
+    }
+    else {
+        println!("No");
     }
 }
 

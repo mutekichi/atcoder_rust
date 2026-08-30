@@ -21,7 +21,23 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        XY: [(i64, i64); n],
+    }
+    let mut xsum = 0;
+    let mut ysum = 0;
+    for (x, y) in XY {
+        xsum += x;
+        ysum += y;
+    }
+    if xsum > ysum {
+        println!("Takahashi");
+    }
+    else if xsum < ysum {
+        println!("Aoki");
+    }
+    else {
+        println!("Draw");
     }
 }
 
