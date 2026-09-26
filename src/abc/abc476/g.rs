@@ -20,22 +20,33 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 
 #[allow(unused_variables)]
 fn main() {
-    input! {
-        n: usize, q: usize,
-        mut R: [i64; n],
-        X: [i64; q],
-    }
-    R.sort_unstable();
-    let mut data = BTreeSet::new();
-    data.insert((0, 0));
+    let n = 8;
+    let mut data1 = vec![vec![0; n]; n];
+    let mut data2 = vec![vec![0; n]; n];
+    let a = 2;
+    let b = 0;
+
     for i in 0..n {
-        data.insert((data.last().unwrap().0 + R[i], i + 1));
+        for j in 0..n {
+            data1[i][j] = max(i.abs_diff(a), j.abs_diff(b));
+            data2[i][j] = max(i.abs_diff(a + 1), j.abs_diff(b));
+        }
     }
-    for x in X {
-        println!(
-            "{}",
-            data.range(..(x, INF_USIZE)).next_back().unwrap().1
-        );
+    for i in 0..n {
+        for j in 0..n {
+            let a = data1[i][j];
+            let b = data2[i][j];
+            if a == b {
+                print!("0");
+            } else if a == b + 1 {
+                print!("+");
+            } else if a + 1 == b {
+                print!("-");
+            } else {
+                print!("?");
+            }
+        }
+        println!();
     }
 }
 

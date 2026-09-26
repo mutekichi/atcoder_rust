@@ -21,21 +21,7 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, q: usize,
-        mut R: [i64; n],
-        X: [i64; q],
-    }
-    R.sort_unstable();
-    let mut data = BTreeSet::new();
-    data.insert((0, 0));
-    for i in 0..n {
-        data.insert((data.last().unwrap().0 + R[i], i + 1));
-    }
-    for x in X {
-        println!(
-            "{}",
-            data.range(..(x, INF_USIZE)).next_back().unwrap().1
-        );
+
     }
 }
 

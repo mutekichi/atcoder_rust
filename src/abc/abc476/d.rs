@@ -21,22 +21,41 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, q: usize,
-        mut R: [i64; n],
-        X: [i64; q],
+        n: usize, m: usize, k: i128,
+        x: i128, y: i128,
+        mut A: [i128; n],
+        mut B: [i128; m],
     }
-    R.sort_unstable();
-    let mut data = BTreeSet::new();
-    data.insert((0, 0));
+    A.sort_unstable();
+    B.sort_unstable();
+    let mut accumA = vec![(0, 0)];
     for i in 0..n {
-        data.insert((data.last().unwrap().0 + R[i], i + 1));
+        let a = A[i];
+        accumA.push((accumA[i].0 + a, i + 1));
     }
-    for x in X {
-        println!(
-            "{}",
-            data.range(..(x, INF_USIZE)).next_back().unwrap().1
-        );
+    let accumA = accumA.into_iter().collect::<BTreeSet<_>>();
+
+    let mut rem = x + k * y;
+    let mut ans = accumA.range(..(rem + 1, 0)).next_back().unwrap().1;
+    md!(ans);
+    let mut total_b = 0;
+
+    for i in 0..m {
+        let diff_b = B[i] / k + if B[i] % k == 0 { 0 } else { 1 };
+        if total_b + diff_b > y {
+            break;
+        }
+        total_b += diff_b;
+        rem -= B[i];
+        md!(rem);
+        if rem < 0 {
+            break;
+        }
+        let count = accumA.range(..(rem + 1, 0)).next_back().unwrap().1;
+        md!(count);
+        ans = ans.max(i + 1 + count);
     }
+    println!("{}", ans);
 }
 
 const INF_I64: i64 = 1 << 60;

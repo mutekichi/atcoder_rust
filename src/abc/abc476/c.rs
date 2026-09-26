@@ -21,21 +21,22 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-        n: usize, q: usize,
-        mut R: [i64; n],
-        X: [i64; q],
+        n: usize,
+        A: [i64; n],
     }
-    R.sort_unstable();
-    let mut data = BTreeSet::new();
-    data.insert((0, 0));
-    for i in 0..n {
-        data.insert((data.last().unwrap().0 + R[i], i + 1));
+    let mut data = vec![];
+    for i in 0..3 {
+        data.push(A[i]);
     }
-    for x in X {
-        println!(
-            "{}",
-            data.range(..(x, INF_USIZE)).next_back().unwrap().1
-        );
+    data.sort_unstable();
+    data.reverse();
+    println!("{}", data[2]);
+    for i in 3..n {
+        data.push(A[i]);
+        data.sort_unstable();
+        data.reverse();
+        data.pop();
+        println!("{}", data[2]);
     }
 }
 

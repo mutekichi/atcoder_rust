@@ -21,8 +21,17 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        a: i64, m: i64, l: i64, r: i64,
     }
+    md!(-5 / 10);
+    println!("{}", get_count(a, m, r) - get_count(a, m, l - 1));
+}
+fn get_count(
+    a: i64,
+    m: i64,
+    x: i64,
+) -> i64 {
+    return (x - a).div_euclid(m);
 }
 
 const INF_I64: i64 = 1 << 60;

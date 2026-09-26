@@ -21,8 +21,43 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize, k: usize, A: [Usize1; k],
     }
+    let mut counts = vec![2; n];
+    for a in A {
+        counts[a] -= 1;
+    }
+    let mut socks = vec![];
+    for i in 0..n {
+        for _ in 0..counts[i] {
+            socks.push(i);
+        }
+    }
+    let mut ans = 0;
+    if (2 * n - k) % 2 == 0 {
+        for i in 0..(2 * n - k) / 2 {
+            ans += socks[i * 2 + 1] - socks[i * 2];
+        }
+    } else {
+        let mut intervals_before = vec![0];
+        let mut intervals_after = vec![0];
+        ans = INF_USIZE;
+        for i in 0..(2 * n - k) / 2 {
+            intervals_before.push(
+                socks[i * 2 + 1] - socks[i * 2] + intervals_before[i],
+            );
+            intervals_after.push(
+                socks[2 * n - k - 1 - i * 2]
+                    - socks[2 * n - k - 1 - i * 2 - 1]
+                    + intervals_after[i],
+            );
+        }
+        intervals_after.reverse();
+        for i in 0..intervals_after.len() {
+            ans = ans.min(intervals_before[i] + intervals_after[i]);
+        }
+    }
+    println!("{}", ans);
 }
 
 const INF_I64: i64 = 1 << 60;
