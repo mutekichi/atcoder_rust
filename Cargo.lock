@@ -49,6 +49,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "abc310"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "abc331"
 version = "0.1.0"
 dependencies = [
@@ -122,6 +134,18 @@ dependencies = [
 
 [[package]]
 name = "abc338"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc339"
 version = "0.1.0"
 dependencies = [
  "itertools",
@@ -242,6 +266,30 @@ dependencies = [
 
 [[package]]
 name = "abc353"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc370"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "abc371"
 version = "0.1.0"
 dependencies = [
  "itertools",
@@ -1288,6 +1336,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "abc4770"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
 name = "ahc055"
 version = "0.1.0"
 dependencies = [
@@ -1561,6 +1621,18 @@ dependencies = [
 
 [[package]]
 name = "arc226"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "memoise",
+ "num-integer",
+ "proconio",
+ "rand",
+ "superslice",
+]
+
+[[package]]
+name = "arc231"
 version = "0.1.0"
 dependencies = [
  "itertools",
