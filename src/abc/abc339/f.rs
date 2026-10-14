@@ -21,10 +21,11 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        A: [Chars; n],
     }
-}
 
+}
 const INF_I64: i64 = 1 << 60;
 const INF_USIZE: usize = 1 << 60;
 const INF_F64: f64 = 1e18;

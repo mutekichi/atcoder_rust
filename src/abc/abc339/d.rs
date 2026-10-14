@@ -21,8 +21,61 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        S: [Chars; n],
     }
+    let mut p = vec![];
+    for i in 0..n {
+        for j in 0..n {
+            if S[i][j] == 'P' {
+                p.push((i, j));
+            }
+        }
+    }
+    p.sort();
+    let mut seen = vec![vec![vec![vec![false; n]; n]; n]; n];
+    let mut queue = VecDeque::new();
+    queue.push_back((p, 0));
+    while let Some((p, count)) = queue.pop_front() {
+        if p[0] == p[1] {
+            md!(p[0].0, p[0].1);
+            println!("{}", count);
+            return;
+        }
+        if seen[p[0].0][p[0].1][p[1].0][p[1].1] {
+            continue;
+        }
+        seen[p[0].0][p[0].1][p[1].0][p[1].1] = true;
+        for &dir in &DIR4 {
+            let mut next_p = vec![];
+            for &p in &p {
+                let (mut y, mut x) = p;
+                if dir.0 == 0 {
+                    let nx = x as isize + dir.1;
+                    if nx == -1
+                        || nx == n as isize
+                        || S[y][nx as usize] == '#'
+                    {
+                    } else {
+                        x = nx as usize;
+                    }
+                } else {
+                    let ny = y as isize + dir.0;
+                    if ny == -1
+                        || ny == n as isize
+                        || S[ny as usize][x] == '#'
+                    {
+                    } else {
+                        y = ny as usize;
+                    }
+                }
+                next_p.push((y, x));
+            }
+            next_p.sort();
+            queue.push_back((next_p, count + 1usize));
+        }
+    }
+    println!("{}", -1);
 }
 
 const INF_I64: i64 = 1 << 60;

@@ -21,8 +21,17 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        S: Chars,
     }
+    let mut ans = vec![];
+    for c in S.into_iter().rev() {
+        if c != '.' {
+            ans.push(c);
+        } else {
+            break;
+        }
+    }
+    println!("{}", ans.iter().rev().join(""));
 }
 
 const INF_I64: i64 = 1 << 60;

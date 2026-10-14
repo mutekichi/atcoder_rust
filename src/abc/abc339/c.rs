@@ -21,8 +21,17 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
-
+        n: usize,
+        A: [isize; n],
     }
+    let mut accum = 0;
+    let mut ans = 0;
+
+    for a in A {
+        accum += a;
+        ans = ans.min(accum);
+    }
+    println!("{}", -ans + accum);
 }
 
 const INF_I64: i64 = 1 << 60;

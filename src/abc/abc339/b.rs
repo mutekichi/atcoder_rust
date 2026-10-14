@@ -21,7 +21,32 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 #[allow(unused_variables)]
 fn main() {
     input! {
+        h: usize, w: usize, n: usize,
+    }
+    let mut pos = (0, 0);
+    let mut dir = 0;
+    let DIR = [(0, h - 1), (1, 0), (0, 1), (w - 1, 0)];
+    let mut grid = vec![vec![false; w]; h];
+    for _ in 0..n {
+        let (x, y) = pos;
+        md!(x, y);
+        if !grid[y][x] {
+            dir = (dir + 1) % 4;
+        } else {
+            dir = (dir + 3) % 4;
+        }
 
+        grid[y][x] = !grid[y][x];
+        let (diffx, diffy) = DIR[dir];
+        let nx = (x + diffx) % w;
+        let ny = (y + diffy) % h;
+        pos = (nx, ny);
+    }
+    for i in 0..h {
+        println!(
+            "{}",
+            grid[i].iter().map(|&v| if v { '#' } else { '.' }).join("")
+        );
     }
 }
 
