@@ -59,6 +59,12 @@ if not os.path.exists(target_file):
 with open(target_file, "r", encoding="utf-8") as f:
     target_lines = f.readlines()
 
+attribution = [
+    "// The implementations below (if any) were created using generative AI before the contest and published at\n",
+    "// https://github.com/mutekichi/atcoder_rust.\n",
+]
+marker = "// FOR TEMPLATE INJECTIONS\n"
+
 insert_idx = -1
 for i, line in enumerate(target_lines):
     if "// FOR TEMPLATE INJECTIONS" in line:
@@ -66,8 +72,12 @@ for i, line in enumerate(target_lines):
         break
 
 if insert_idx == -1:
-    target_lines.extend(["\n"] + snippet)
+    target_lines.extend(["\n"] + attribution + [marker] + snippet)
 else:
+    marker_idx = insert_idx - 1
+    if target_lines[max(0, marker_idx - len(attribution)):marker_idx] != attribution:
+        target_lines[marker_idx:marker_idx] = attribution
+        insert_idx += len(attribution)
     target_lines.insert(insert_idx, "".join(snippet) + "\n")
 
 with open(target_file, "w", encoding="utf-8") as f:
