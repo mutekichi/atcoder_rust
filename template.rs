@@ -86,9 +86,3 @@ impl UsizeExt for usize {
         (self as u8 + b'a') as char
     }
 }
-
-// The implementations below (if any) were created using generative AI before the contest and published at
-// https://github.com/mutekichi/atcoder_rust.
-// FOR TEMPLATE INJECTIONS
-
-// END TEMPLATE INJECTIONS

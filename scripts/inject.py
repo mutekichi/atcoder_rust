@@ -60,8 +60,9 @@ with open(target_file, "r", encoding="utf-8") as f:
     target_lines = f.readlines()
 
 attribution = [
-    "// The implementations below (if any) were created using generative AI before the contest and published at\n",
+    "// The implementations below were created using generative AI before the contest and published at\n",
     "// https://github.com/mutekichi/atcoder_rust.\n",
+    "// These implementations may have been modified after being copied.\n",
 ]
 marker = "// FOR TEMPLATE INJECTIONS\n"
 
@@ -75,6 +76,19 @@ if insert_idx == -1:
     target_lines.extend(["\n"] + attribution + [marker] + snippet)
 else:
     marker_idx = insert_idx - 1
+    # Replace attribution from earlier versions when updating an existing file.
+    old_attribution = [
+        "// The implementations below (if any) were created using generative AI before the contest and published at\n",
+        "// https://github.com/mutekichi/atcoder_rust.\n",
+    ]
+    old_single_line = [old_attribution[0].rstrip("\n") + " " + old_attribution[1][3:]]
+    for previous in (old_attribution, old_single_line):
+        start = marker_idx - len(previous)
+        if start >= 0 and target_lines[start:marker_idx] == previous:
+            del target_lines[start:marker_idx]
+            marker_idx = start
+            insert_idx = marker_idx + 1
+            break
     if target_lines[max(0, marker_idx - len(attribution)):marker_idx] != attribution:
         target_lines[marker_idx:marker_idx] = attribution
         insert_idx += len(attribution)
