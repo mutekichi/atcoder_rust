@@ -22,12 +22,9 @@ use std::ops::Bound::{self, Excluded, Included, Unbounded};
 fn main() {
     input! {
         S: String,
+        T: String,
     }
-    if S.ends_with("er") {
-        println!("er");
-    } else {
-        println!("ist");
-    }
+    println!("{}", format!("{} {}", S, T));
 }
 
 const INF_I64: i64 = 1 << 60;
