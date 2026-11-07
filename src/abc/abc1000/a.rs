@@ -25,7 +25,7 @@ fn main() {
     }
     let comb = Combination::<C998244353>::new(n);
     for i in 0..n {
-        println!("{}", comb.ncr(n, i));
+        println!("{}", comb.ncr(n,))
     }
 }
 

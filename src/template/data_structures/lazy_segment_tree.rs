@@ -34,34 +34,35 @@
 ///
 /// ## 2. Range Add Query (RAQ) + Range Sum Query (RSQ)
 /// ```
-/// #[derive(Clone, Copy, Debug)]
-/// struct S { val: i64, size: i64 }
+/// type S = (i64, i64); // (区間の合計, 要素数)
 ///
 /// let data_raw = vec![1, 2, 3, 4, 5];
-/// let data: Vec<S> = data_raw.iter().map(|&x| S { val: x, size: 1 }).collect();
+/// let data: Vec<S> = data_raw.iter().map(|&x| (x, 1)).collect();
 ///
 /// let mut st = LazySegmentTree::new(
 ///     &data,
-///     |a, b| S { val: a.val + b.val, size: a.size + b.size },     // op: sum
-///     S { val: 0, size: 0 },                                      // e
-///     |x, op| S { val: x.val + op * x.size, size: x.size },       // mapping: add (op * width)
-///     |new_op, old_op| new_op + old_op,                           // composition: sum of additions
-///     0                                                           // id: 0
+///     |a: S, b: S| (a.0 + b.0, a.1 + b.1), // op: sum
+///     (0, 0),                              // e
+///     |x: S, op: i64| (x.0 + op * x.1, x.1), // mapping: add (op * width)
+///     |new_op, old_op| new_op + old_op,     // composition: sum of additions
+///     0                                    // id: 0
 /// );
 /// ```
 ///
 /// ## 3. Range Affine Update + Range Sum Query
 /// ```
-/// #[derive(Clone, Copy, Debug)]
-/// struct S { val: i64, size: i64 }
+/// type S = (i64, i64); // (区間の合計, 要素数)
 /// type Op = (i64, i64); // (b, c) -> x * b + c
+///
+/// let data_raw = vec![1, 2, 3, 4, 5];
+/// let data: Vec<S> = data_raw.iter().map(|&x| (x, 1)).collect();
 ///
 /// let mut st = LazySegmentTree::new(
 ///     &data,
-///     |a, b| S { val: a.val + b.val, size: a.size + b.size },
-///     S { val: 0, size: 0 },
-///     |x, op| S { val: x.val * op.0 + op.1 * x.size, size: x.size },
-///     |new_op, old_op| (new_op.0 * old_op.0, new_op.0 * old_op.1 + new_op.1),
+///     |a: S, b: S| (a.0 + b.0, a.1 + b.1),
+///     (0, 0),
+///     |x: S, op: Op| (x.0 * op.0 + op.1 * x.1, x.1),
+///     |new_op: Op, old_op: Op| (new_op.0 * old_op.0, new_op.0 * old_op.1 + new_op.1),
 ///     (1, 0)
 /// );
 /// ```
